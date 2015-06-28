@@ -1,0 +1,10 @@
+nbproject
+cases/oscAirfoil/SingleGrid/out
+cases/oscAirfoil/SingleGrid/src/out
+.dep.inc
+*~
+*.a
+*.o
+*.so
+
+
