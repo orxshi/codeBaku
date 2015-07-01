@@ -24,7 +24,7 @@ void Solver::impl (Grid& gr)
                 break;
             case 2:
                 MPI_Barrier (PETSC_COMM_WORLD);
-                petsc (gr);
+                petsc.solveAxb (gr);
                 MPI_Barrier (PETSC_COMM_WORLD);
                 break;
             default:

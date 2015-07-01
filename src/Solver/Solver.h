@@ -20,6 +20,26 @@
 
 struct Solver
 {
+    struct Petsc
+    {
+        Vec x, b;
+        Mat A;
+        KSP ksp;
+        PC pc;
+        MPI_Comm world;
+        PetscInt n;
+        PetscInt bs;
+        PetscInt xGlobalSize;
+        PetscInt xLocalSize;
+        PetscInt vecFirst, vecLast;
+        PetscInt first, last;
+        double* DX;
+        
+        Petsc (Grid& gr);
+        void solveAxb (Grid& gr);
+        void finalize();
+    } petsc;    
+    
     int nGaussIter;
     int maxTimeStep;
     int nTimeStep;
@@ -43,14 +63,6 @@ struct Solver
     //LinearSol_t linearSolverType;        
     string instanceName;
     
-    /*Vec x, b;
-    Mat A;
-    PetscScalar* dx;
-    PetscInt n;
-    PetscInt bs;
-    
-    MPI_Comm world;*/
-    
     Solver (Grid& gr, string instanceName);
     
     void expl (Grid& gr);
@@ -64,7 +76,6 @@ struct Solver
     void outRes (string fileName);
     void preSolverCheck(const Grid& gr);    
     void read (string fileName);
-    void petsc (Grid& gr);
     void set_residual (Grid& g);
     void diff_to_cons_prim(Grid& g);
     

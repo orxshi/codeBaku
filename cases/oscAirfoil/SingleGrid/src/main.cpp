@@ -49,6 +49,7 @@ int main(int argc, char** argv)
     sma.getAllFaceVelocities (gr);
     watchSteady.start();
     (solSteady.implicit) ? solSteady.impl(gr) : solSteady.expl(gr);
+    solSteady.petsc.finalize();
     watchSteady.stop();    
     
     int countr = 0;

@@ -1,6 +1,6 @@
 #include "Solver.h"
 
-Solver::Solver (Grid& gr, string instanceName)
+Solver::Solver (Grid& gr, string instanceName) : petsc(gr)
 {
     //default    
     tOrder = 2;
@@ -23,6 +23,8 @@ Solver::Solver (Grid& gr, string instanceName)
     nImplicitCalls = 0;    
     this->instanceName = instanceName;
     
+    
+    
     /*world = PETSC_COMM_WORLD;
     n = gr.n_in_elm;
     bs = N_VAR;
@@ -44,6 +46,38 @@ Solver::Solver (Grid& gr, string instanceName)
     // specific to pentagonal mesh . change later
     
     dx = (PetscScalar*)malloc (n * bs * sizeof(PetscScalar));*/
+}
+
+Solver::Petsc::Petsc (Grid& gr)
+{
+    world = PETSC_COMM_WORLD;
+    n = gr.n_in_elm;
+    bs = N_VAR;
+    xGlobalSize = n*bs;
+    PetscMalloc1 (xGlobalSize, &DX);
+    
+    // set x
+    VecCreate (world, &x);
+    VecSetType (x, VECSTANDARD);
+    VecSetSizes (x, PETSC_DECIDE, xGlobalSize);
+    VecGetLocalSize (x, &xLocalSize);
+    VecGetOwnershipRange (x, &vecFirst, &vecLast);
+
+    // set b
+    VecDuplicate (x, &b);
+    
+    // set A
+    MatCreate (world, &A);    
+    //MatSetType (A, MATSEQBAIJ);
+    MatSetType (A, MATMPIAIJ);
+    MatSetSizes (A, PETSC_DECIDE, PETSC_DECIDE, xGlobalSize, xGlobalSize);
+    //MatSeqBAIJSetPreallocation (A, bs, 4, NULL);
+    //MatSeqAIJSetPreallocation (A, 4*bs, NULL);    
+    MatMPIAIJSetPreallocation (A, 4*bs, NULL, 4*bs, NULL);
+    //MatSetOption(A, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
+    //MatCreateBAIJ (world, bs, PETSC_DECIDE, PETSC_DECIDE, n*bs, n*bs, 1, NULL, 3, NULL, &A);
+    // specific to pentagonal mesh . change later
+    MatGetOwnershipRange (A, &first, &last);
 }
 
 void Solver::preSolverCheck (const Grid& gr)
