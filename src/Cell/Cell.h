@@ -28,7 +28,7 @@ enum class nFaces_t {UNDEFINED=-1, TRI=1, QUAD=1, TET=4, PEN=5, HEX=6};
 enum class nVertices_t {UNDEFINED=-1, TRI=3, QUAD=4, TET=4, PEN=6, HEX=8};
 enum class iBlank_t {UNDEFINED, NA, HOLE, FRINGE, FIELD};
 enum class BC {UNDEFINED=-2, NA=-1, EMPTY=0, SLIP_WALL=1, DIRICHLET=2};
-enum class vtkCellType_t {UNDEFINED=-1, TET=10, HEX=12, WEDGE=13};
+enum class vtkCellType_t {UNDEFINED=-1, TET=10, HEX=12, WEDGE=13, TRI=5};
 enum class fringeBou_t {UNDEFINED=-1, NO=0, YES=1};
 
 struct Cell

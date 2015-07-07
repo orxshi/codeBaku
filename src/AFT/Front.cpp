@@ -151,13 +151,16 @@ namespace AFT
                 
                 cout << "belonging = " << frontEdge.belonging << endl;
                 cout << "newlyCreated = " << frontEdge.newlyCreated << endl;
+                cout << "t0 ID = " << it0 << endl;
+                cout << "t1 ID = " << it1 << endl;
                 
-                for (int f=0; f<frontList.size(); ++f)
+                /*for (int f=0; f<frontList.size(); ++f)
                 {
                     cout << edges[ frontList[f].edge ].belonging << endl;
-                }
+                }*/
                 
-                outputTriangles (points, triangles);
+                //outputTriangles (points, triangles);
+                outputTrianglesVTK (points, triangles, "../out");
                 exit(-2);
             }
             

@@ -382,6 +382,76 @@ namespace AFT
         out.close();
     }
     
+    void outputTrianglesVTK (const vector<Point>& points, const vector<Triangle>& triangles, string dir)
+    {
+        int cellListSize = 0;
+
+        string temps = "tri.vtk";
+        string slash = "/";
+        dir.append (slash);
+        dir.append (temps);
+
+        ofstream out;
+        out.open (dir);
+
+        out << "# vtk DataFile Version 3.0" << endl;
+        out << "Triangles" << endl;
+        out << "ASCII" << endl;
+        out << "DATASET UNSTRUCTURED_GRID" << endl;
+        out << "POINTS " << points.size() << " float" << endl;
+
+        for (const Point& p: points)
+        {
+            out << p.dim[0];
+            out << " ";
+            out << p.dim[1];
+            out << " ";
+            out << p.dim[2];
+            out << endl;
+        }
+
+        // get cell list size
+        for (const Triangle& t: triangles)
+        {
+            cellListSize += (t.p.size() + 1);
+        }
+
+        out << endl;    
+        out << "CELLS " << triangles.size() << " " << cellListSize << endl;
+        
+        for (const Triangle& t: triangles)
+        {
+            out << t.p.size();
+            out << " ";
+            
+            for (const int p: t.p)
+            {
+                out << &points[p] - &points.front();
+                out << " ";
+            }
+            
+            out << endl;
+        }
+        
+        out << "CELL_TYPES " << triangles.size() << endl;
+        for (unsigned int t=0; t<triangles.size(); ++t)
+        {
+            out << static_cast<int>(vtkCellType_t::TRI);
+            out << endl;
+        }
+        
+        out << "CELL_DATA " << triangles.size() << endl;
+        
+        out << "SCALARS " << "I " << "int " << "1" << endl;
+        out << "LOOKUP_TABLE default" << endl;    
+        for (unsigned int t=0; t<triangles.size(); ++t)
+        {
+            out << t << endl;
+        }
+
+        out.close();
+    }
+    
     void findNeighbors (const vector<Edge>& edges, vector<Triangle>& triangles)
     {
         for (unsigned int t=0; t<triangles.size(); ++t)

@@ -109,6 +109,7 @@ namespace AFT
     void findNeighbors (const vector<Edge>& edges, vector<Triangle>& triangles);
     void circleCenter(const CVector& A, const CVector& B, const CVector& C, CVector& cnt, double& radius);
     void flip (vector<Triangle>& triangles, vector<Edge>& edges, const vector<Point>& points);
+    void outputTrianglesVTK (const vector<Point>& points, const vector<Triangle>& triangles, string dir);
     
     // Reblanking
     void fieldToFringe (Grid& gr, Grid& ogr, int crt);
