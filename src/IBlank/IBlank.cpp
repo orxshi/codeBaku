@@ -89,33 +89,77 @@ void Grid::identifyIBlank (Grid& gr)
             
     for (int c=n_bou_elm; c<cell.size(); ++c)
     {
-        int index;
+        int index;        
         
         if (cell[c].iBlank == iBlank_t::UNDEFINED)
         {            
             index = getIndex (cell[c]);
             
             if (index == -1)
-            {                
-                cell[c].iBlank = iBlank_t::FIELD;
-            }
-            else
-            {             
-                cell[c].iBlank = iBlank_t::FRINGE;
+            {     
+                bool insideHole;
                 
-                if (gr.cell[index].wallDistance < cell[c].wallDistance)
+                if (gr.nHoles > 0)
                 {
-                    cell[c].iBlank = iBlank_t::FRINGE;
-                    gr.cell[index].iBlank = iBlank_t::FIELD;
-                    cell[c].donor = &gr.cell[index];
-                    gr.cell[index].receiver = &cell[c];
+                    for (int i=0; i<nHoles; ++i)
+                    {
+                        for (int j=0; j<N_DIM; ++j)
+                        {
+                            if (cell[c].cnt[j] >= gr.holes[i].min[j] && cell[c].cnt[j] <= gr.holes[i].max[j])
+                            {
+                                insideHole = true;
+                            }
+                            else
+                            {
+                                insideHole = false;
+                                break;
+                            }
+                        }
+                    }                    
+                }
+                
+                if (gr.nHoles > 0 && insideHole)
+                {
+                    cell[c].iBlank = iBlank_t::HOLE;
                 }
                 else
                 {
                     cell[c].iBlank = iBlank_t::FIELD;
-                    gr.cell[index].iBlank = iBlank_t::FRINGE;
-                    gr.cell[index].donor = &cell[c];
-                    cell[c].receiver = &gr.cell[index];
+                }
+            }
+            else
+            {
+                if (gr.cell[index].iBlank == iBlank_t::FIELD)
+                {
+                    cell[c].iBlank = iBlank_t::FRINGE;
+                    cell[c].donor = &gr.cell[index];
+                    gr.cell[index].receiver.push_back (&cell[c]);
+                }
+                else if (gr.cell[index].iBlank == iBlank_t::FRINGE)
+                {
+                    cell[c].iBlank = iBlank_t::FIELD;
+                }
+                else if (gr.cell[index].iBlank == iBlank_t::UNDEFINED)
+                {
+                    if (gr.cell[index].wallDistance < cell[c].wallDistance)
+                    {
+                        cell[c].iBlank = iBlank_t::FRINGE;
+                        gr.cell[index].iBlank = iBlank_t::FIELD;
+                        cell[c].donor = &gr.cell[index];
+                        gr.cell[index].receiver.push_back (&cell[c]);
+                    }
+                    else
+                    {
+                        cell[c].iBlank = iBlank_t::FIELD;
+                        gr.cell[index].iBlank = iBlank_t::FRINGE;
+                        gr.cell[index].donor = &cell[c];
+                        cell[c].receiver.push_back (&gr.cell[index]);
+                    }
+                }
+                else
+                {
+                    cout << "undefined behavior in Grid::identifyIBlank(...)" << endl;
+                    exit(-2);
                 }
             }
         }
@@ -127,18 +171,49 @@ void Grid::identifyIBlank (Grid& gr)
         
         if (cell[c].iBlank == iBlank_t::UNDEFINED)
         {
-            index = getIndex (cell[c]);
-        
-            if (index == -1)
+            if (cell[c].fringeBou == fringeBou_t::YES)
+            {
+                index = getIndex (cell[c]);
+
+                if (index == -1)
+                {
+                    cell[c].iBlank == iBlank_t::NA;
+                }
+                else
+                {
+                    if (gr.cell[index].iBlank == iBlank_t::FIELD)
+                    {
+                        cell[c].iBlank = iBlank_t::FRINGE;
+                        cell[c].donor = &gr.cell[index];
+                        gr.cell[index].receiver.push_back (&cell[c]);
+                    }
+                    else if (gr.cell[index].iBlank == iBlank_t::FRINGE)
+                    {
+                        cout << "unset situation in Grid::identifyIBlank(...)" << endl;
+                        exit(-2);
+                    }
+                    else if (gr.cell[index].iBlank == iBlank_t::UNDEFINED)
+                    {
+                        cell[c].iBlank = iBlank_t::FRINGE;
+                        cell[c].donor = &gr.cell[index];
+                        gr.cell[index].receiver.push_back (&cell[c]);
+                        gr.cell[index].iBlank = iBlank_t::FIELD;
+                    }
+                    else
+                    {
+                        cout << "second undefined behavior in Grid::identifyIBlank(...)" << endl;
+                        exit(-2);
+                    }
+                }
+            }
+            else if (cell[c].fringeBou == fringeBou_t::NO)
             {
                 cell[c].iBlank == iBlank_t::NA;
             }
-            else
+            else if (cell[c].fringeBou == fringeBou_t::UNDEFINED)
             {
-                cell[c].iBlank = iBlank_t::FRINGE;
-                cell[c].donor = &gr.cell[index];
-                gr.cell[index].receiver = &cell[c];
-                gr.cell[index].iBlank = iBlank_t::FIELD;
+                cout << "undefined fringeBou_t in Grid::identifyIBlank(...)" << endl;
+                exit(-2);
             }
         }
     }

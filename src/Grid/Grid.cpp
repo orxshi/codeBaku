@@ -27,5 +27,31 @@ Grid::Grid (string mainDir, int id)
     string slash = "/";
     logDir.append (slash);
     logDir.append (temps);
+    
+    nHoles = 0;    
 }
 
+Grid::Grid (const Grid& other)
+{
+    n_bou_elm = other.n_bou_elm;
+    n_in_elm = other.n_in_elm;
+    totalNElms = other.totalNElms;
+    id = other.id;
+    phys_count = other.phys_count;
+    wallDistance = other.wallDistance;
+    //in = other.in;
+    meshFile = other.meshFile;
+    nHoles = other.nHoles;
+    outputDir = other.outputDir;
+    mainDir = other.mainDir;
+    logDir = other.logDir;
+    phys = other.phys;
+    bc = other.bc;
+    pt = other.pt;
+    face = other.face;
+    cell = other.cell;
+    bt = other.bt;    
+    bcVerbose = other.bcVerbose;
+    cellADT = other.cellADT;
+    holes = other.holes;    
+}

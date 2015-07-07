@@ -169,6 +169,7 @@ void Grid::read_elm ()
         }
         
         cell.push_back( move(tmpElm) );
+        //cell.push_back(tmpElm);
     }
     
     for (int c=0; c<n_bou_elm; ++c)
@@ -365,8 +366,6 @@ void Grid::readInput()
     phys.resize(phys_count);
     bc.resize(phys_count);
 
-	
-    
     for (int i=0; i<phys_count; ++i)
     {
         in >> tmps; in >> phys[i];
@@ -375,6 +374,18 @@ void Grid::readInput()
     for (int i=0; i<phys_count; ++i)
     {
         in >> tmps; in >> bc[i];
+    }
+    
+    in >> tmps; in >> nHoles;
+    holes.resize(nHoles);
+    
+    for (int i=0; i<nHoles; ++i)
+    {
+        for (int j=0; j<N_DIM; ++j)
+        {
+            in >> tmps; in >> holes[i].min[j];
+            in >> tmps; in >> holes[i].max[j];
+        }
     }
     
     in.close();

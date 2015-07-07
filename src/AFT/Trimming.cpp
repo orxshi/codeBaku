@@ -15,6 +15,7 @@ void Grid::trimWhoHasFringeNeighbor()
                 if (nei.iBlank == iBlank_t::FRINGE)
                 {
                     cll.trim = true;
+                    ++cll.nTrims;
                     break;
                 }
             }
@@ -38,13 +39,14 @@ void Grid::trimWhoHasTrimNeighbor (int threshold)
             {
                 const Cell& nei = cell[n];
                 
-                if (nei.trim == true)
+                if (nei.trim == true && nei.iBlank == iBlank_t::FIELD && nei.nTrims == 1)
                 {
                     ++counter;
                     
                     if (counter == threshold)
                     {
                         cll.trim = true;
+                        ++cll.nTrims;
                         break;
                     }
                 }

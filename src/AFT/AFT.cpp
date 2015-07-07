@@ -32,13 +32,15 @@ namespace AFT
         cout << "Trimming/Re-blanking... " << flush;
         gr[0].trimWhoHasFringeNeighbor();
         gr[1].trimWhoHasFringeNeighbor();
-        gr[0].trimWhoHasTrimNeighbor (2);
+        gr[0].trimWhoHasTrimNeighbor (3);
         gr[1].trimWhoHasTrimNeighbor (2);
         cout << "done!" << endl;
         
         cout << "Outputing after trimming/reblanking... " << flush;
-        gr[0].outAllTecplot();
-        gr[1].outAllTecplot();
+        //gr[0].outAllTecplot();
+        //gr[1].outAllTecplot();
+        gr[0].outAllVTK(0);
+        gr[1].outAllVTK(0);
         cout << "done!" << endl;
      
         cout << "Preparing... " << flush;
@@ -58,7 +60,7 @@ namespace AFT
             {
                 mesh1Edges.push_back (e);
             }
-        }
+        }        
         edge0ADT.build (points, mesh0Edges);
         edge1ADT.build (points, mesh1Edges);
         edgeADT.build (points, edges);
@@ -89,7 +91,8 @@ namespace AFT
         
         cout << "Outputing new grid... " << flush;
         //newGrid.createOutputDir( gr[0].mainDir );
-        newGrid.outAllTecplot();
+        //newGrid.outAllTecplot();
+        newGrid.outAllVTK(0);
         cout << "done!" << endl;
         
         cout << "Creating final grid... " << flush;
@@ -97,9 +100,10 @@ namespace AFT
         //finalGrid.createOutputDir( gr[0].mainDir );
         cout << "done!" << endl;
         
-        /*cout << "Outputing final grid... " << flush;        
-        finalGrid.outAllTecplot();
-        cout << "done!" << endl;*/
+        cout << "Outputing final grid... " << flush;        
+        //finalGrid.outAllTecplot();
+        finalGrid.outAllVTK(0);
+        cout << "done!" << endl;
         
         cout << "Reading input of final grid... " << flush;
         cout << "FINAL GRID READ INPUT AND PRINT INPUT IS NOT SET IN AFT(...)" << endl;

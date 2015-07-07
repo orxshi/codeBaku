@@ -18,13 +18,23 @@ void Grid::fieldToFringe (int crt)
                     ++counter;
                     if (counter == crt)
                     {
-                        c.receiver->iBlank = iBlank_t::FIELD;
-                        c.receiver->donor = NULL;
-                        c.receiver->receiver = &c;
+                        for (int i=0; i<c.receiver.size(); ++i)
+                        {
+                            c.receiver[i]->iBlank = iBlank_t::FIELD;
+                            c.receiver[i]->donor = NULL;
+                            c.receiver[i]->receiver.push_back (&c);
+                        }
+                        
 
                         c.iBlank = iBlank_t::FRINGE;
-                        c.donor = c.receiver;
-                        c.receiver = NULL;
+                        c.donor = c.receiver[0]; // may do better choice
+                        
+                        for (int i=0; i<c.receiver.size(); ++i)
+                        {
+                            c.receiver[i] = NULL;
+                        }
+                        c.receiver.clear();
+                        
                         break;
                     }
                 }
@@ -35,8 +45,7 @@ void Grid::fieldToFringe (int crt)
     
 void Grid::fringeToField (int crt)
 {
-    int counter;
-    int donor;
+    int counter;    
 
     for (Cell& c: cell)
     {
@@ -52,12 +61,20 @@ void Grid::fringeToField (int crt)
                     ++counter;
                     if (counter == crt)
                     {
-                        c.donor->iBlank = iBlank_t::FRINGE;
-                        c.donor->donor = &c;
-                        c.donor->receiver = NULL;
+                        //c.donor->iBlank = iBlank_t::FRINGE;
+                        //c.donor->donor = &c;
+                        
+                        for (int i=0; i<c.donor->receiver.size(); ++i)
+                        {
+                            if (c.donor->receiver[i] == &c)
+                            {
+                                c.donor->receiver[i] = NULL;
+                                c.donor->receiver.erase (c.donor->receiver.begin()+i);
+                                break;
+                            }
+                        }
 
                         c.iBlank = iBlank_t::FIELD;
-                        c.receiver = c.donor;
                         c.donor = NULL;
 
                         break;
@@ -68,7 +85,7 @@ void Grid::fringeToField (int crt)
     }
 }
 
-void Grid::blankWithPhys (int phys)
+/*void Grid::blankWithPhys (int phys)
 {
     for (int c=0; c<n_bou_elm; ++c)
     {
@@ -78,6 +95,7 @@ void Grid::blankWithPhys (int phys)
         {
             cll.iBlank = iBlank_t::FRINGE;
             cell[cll.nei[0]].iBlank = iBlank_t::FRINGE;
+            // but who is donor???
         }
     }
-}
+}*/

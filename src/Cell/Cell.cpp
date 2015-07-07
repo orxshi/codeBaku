@@ -9,11 +9,156 @@ Cell::Cell()
     type = elmType_t::UNDEFINED;
     bc = BC::UNDEFINED;
     donor = NULL;
-    receiver = NULL;
+    //receiver = NULL;
     for (Vector<N_DIM>& i: grad)
     {
         i.fill (0.);
     }
+    fringeBou = fringeBou_t::UNDEFINED;
+    nTrims = 0;
+}
+
+Cell::Cell (const Cell& other)
+{
+    phys = other.phys;
+    donor = NULL;
+    
+    for (int i=0; i<receiver.size(); ++i)
+    {
+        receiver[i] = NULL;
+    }
+    receiver.clear();
+    
+    iBlank = other.iBlank;
+    belonging = other.belonging;    
+    nei = other.nei;
+    Mach = other.Mach;
+    sigma = other.sigma;
+    wallDistance = other.wallDistance;
+    vol = other.vol;
+    r_11 = other.r_11;
+    r_12 = other.r_12;
+    r_22 = other.r_22;
+    r_23 = other.r_23;
+    r_33 = other.r_33;
+    R = other.R;
+    dQ = other.dQ;
+    old_dQ = other.old_dQ;
+    prim = other.prim;
+    cons = other.cons;
+    old_cons = other.old_cons;
+    oldold_cons = other.oldold_cons;
+    resInner = other.resInner;
+    resOuter = other.resOuter;
+    D = other.D;
+    trim = other.trim;
+    newlyCreated = other.newlyCreated;
+    ghost = other.ghost;
+    cnt = other.cnt;
+    grad = other.grad;
+    emin = other.emin;
+    emax = other.emax;
+    face = other.face;
+    type = other.type;
+    vtx = other.vtx;
+    bc = other.bc;
+    fringeBou = other.fringeBou;
+    nTrims = other.nTrims;
+}
+
+Cell& Cell::operator= (const Cell& other)
+{
+    phys = other.phys;
+    donor = NULL;
+    
+    for (int i=0; i<receiver.size(); ++i)
+    {
+        receiver[i] = NULL;
+    }
+    receiver.clear();
+
+    iBlank = other.iBlank;
+    belonging = other.belonging;    
+    nei = other.nei;
+    Mach = other.Mach;
+    sigma = other.sigma;
+    wallDistance = other.wallDistance;
+    vol = other.vol;
+    r_11 = other.r_11;
+    r_12 = other.r_12;
+    r_22 = other.r_22;
+    r_23 = other.r_23;
+    r_33 = other.r_33;
+    R = other.R;
+    dQ = other.dQ;
+    old_dQ = other.old_dQ;
+    prim = other.prim;
+    cons = other.cons;
+    old_cons = other.old_cons;
+    oldold_cons = other.oldold_cons;
+    resInner = other.resInner;
+    resOuter = other.resOuter;
+    D = other.D;
+    trim = other.trim;
+    newlyCreated = other.newlyCreated;
+    ghost = other.ghost;
+    cnt = other.cnt;
+    grad = other.grad;
+    emin = other.emin;
+    emax = other.emax;
+    face = other.face;
+    type = other.type;
+    vtx = other.vtx;
+    bc = other.bc;
+    fringeBou = other.fringeBou;
+    nTrims = other.nTrims;
+}
+
+Cell::Cell (Cell&& other) :
+phys (move(other.phys)),
+iBlank (move(other.iBlank)),
+belonging(move(other.belonging)),
+nei(move(other.nei)),
+Mach(move(other.Mach)),
+sigma(move(other.sigma)),
+wallDistance(move(other.wallDistance)),
+vol(move(other.vol)),
+r_11(move(other.r_11)),
+r_12(move(other.r_12)),
+r_22(move(other.r_22)),
+r_23(move(other.r_23)),
+r_33(move(other.r_33)),
+R(move(other.R)),
+dQ(move(other.dQ)),
+old_dQ(move(other.old_dQ)),
+prim(move(other.prim)),
+cons(move(other.cons)),
+old_cons(move(other.old_cons)),
+oldold_cons(move(other.oldold_cons)),
+resInner(move(other.resInner)),
+resOuter(move(other.resOuter)),
+D(move(other.D)),
+trim(move(other.trim)),
+newlyCreated(move(other.newlyCreated)),
+ghost(move(other.ghost)),
+cnt(move(other.cnt)),
+grad(move(other.grad)),
+emin(move(other.emin)),
+emax(move(other.emax)),   
+face(move(other.face)),
+type(move(other.type)),
+vtx(move(other.vtx)),
+bc(move(other.bc)),
+fringeBou(move(other.fringeBou)),
+nTrims(move(other.nTrims))
+{    
+    donor = NULL;
+    
+    for (int i=0; i<receiver.size(); ++i)
+    {
+        receiver[i] = NULL;
+    }
+    receiver.clear();
 }
 
 void Cell::set_centroid (const vector<Point>& pt)

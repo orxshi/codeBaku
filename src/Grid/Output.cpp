@@ -426,6 +426,7 @@ void Grid::outAllVTK (int time)
     }
     
     out << "CELL_DATA " << n_in_elm << endl;
+    
     out << "SCALARS " << "rho " << "float " << "1" << endl;
     out << "LOOKUP_TABLE default" << endl;    
     for (int c=n_bou_elm; c<cell.size(); ++c)
@@ -433,6 +434,24 @@ void Grid::outAllVTK (int time)
         const Cell& cll = cell[c];
                      
         out << cll.prim[0] << endl;
+    }
+    
+    out << "SCALARS " << "iBlank " << "int " << "1" << endl;
+    out << "LOOKUP_TABLE default" << endl;    
+    for (int c=n_bou_elm; c<cell.size(); ++c)
+    {
+        const Cell& cll = cell[c];
+                     
+        out << static_cast<int>(cll.iBlank) << endl;
+    }
+    
+    out << "SCALARS " << "trim " << "int " << "1" << endl;
+    out << "LOOKUP_TABLE default" << endl;    
+    for (int c=n_bou_elm; c<cell.size(); ++c)
+    {
+        const Cell& cll = cell[c];
+                     
+        out << cll.trim << endl;
     }
     
     out.close();

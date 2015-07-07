@@ -19,6 +19,7 @@
 using std::vector;
 using std::array;
 using std::reference_wrapper;
+using std::move;
 
 class Face; // forward declaration
 
@@ -28,15 +29,17 @@ enum class nVertices_t {UNDEFINED=-1, TRI=3, QUAD=4, TET=4, PEN=6, HEX=8};
 enum class iBlank_t {UNDEFINED, NA, HOLE, FRINGE, FIELD};
 enum class BC {UNDEFINED=-2, NA=-1, EMPTY=0, SLIP_WALL=1, DIRICHLET=2};
 enum class vtkCellType_t {UNDEFINED=-1, TET=10, HEX=12, WEDGE=13};
+enum class fringeBou_t {UNDEFINED=-1, NO=0, YES=1};
 
 struct Cell
 {
     // Fields
     int phys;
     Cell* donor;
-    Cell* receiver;
+    vector<Cell*> receiver;
     iBlank_t iBlank;
     int belonging;
+    int nTrims;
     vector <int> nei;
     double Mach;
     double sigma;
@@ -58,10 +61,14 @@ struct Cell
     vector <int> face;    
     elmType_t type;
     vector <int> vtx;    
-    BC bc;
+    BC bc;    
+    fringeBou_t fringeBou;
 
-    // Constructor
+    // Constructors
     Cell();
+    Cell (const Cell& other);
+    Cell& operator= (const Cell& other);
+    Cell (Cell&& other);
 
     // Methods
     void set_centroid (const vector<Point>& pt);

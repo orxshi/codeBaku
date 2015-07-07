@@ -47,6 +47,12 @@ using std::setw;
 using std::stringstream;
 using std::scientific;
 
+struct Hole
+{
+    array <double, N_DIM> min;
+    array <double, N_DIM> max;
+};
+
 struct Grid
 {
     // Fields
@@ -55,7 +61,7 @@ struct Grid
     int totalNElms;
     int id;
     int phys_count;
-    //int nHoles;    
+    int nHoles;    
     double wallDistance;    
     ifstream in; // for reading grid input
     string meshFile;
@@ -68,8 +74,8 @@ struct Grid
     vector <Face> face;
     vector <Cell> cell;
     vector <btree> bt;
-    
-    array<string,3> bcVerbose;
+    vector <Hole> holes;    
+    array<string,3> bcVerbose;    
     
     struct CellADT: ADT
     {
@@ -80,6 +86,7 @@ struct Grid
 
     // Constructor
     Grid (string mainDir, int id);
+    Grid (const Grid&);
 
     // Private Methods
     void read_ptSize ();
@@ -112,7 +119,7 @@ struct Grid
     void nontrimToTrim (int crt);
     void fieldToFringe (int crt);
     void fringeToField (int crt);
-    void blankWithPhys (int phys);
+    //void blankWithPhys (int phys);
     void getMovingFaceVelocity();
     void rotateMesh (double delAlpha, CVector& centerAirfoil);    
     void outAllTecplot();
