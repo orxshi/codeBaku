@@ -1,4 +1,3 @@
-#address = $(CODE_BAKU_SRC)
 include ${PETSC_DIR}/lib/petsc/conf/variables
 #include ${PETSC_DIR}/lib/petsc/conf/rules
 #include ${PETSC_DIR}/lib/petsc/conf/test
@@ -34,18 +33,6 @@ SOURCES=BoundaryConditions/BoundaryConditions.cpp\
         Gradient/Gradient.cpp\
         Limiter/Limiter.cpp\
 	Point/Point.cpp\
-        AFT/AFT.cpp\
-	AFT/Edge.cpp\
-	AFT/Preset.cpp\
-	AFT/Trimming.cpp\
-	AFT/Triangle.cpp\
-	AFT/Intersection.cpp\
-	AFT/Point.cpp\
-	AFT/ReBlanking.cpp\
-	AFT/FModules.cpp\
-	AFT/Front.cpp\
-	AFT/NewGrid.cpp\
-	AFT/FinalGrid.cpp\
 	MovingMesh/MovingMesh.cpp\
 	Solid/Solid.cpp\
 	Coeffs/Coeffs.cpp

@@ -93,6 +93,7 @@ namespace AFT
     Edge createEdge (int indexA, int indexB, int belonging, bool newlyCreated);
     int edgeExists (const int ip1, const int ip2, const vector<Point>& points, const vector<Edge>& edges, bool& exists);
     bool checkEdgeIntersection (const Point& closestPoint, const Point& frontListPoint, EdgeADT& edgeADT);
+    int checkNumberOfEdgeIntersection (const Point& closestPoint, const Point& frontListPoint, EdgeADT& edgeADT);
     void knowParentTriangles (vector<Edge>& edges, const vector<Triangle>& triangles);
     
     // Intersection
@@ -110,6 +111,7 @@ namespace AFT
     void circleCenter(const CVector& A, const CVector& B, const CVector& C, CVector& cnt, double& radius);
     void flip (vector<Triangle>& triangles, vector<Edge>& edges, const vector<Point>& points);
     void outputTrianglesVTK (const vector<Point>& points, const vector<Triangle>& triangles, string dir);
+    void addToTriangleList(vector<Triangle>& triangles, const Triangle& tmpTriangle, TriangleADT& triangleADT, const vector<Point>& points);
     
     // Reblanking
     void fieldToFringe (Grid& gr, Grid& ogr, int crt);
@@ -120,6 +122,8 @@ namespace AFT
     void createNewPoint (bool& newPointSuccess, vector<FrontMember>& frontList, double aveMeshSize, vector<Point>& points,
                        vector<Edge>& edges, vector<Triangle>& triangles, TriangleADT& triangleADT, PointADT& pointADT,
                         EdgeADT& edgeADT, EdgeADT& edge0ADT, EdgeADT& edge1ADT, const Point& meshCenter, const int newGridId);
+    void getTwoNormalPoints (int it0, int it1, const vector<Point>& points, Point& crP1, Point& crP2, double pdis);
+    bool rayCasting (const Point& farPoint, const Point& p, EdgeADT& edgeADT);
     
     // FModules
     void F1 (int iCPX, int iCPY, bool& YChecked, bool& XChecked, int terminal, vector<FrontMember>& frontList, vector<Edge>& edges,

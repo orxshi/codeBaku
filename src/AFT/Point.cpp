@@ -213,9 +213,10 @@ namespace AFT
     bool pointsNearby (const CVector& range1, const CVector& range2, PointADT& pointADT)
     {
         int result = -1;
-
+        
         ADT::ADTPoint vec = pointADT.createADTPoint (range1, range2);
 
+        pointADT.searchForNIntersections = false;
         result = pointADT.search (vec);
 
         if (result != -1)
@@ -260,10 +261,14 @@ namespace AFT
         Edge& frontEdge = edges[iFrontEdge];
         int it0 = frontEdge.t[0];
         int it1 = frontEdge.t[1];
+        Point farPoint;
+        farPoint.dim[0] = pointADT.root->d[0] + fabs(pointADT.root->d[0]); // 2*xmax
+        farPoint.dim[1] = pointADT.root->d[1] + fabs(pointADT.root->d[1]); // 2*ymax
+        farPoint.dim[2] = 0.;        
         
         if ( frontFirst.newPointChecked == false )
         {
-            double dx = points[it1].dim[0] - points[it0].dim[0];
+            /*double dx = points[it1].dim[0] - points[it0].dim[0];
             double dy = points[it1].dim[1] - points[it0].dim[1];
             double dz = 0.;
             double length = sqrt( pow(dx,2) + pow(dy,2) + pow(dz,2) );
@@ -293,7 +298,14 @@ namespace AFT
             double pdis = getPointDistance (length);
             
             crP1.dim = center + (pdis * normal1);
-            crP2.dim = center + (pdis * normal2);            
+            crP2.dim = center + (pdis * normal2);  */
+            
+            Point crP;
+            Point crP1;
+            Point crP2;
+            double pdis;
+            
+            getTwoNormalPoints (it0, it1, points, crP1, crP2, pdis);
                         
             points.push_back (crP1);
             points.push_back (crP2);
@@ -312,34 +324,116 @@ namespace AFT
                 
                 if (!triIntersects)
                 {
-                    crP = crP1;
-                }
-                else
-                {
-                    crP = crP2;
-                }
-            }
-            else
-            {
-                bool p1e1 = checkEdgeIntersection (meshCenter, crP1, edge1ADT);
-                bool p2e1 = checkEdgeIntersection (meshCenter, crP2, edge1ADT);
-
-                bool p1e0 = checkEdgeIntersection (meshCenter, crP1, edge0ADT);
-                bool p2e0 = checkEdgeIntersection (meshCenter, crP2, edge0ADT);
-
-                if (frontEdge.belonging == 0)
-                {
-                    if (p1e0)
+                    //crP = crP1;
+                    bool crP1InsideDomain = rayCasting (farPoint, crP1, edgeADT);
+                    if (crP1InsideDomain)
                     {
                         crP = crP1;
                     }
-                    else if (p2e0)
+                    else
+                    {
+                        cout << "crP1 is outside domain in useNewPoints(...)" << endl;
+                        frontFirst.newPointChecked = true;
+                        newPointSuccess = false;
+                        points.pop_back(); // erase crP1
+                        points.pop_back(); // erase crP2
+                        return;
+                    }
+                }
+                else
+                {
+                    //crP = crP2;
+                    bool crP2InsideDomain = rayCasting (farPoint, crP2, edgeADT);
+                    if (crP2InsideDomain)
                     {
                         crP = crP2;
                     }
                     else
                     {
-                        cout << "intersects both in useNewPoints(...)" << endl;
+                        cout << "crP2 is outside domain in useNewPoints(...)" << endl;
+                        frontFirst.newPointChecked = true;
+                        newPointSuccess = false;
+                        points.pop_back(); // erase crP1
+                        points.pop_back(); // erase crP2
+                        return;
+                    }
+                }
+            }
+            else
+            {
+                /*bool p1e1 = checkEdgeIntersection (meshCenter, crP1, edge1ADT);
+                bool p2e1 = checkEdgeIntersection (meshCenter, crP2, edge1ADT);
+
+                bool p1e0 = checkEdgeIntersection (meshCenter, crP1, edge0ADT);
+                bool p2e0 = checkEdgeIntersection (meshCenter, crP2, edge0ADT);*/
+                
+                /*int p1e1 = checkNumberOfEdgeIntersection (farPoint, crP1, edge1ADT);
+                int p2e1 = checkNumberOfEdgeIntersection (farPoint, crP2, edge1ADT);
+                
+                int p1e0 = checkNumberOfEdgeIntersection (farPoint, crP1, edge0ADT);
+                int p2e0 = checkNumberOfEdgeIntersection (farPoint, crP2, edge0ADT);*/
+                
+                
+                bool crP1InsideDomain = rayCasting (farPoint, crP1, edgeADT);
+                bool crP2InsideDomain = rayCasting (farPoint, crP2, edgeADT);
+                
+                if (crP1InsideDomain)
+                {
+                    crP = crP1;
+                }
+                else if (crP2InsideDomain)
+                {
+                    crP = crP2;
+                }
+                else
+                {
+                    //cout << "intersects both in useNewPoints(...)" << endl;
+                    cout << "both normal points are outside domain in useNewPoints(...)" << endl;
+                    frontFirst.newPointChecked = true;
+                    newPointSuccess = false;
+                    points.pop_back(); // erase crP1
+                    points.pop_back(); // erase crP2
+                    //exit(-2);
+                    return;
+                }
+                
+                /*int p1e = checkNumberOfEdgeIntersection (farPoint, crP1, edgeADT);
+                int p2e = checkNumberOfEdgeIntersection (farPoint, crP2, edgeADT);
+                
+                if (p1e % 2 != 0) // odd (inside)
+                {
+                    crP = crP1;
+                }
+                else if (p2e % 2 != 0)
+                {
+                    crP = crP2;
+                }
+                else
+                {
+                    //cout << "intersects both in useNewPoints(...)" << endl;
+                    cout << "both normal points are outside domain in useNewPoints(...)" << endl;
+                    frontFirst.newPointChecked = true;
+                    newPointSuccess = false;
+                    points.pop_back(); // erase crP1
+                    points.pop_back(); // erase crP2
+                    //exit(-2);
+                    return;
+                }*/
+
+                /*if (frontEdge.belonging == 0)
+                {
+                    if (p1e0 % 2 != 0) // odd (inside)
+                    {
+                        crP = crP1;
+                    }
+                    else if (p2e0 % 2 != 0)
+                    {
+                        crP = crP2;
+                    }
+                    else
+                    {
+                        //cout << "intersects both in useNewPoints(...)" << endl;
+                        cout << "both normal points are outside domain of mesh0 in useNewPoints(...)" << endl;
                         frontFirst.newPointChecked = true;
                         newPointSuccess = false;
                         points.pop_back(); // erase crP1
@@ -350,17 +444,18 @@ namespace AFT
                 }
                 else if (frontEdge.belonging == 1)
                 {
-                    if (!p1e1)
+                    if (p1e1 % 2 != 0)
                     {
                         crP = crP1;
                     }
-                    else if (!p2e1)
+                    else if (p2e1 % 2 != 0)
                     {
                         crP = crP2;
                     }
                     else
                     {
-                        cout << "not intersects both in useNewPoints(...)" << endl;
+                        //cout << "not intersects both in useNewPoints(...)" << endl;
+                        cout << "both normal points are outside domain of mesh1 in useNewPoints(...)" << endl;
                         frontFirst.newPointChecked = true;
                         newPointSuccess = false;
                         points.pop_back(); // erase crP1
@@ -373,7 +468,7 @@ namespace AFT
                 {
                     cout << "!!! Error: frontEdge.belonging != 0 or frontEdge.belonging != 1 in useNewPoints(...)" << endl;
                     exit(-2);
-                }
+                }*/
             }
             
             points.pop_back(); // erase crP1
@@ -468,4 +563,57 @@ namespace AFT
         frontFirst.newPointChecked = true;
         newPointSuccess = false;
     }
+
+    void getTwoNormalPoints (int it0, int it1, const vector<Point>& points, Point& crP1, Point& crP2, double pdis)
+    {
+        double dx = points[it1].dim[0] - points[it0].dim[0];
+        double dy = points[it1].dim[1] - points[it0].dim[1];
+        double dz = 0.;
+        double length = sqrt( pow(dx,2) + pow(dy,2) + pow(dz,2) );
+
+        CVector normal1;
+        normal1[0] = -dy;
+        normal1[1] = dx;
+        normal1[2] = 0.;
+
+        CVector normal2;
+        normal2[0] = dy;
+        normal2[1] = -dx;
+        normal2[2] = 0.;
+
+        normal1 = norm (normal1);
+        normal2 = norm (normal2);
+
+        CVector center;
+        center[0] = 0.5 * (points[it0].dim[0] + points[it1].dim[0]);
+        center[1] = 0.5 * (points[it0].dim[1] + points[it1].dim[1]);
+        center[2] = 0.;
+
+        //Point crP1;
+        //Point crP2;
+
+        pdis = getPointDistance (length);
+
+        crP1.dim = center + (pdis * normal1);
+        crP2.dim = center + (pdis * normal2);
+    }
+    
+    bool rayCasting (const Point& farPoint, const Point& p, EdgeADT& edgeADT)
+    {
+        // determines whether point, p is inside domain of edgeADT or not
+        // returns true if inside
+        // returns false if outside
+        
+        int nInter = checkNumberOfEdgeIntersection (farPoint, p, edgeADT);
+
+        if (nInter % 2 == 0) // even (outside)
+        {
+            return false;
+        }
+        else // odd (inside)
+        {
+            return true;
+        }
+    }
 }
+

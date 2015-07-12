@@ -99,6 +99,7 @@ namespace AFT
 
         ADT::ADTPoint vec = edgeADT.createADTPoint (frontListPoint, closestPoint);
 
+        edgeADT.searchForNIntersections = false;
         result = edgeADT.search (vec);
 
         if (result != -1)
@@ -107,6 +108,16 @@ namespace AFT
         }
         
         return false;
+    }
+    
+    int checkNumberOfEdgeIntersection (const Point& closestPoint, const Point& frontListPoint, EdgeADT& edgeADT)
+    {
+        ADT::ADTPoint vec = edgeADT.createADTPoint (frontListPoint, closestPoint);
+
+        edgeADT.searchForNIntersections = true;
+        edgeADT.search (vec);
+        
+        return edgeADT.nIntersections;
     }
     
     void knowParentTriangles (vector<Edge>& edges, const vector<Triangle>& triangles)

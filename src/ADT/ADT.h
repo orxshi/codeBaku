@@ -44,7 +44,9 @@ struct ADT
     };
     
     unsigned int sizeTree;
-    vector<ADTPoint> points;    
+    vector<ADTPoint> points;
+    int nIntersections;
+    bool searchForNIntersections;
 
     struct Node
     {

@@ -284,6 +284,7 @@ namespace AFT
 
         ADT::ADTPoint vec = triangleADT.createADTPoint (tri, points);
 
+        triangleADT.searchForNIntersections = false;        
         result = triangleADT.search (vec);
 
         if (result != -1)
@@ -758,6 +759,17 @@ namespace AFT
         double difY = A[1] - cnt[1];
 
         radius = sqrt(difX * difX + difY * difY);
+    }
+    
+    void addToTriangleList(vector<Triangle>& triangles, const Triangle& tmpTriangle,
+            TriangleADT& triangleADT, const vector<Point>& points)
+    {
+        bool tmpBool;
+        
+        triangles.push_back (tmpTriangle);
+        ADT::ADTPoint vec = triangleADT.createADTPoint (tmpTriangle, points);
+        vec.idx = triangles.size() - 1;
+        triangleADT.insert (vec, triangleADT.root, tmpBool);
     }
 }
 

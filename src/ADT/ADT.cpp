@@ -4,6 +4,8 @@ ADT::ADT()
 {
     sizeTree = 0;
     root = NULL;
+    nIntersections = 0;
+    searchForNIntersections = false;
 }
 
 ADT::~ADT()
@@ -153,14 +155,31 @@ void ADT::search (Node* node, const ADTPoint& targetPoint, int& index)
         // check whether the point is inside the element
         if ( doCubesOverlap (node, targetPoint) && compareFunction (node, targetPoint) )
         {
-            fill (searchStack.begin(), searchStack.end(), nullptr);
-            searchStack.clear();
-            
-            index = node->p.idx;
-            
-            if (node != root)
+            if (searchForNIntersections)
             {
-                node = NULL;
+                ++nIntersections;
+                
+                searchChildren (node, targetPoint);
+
+                if (!searchStack.empty())
+                {
+                    Node* last = searchStack.back();                
+                    searchStack.back() = NULL;                
+                    searchStack.pop_back();
+                    search (last, targetPoint, index);
+                }
+            }
+            else
+            {
+                fill (searchStack.begin(), searchStack.end(), nullptr);
+                searchStack.clear();
+            
+                index = node->p.idx;
+            
+                if (node != root)
+                {
+                    node = NULL;
+                }
             }
         }
         else
@@ -181,6 +200,7 @@ void ADT::search (Node* node, const ADTPoint& targetPoint, int& index)
 int ADT::search (const ADTPoint& targetPoint)
 {
     int i = -1;
+    nIntersections = 0;
     
     fill (searchStack.begin(), searchStack.end(), nullptr);
     searchStack.clear();

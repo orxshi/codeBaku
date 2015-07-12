@@ -78,11 +78,13 @@ namespace AFT
 
             if (A_B_CPX_exists == false)
             {
-                triangles.push_back (tmpTriangle);
+                /*triangles.push_back (tmpTriangle);
 
                 ADT::ADTPoint vec = triangleADT.createADTPoint (tmpTriangle, points);
                 vec.idx = triangles.size() - 1;
-                triangleADT.insert (vec, triangleADT.root, tmpBool);
+                triangleADT.insert (vec, triangleADT.root, tmpBool);*/
+                
+                addToTriangleList (triangles, tmpTriangle, triangleADT, points);
                 
                 eraseExistingEdgeFromFrontList (iA_CPX, frontList);
                 eraseExistingEdgeFromFrontList (iB_CPX, frontList);
@@ -136,10 +138,12 @@ namespace AFT
                         vec.idx = edges.size() - 1;
                         edgeADT.insert (vec, edgeADT.root, tmpBool);
 
-                        triangles.push_back (tmpTriangle);
+                        /*triangles.push_back (tmpTriangle);
                         vec = triangleADT.createADTPoint (tmpTriangle, points);
                         vec.idx = triangles.size() - 1;
-                        triangleADT.insert (vec, triangleADT.root, tmpBool);
+                        triangleADT.insert (vec, triangleADT.root, tmpBool);*/
+                        
+                        addToTriangleList (triangles, tmpTriangle, triangleADT, points);
                         
                         eraseExistingEdgeFromFrontList (iA_CPX, frontList);
                         eraseFromFrontList (frontList);
@@ -205,10 +209,12 @@ namespace AFT
                 vec.idx = edges.size() - 1;
                 edgeADT.insert (vec, edgeADT.root, tmpBool);
 
-                triangles.push_back(tmpTriangle);
+                /*triangles.push_back(tmpTriangle);
                 vec = triangleADT.createADTPoint (tmpTriangle, points);
                 vec.idx = triangles.size() - 1;
-                triangleADT.insert (vec, triangleADT.root, tmpBool);
+                triangleADT.insert (vec, triangleADT.root, tmpBool);*/
+                
+                addToTriangleList (triangles, tmpTriangle, triangleADT, points);
                 
                 eraseExistingEdgeFromFrontList (iB_CPX, frontList);
                 eraseFromFrontList (frontList);
@@ -260,22 +266,12 @@ namespace AFT
                     vec.idx = edges.size() - 1;
                     edgeADT.insert (vec, edgeADT.root, tmpBool);
 
-                    triangles.push_back(tmpTriangle);
-                    
-                    /*if (triangles.size() == 51)
-                                {
-                                    cout << "size 51 in f3" << endl;
-                                    cout << iA << endl;
-                                    cout << iB << endl;
-                                    cout << frontEdge.belonging << endl;
-                                    cout << iCPX << endl;
-                                    cout << CPX.newlyCreated << endl;
-                                    cin.ignore();
-                                }*/
-                    
+                    /*triangles.push_back(tmpTriangle);
                     vec = triangleADT.createADTPoint (tmpTriangle, points);
                     vec.idx = triangles.size() - 1;
-                    triangleADT.insert (vec, triangleADT.root, tmpBool);
+                    triangleADT.insert (vec, triangleADT.root, tmpBool);*/
+                    
+                    addToTriangleList (triangles, tmpTriangle, triangleADT, points);
 
                     eraseFromFrontList (frontList);
                     addToFrontList (edges.size()-2, frontList);
