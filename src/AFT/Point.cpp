@@ -97,7 +97,7 @@ namespace AFT
             }
         };
         
-        if (frontEdge.newlyCreated)
+        /*if (frontEdge.newlyCreated)
         {
             for (unsigned int p=0; p<points.size(); ++p)
             {
@@ -115,6 +115,14 @@ namespace AFT
                 {
                     func(p);
                 }
+            }
+        }*/
+        
+        for (unsigned int p=0; p<points.size(); ++p)
+        {
+            if ( p != it1 && p != it0 )
+            {
+                func(p);
             }
         }
         
@@ -248,320 +256,39 @@ namespace AFT
         return (0.5 * r * 1.73205080757); // weird number is tan(60)
     }
     
-    void createNewPoint (bool& newPointSuccess, vector<FrontMember>& frontList, double aveMeshSize, vector<Point>& points,
+    void createTriWithNewPoint (Point& crP, vector<FrontMember>& frontList, vector<Point>& points,
                         vector<Edge>& edges, vector<Triangle>& triangles, TriangleADT& triangleADT, PointADT& pointADT,
-                        EdgeADT& edgeADT, EdgeADT& edge0ADT, EdgeADT& edge1ADT, const Point& meshCenter, const int newGridId)
+                        EdgeADT& edgeADT, const int newGridId)
     {
-        Triangle tmpTriangle;
-        bool tempBool;
-        ADT::ADTPoint vec;
-        
         FrontMember& frontFirst = frontList.front();
         int iFrontEdge = frontFirst.edge;
         Edge& frontEdge = edges[iFrontEdge];
         int it0 = frontEdge.t[0];
         int it1 = frontEdge.t[1];
-        Point farPoint;
-        farPoint.dim[0] = pointADT.root->d[0] + fabs(pointADT.root->d[0]); // 2*xmax
-        farPoint.dim[1] = pointADT.root->d[1] + fabs(pointADT.root->d[1]); // 2*ymax
-        farPoint.dim[2] = 0.;        
         
-        if ( frontFirst.newPointChecked == false )
-        {
-            /*double dx = points[it1].dim[0] - points[it0].dim[0];
-            double dy = points[it1].dim[1] - points[it0].dim[1];
-            double dz = 0.;
-            double length = sqrt( pow(dx,2) + pow(dy,2) + pow(dz,2) );
+        crP.belonging = newGridId;
+        crP.newlyCreated = true;            
+        addToPointList (crP, points, pointADT);
+        int iCrP = points.size() - 1;
 
-            CVector normal1;
-            normal1[0] = -dy;
-            normal1[1] = dx;
-            normal1[2] = 0.;
+        Edge tmpEdge1 = createEdge (iCrP, it0, newGridId, true);
+        addToEdgeList (tmpEdge1, iCrP, it0, edges, edgeADT, points);
+        int iTmpEdge1 = edges.size() - 1;
 
-            CVector normal2;
-            normal2[0] = dy;
-            normal2[1] = -dx;
-            normal2[2] = 0.;
+        Edge tmpEdge2 = createEdge (iCrP, it1, newGridId, true);
+        addToEdgeList (tmpEdge2, iCrP, it1, edges, edgeADT, points);
+        int iTmpEdge2 = edges.size() - 1;
 
-            normal1 = norm (normal1);
-            normal2 = norm (normal2);
+        Triangle tmpTriangle;
+        tmpTriangle = createTriangle (iFrontEdge, iTmpEdge1, iTmpEdge2, edges, points);
+        addToTriangleList (triangles, tmpTriangle, triangleADT, points);
 
-            CVector center;
-            center[0] = 0.5 * (points[it0].dim[0] + points[it1].dim[0]);
-            center[1] = 0.5 * (points[it0].dim[1] + points[it1].dim[1]);
-            center[2] = 0.;
+        eraseFromFrontList (frontList);
+        addToFrontList (iTmpEdge2, frontList);
+        addToFrontList (iTmpEdge1, frontList);
+        sortFrontList (frontList, points, edges);
 
-            Point crP;
-            Point crP1;
-            Point crP2;
-            
-            double pdis = getPointDistance (length);
-            
-            crP1.dim = center + (pdis * normal1);
-            crP2.dim = center + (pdis * normal2);  */
-            
-            Point crP;
-            Point crP1;
-            Point crP2;
-            double pdis;
-            
-            getTwoNormalPoints (it0, it1, points, crP1, crP2, pdis);
-                        
-            points.push_back (crP1);
-            points.push_back (crP2);
-            
-            int iCrP1 = points.size() - 2;
-            int iCrP2 = points.size() - 1;
-
-            if (frontEdge.newlyCreated)
-            //if (frontEdge.belonging == 2)
-            {
-                tmpTriangle.p.push_back (it0);
-                tmpTriangle.p.push_back (it1);
-                tmpTriangle.p.push_back (iCrP1);
-                
-                bool triIntersects = triangleIntersect (tmpTriangle, triangleADT, points);
-                
-                if (!triIntersects)
-                {
-                    //crP = crP1;
-                    bool crP1InsideDomain = rayCasting (farPoint, crP1, edgeADT);
-                    if (crP1InsideDomain)
-                    {
-                        crP = crP1;
-                    }
-                    else
-                    {
-                        cout << "crP1 is outside domain in useNewPoints(...)" << endl;
-                        frontFirst.newPointChecked = true;
-                        newPointSuccess = false;
-                        points.pop_back(); // erase crP1
-                        points.pop_back(); // erase crP2
-                        return;
-                    }
-                }
-                else
-                {
-                    //crP = crP2;
-                    bool crP2InsideDomain = rayCasting (farPoint, crP2, edgeADT);
-                    if (crP2InsideDomain)
-                    {
-                        crP = crP2;
-                    }
-                    else
-                    {
-                        cout << "crP2 is outside domain in useNewPoints(...)" << endl;
-                        frontFirst.newPointChecked = true;
-                        newPointSuccess = false;
-                        points.pop_back(); // erase crP1
-                        points.pop_back(); // erase crP2
-                        return;
-                    }
-                }
-            }
-            else
-            {
-                /*bool p1e1 = checkEdgeIntersection (meshCenter, crP1, edge1ADT);
-                bool p2e1 = checkEdgeIntersection (meshCenter, crP2, edge1ADT);
-
-                bool p1e0 = checkEdgeIntersection (meshCenter, crP1, edge0ADT);
-                bool p2e0 = checkEdgeIntersection (meshCenter, crP2, edge0ADT);*/
-                
-                /*int p1e1 = checkNumberOfEdgeIntersection (farPoint, crP1, edge1ADT);
-                int p2e1 = checkNumberOfEdgeIntersection (farPoint, crP2, edge1ADT);
-                
-                int p1e0 = checkNumberOfEdgeIntersection (farPoint, crP1, edge0ADT);
-                int p2e0 = checkNumberOfEdgeIntersection (farPoint, crP2, edge0ADT);*/
-                
-                
-                bool crP1InsideDomain = rayCasting (farPoint, crP1, edgeADT);
-                bool crP2InsideDomain = rayCasting (farPoint, crP2, edgeADT);
-                
-                if (crP1InsideDomain)
-                {
-                    crP = crP1;
-                }
-                else if (crP2InsideDomain)
-                {
-                    crP = crP2;
-                }
-                else
-                {
-                    //cout << "intersects both in useNewPoints(...)" << endl;
-                    cout << "both normal points are outside domain in useNewPoints(...)" << endl;
-                    frontFirst.newPointChecked = true;
-                    newPointSuccess = false;
-                    points.pop_back(); // erase crP1
-                    points.pop_back(); // erase crP2
-                    //exit(-2);
-                    return;
-                }
-                
-                /*int p1e = checkNumberOfEdgeIntersection (farPoint, crP1, edgeADT);
-                int p2e = checkNumberOfEdgeIntersection (farPoint, crP2, edgeADT);
-                
-                if (p1e % 2 != 0) // odd (inside)
-                {
-                    crP = crP1;
-                }
-                else if (p2e % 2 != 0)
-                {
-                    crP = crP2;
-                }
-                else
-                {
-                    //cout << "intersects both in useNewPoints(...)" << endl;
-                    cout << "both normal points are outside domain in useNewPoints(...)" << endl;
-                    frontFirst.newPointChecked = true;
-                    newPointSuccess = false;
-                    points.pop_back(); // erase crP1
-                    points.pop_back(); // erase crP2
-                    //exit(-2);
-                    return;
-                }*/
-
-                /*if (frontEdge.belonging == 0)
-                {
-                    if (p1e0 % 2 != 0) // odd (inside)
-                    {
-                        crP = crP1;
-                    }
-                    else if (p2e0 % 2 != 0)
-                    {
-                        crP = crP2;
-                    }
-                    else
-                    {
-                        //cout << "intersects both in useNewPoints(...)" << endl;
-                        cout << "both normal points are outside domain of mesh0 in useNewPoints(...)" << endl;
-                        frontFirst.newPointChecked = true;
-                        newPointSuccess = false;
-                        points.pop_back(); // erase crP1
-                        points.pop_back(); // erase crP2
-                        //exit(-2);
-                        return;
-                    }
-                }
-                else if (frontEdge.belonging == 1)
-                {
-                    if (p1e1 % 2 != 0)
-                    {
-                        crP = crP1;
-                    }
-                    else if (p2e1 % 2 != 0)
-                    {
-                        crP = crP2;
-                    }
-                    else
-                    {
-                        //cout << "not intersects both in useNewPoints(...)" << endl;
-                        cout << "both normal points are outside domain of mesh1 in useNewPoints(...)" << endl;
-                        frontFirst.newPointChecked = true;
-                        newPointSuccess = false;
-                        points.pop_back(); // erase crP1
-                        points.pop_back(); // erase crP2
-                        return;
-                        //exit(-2);
-                    }
-                }
-                else
-                {
-                    cout << "!!! Error: frontEdge.belonging != 0 or frontEdge.belonging != 1 in useNewPoints(...)" << endl;
-                    exit(-2);
-                }*/
-            }
-            
-            points.pop_back(); // erase crP1
-            points.pop_back(); // erase crP2
-            
-            //cout << "df0 = " << points.size() << endl;
-            //cin.ignore();
-            
-            bool doesPointExist = pointExists (crP.dim, points);
-    
-            CVector meshDis;
-            meshDis[0] = 0.5 * pdis;
-            meshDis[1] = 0.5 * pdis;
-            meshDis[2] = 0.;
-    
-            bool pointNearby = pointsNearby (crP.dim-meshDis, crP.dim+meshDis, pointADT);
-            
-            if (!pointNearby)
-            {
-                if (!doesPointExist)
-                {
-                    bool intersection = checkEdgeIntersection (crP, points[it0], edgeADT);
-
-                    if (!intersection)
-                    {
-                        intersection = checkEdgeIntersection (crP, points[it1], edgeADT);
-
-                        if (!intersection)
-                        {
-                            crP.belonging = newGridId;
-                            crP.newlyCreated = true;
-                            
-                            points.push_back (crP);
-                            /*vec = pointADT.createADTPoint (crP.dim, crP.dim);
-                            vec.idx = points.size() - 1;
-                            pointADT.insert (vec, pointADT.root, tempBool);*/
-                            
-                            int iCrP = points.size() - 1;
-                            
-                            Edge tmpEdge1 = createEdge (iCrP, it0, newGridId, true);
-                            Edge tmpEdge2 = createEdge (iCrP, it1, newGridId, true);
-                            
-                            edges.push_back (tmpEdge1);
-                            edges.push_back (tmpEdge2);
-                            
-                            int iTmpEdge1 = edges.size() - 2;
-                            int iTmpEdge2 = edges.size() - 1;
-                                
-                            tmpTriangle = createTriangle (iFrontEdge, iTmpEdge1, iTmpEdge2, edges, points);
-                            bool triIntersects = triangleIntersect (tmpTriangle, triangleADT, points);
-
-                            if (!triIntersects)
-                            {
-                                vec = pointADT.createADTPoint (crP.dim, crP.dim);
-                                vec.idx = points.size() - 1;
-                                pointADT.insert (vec, pointADT.root, tempBool);
-
-                                vec = edgeADT.createADTPoint (crP, points[it0]);
-                                vec.idx = iTmpEdge1;
-                                edgeADT.insert (vec, edgeADT.root, tempBool);
-
-                                vec = edgeADT.createADTPoint (crP, points[it1]);
-                                vec.idx = iTmpEdge2;
-                                edgeADT.insert (vec, edgeADT.root, tempBool);
-
-                                triangles.push_back(tmpTriangle);
-
-                                vec = triangleADT.createADTPoint (tmpTriangle, points);
-                                vec.idx = triangles.size() - 1;
-                                triangleADT.insert (vec, triangleADT.root, tempBool);
-
-                                eraseFromFrontList (frontList);
-                                addToFrontList (iTmpEdge2, frontList);
-                                addToFrontList (iTmpEdge1, frontList);
-                                sortFrontList (frontList, points, edges);
-
-                                newPointSuccess = true;
-                                return;
-                            }
-                            else
-                            {
-                                points.pop_back(); // erase crP
-                                edges.pop_back(); // erase tmpEdge1
-                                edges.pop_back(); // erase tmpEdge2
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        frontFirst.newPointChecked = true;
-        newPointSuccess = false;
+        return;
     }
 
     void getTwoNormalPoints (int it0, int it1, const vector<Point>& points, Point& crP1, Point& crP2, double pdis)
@@ -598,11 +325,16 @@ namespace AFT
         crP2.dim = center + (pdis * normal2);
     }
     
-    bool rayCasting (const Point& farPoint, const Point& p, EdgeADT& edgeADT)
+    bool rayCasting (const Point& p, EdgeADT& edgeADT)
     {
         // determines whether point, p is inside domain of edgeADT or not
         // returns true if inside
         // returns false if outside
+        
+        Point farPoint;
+        farPoint.dim[0] = edgeADT.root->d[0] + fabs(edgeADT.root->d[0]); // 2*xmax
+        farPoint.dim[1] = edgeADT.root->d[1] + fabs(edgeADT.root->d[1]); // 2*ymax
+        farPoint.dim[2] = 0.;
         
         int nInter = checkNumberOfEdgeIntersection (farPoint, p, edgeADT);
 
@@ -615,5 +347,141 @@ namespace AFT
             return true;
         }
     }
+    
+    bool candidateNewPoint (Point& crP, double& scoreNP, double aveTriArea, vector<FrontMember>& frontList, double pdisAveTri, vector<Point>& points,
+                        vector<Edge>& edges, vector<Triangle>& triangles, TriangleADT& triangleADT, PointADT& pointADT,
+                        EdgeADT& edgeADT, EdgeADT& edge01ADT)
+    {
+        Triangle tmpTriangle;
+        Point crP1;
+        Point crP2;
+        double pdis;
+        
+        FrontMember& frontFirst = frontList.front();
+        int iFrontEdge = frontFirst.edge;
+        Edge& frontEdge = edges[iFrontEdge];
+        int it0 = frontEdge.t[0];
+        int it1 = frontEdge.t[1];
+        
+        bool newPointSuccess = true;
+
+        getTwoNormalPoints (it0, it1, points, crP1, crP2, pdis);
+
+        points.push_back (crP1); int iCrP1 = points.size() - 1;
+        points.push_back (crP2); int iCrP2 = points.size() - 1;
+
+        if (frontEdge.newlyCreated)
+        {
+            tmpTriangle.p.push_back (it0);
+            tmpTriangle.p.push_back (it1);
+            tmpTriangle.p.push_back (iCrP1);
+
+            bool triIntersects = triangleIntersect (tmpTriangle, triangleADT, points);
+
+            if (!triIntersects)
+            {
+                bool crP1InsideDomain = rayCasting (crP1, edge01ADT);
+                if (crP1InsideDomain)
+                {
+                    crP = crP1;
+                }
+                else
+                {
+                    newPointSuccess = false;
+                }
+            }
+            else
+            {
+                bool crP2InsideDomain = rayCasting (crP2, edge01ADT);
+                if (crP2InsideDomain)
+                {
+                    crP = crP2;
+                }
+                else
+                {
+                    newPointSuccess = false;
+                }
+            }
+        }
+        else
+        {
+            bool crP1InsideDomain = rayCasting (crP1, edge01ADT);
+            bool crP2InsideDomain = rayCasting (crP2, edge01ADT);
+
+            if (crP1InsideDomain)
+            {
+                crP = crP1;
+            }
+            else if (crP2InsideDomain)
+            {
+                crP = crP2;
+            }
+            else
+            {
+                newPointSuccess = false;
+            }
+        }
+
+        points.pop_back(); // erase crP1
+        points.pop_back(); // erase crP2
+
+        if (newPointSuccess)
+        {
+            newPointSuccess = false;
+
+            bool doesPointExist = pointExists (crP.dim, points);
+
+            if (!doesPointExist)
+            {
+                CVector meshDis;
+                meshDis[0] = 0.7 * pdisAveTri;
+                meshDis[1] = 0.7 * pdisAveTri;
+                meshDis[2] = 0.;
+
+                bool pointNearby = pointsNearby (crP.dim-meshDis, crP.dim+meshDis, pointADT);
+
+                if (!pointNearby)
+                {
+                    bool intersection = checkEdgeIntersection (crP, points[it0], edgeADT);
+
+                    if (!intersection)
+                    {
+                        intersection = checkEdgeIntersection (crP, points[it1], edgeADT);
+
+                        if (!intersection)
+                        {
+                            newPointSuccess = true;
+                            points.push_back(crP);
+                            int iNP = points.size() - 1;
+
+                            Triangle tmpTriangle;
+
+                            tmpTriangle.p.push_back (it0);
+                            tmpTriangle.p.push_back (it1);
+                            tmpTriangle.p.push_back (iNP);
+
+                            scoreNP = tmpTriangle.qualityScore (points, aveTriArea);
+                            
+                            points.pop_back();
+                        }
+                    }
+                }
+            }
+        }
+        
+        return newPointSuccess;
+    }
+    
+    void addToPointList (Point& p, vector<Point>& points, PointADT& pointADT)
+    {
+        bool tempBool;
+        
+        points.push_back(p);
+        ADT::ADTPoint vec = pointADT.createADTPoint (p.dim, p.dim);
+        vec.idx = points.size() - 1;
+        pointADT.insert (vec, pointADT.root, tempBool);
+    }
+    
+    
 }
 

@@ -130,28 +130,38 @@ void Grid::read_elm ()
         switch ( tmpElm.type )
         {
             case elmType_t::TRI:
-                tmpElm.vtx.reserve ( static_cast<int>(nVertices_t::TRI) );
-                tmpElm.face.reserve (static_cast<int>(nFaces_t::TRI));
+                //tmpElm.vtx.reserve ( static_cast<int>(nVertices_t::TRI) );
+                //tmpElm.face.reserve (static_cast<int>(nFaces_t::TRI));
+                tmpElm.nVertices = static_cast<int>(nVertices_t::TRI);
+                tmpElm.nFaces = static_cast<int>(nFaces_t::TRI);
                 break;
 
             case elmType_t::HEX:
-                tmpElm.vtx.reserve ( static_cast<int>(nVertices_t::HEX));
-                tmpElm.face.reserve (static_cast<int>(nFaces_t::HEX));
+                //tmpElm.vtx.reserve ( static_cast<int>(nVertices_t::HEX));
+                //tmpElm.face.reserve (static_cast<int>(nFaces_t::HEX));
+                tmpElm.nVertices = static_cast<int>(nVertices_t::HEX);
+                tmpElm.nFaces = static_cast<int>(nFaces_t::HEX);
                 break;
 
             case elmType_t::TET:
-                tmpElm.vtx.reserve ( static_cast<int>(nVertices_t::TET));
-                tmpElm.face.reserve (static_cast<int>(nFaces_t::TET));
+                //tmpElm.vtx.reserve ( static_cast<int>(nVertices_t::TET));
+                //tmpElm.face.reserve (static_cast<int>(nFaces_t::TET));
+                tmpElm.nVertices = static_cast<int>(nVertices_t::TET);
+                tmpElm.nFaces = static_cast<int>(nFaces_t::TET);
                 break;
 
             case elmType_t::QUAD:
-                tmpElm.vtx.reserve ( static_cast<int>(nVertices_t::QUAD));
-                tmpElm.face.reserve (static_cast<int>(nFaces_t::QUAD));
+                //tmpElm.vtx.reserve ( static_cast<int>(nVertices_t::QUAD));
+                //tmpElm.face.reserve (static_cast<int>(nFaces_t::QUAD));
+                tmpElm.nVertices = static_cast<int>(nVertices_t::QUAD);
+                tmpElm.nFaces = static_cast<int>(nFaces_t::QUAD);
                 break;
 
             case elmType_t::PEN:
-                tmpElm.vtx.reserve ( static_cast<int>(nVertices_t::PEN));
-                tmpElm.face.reserve (static_cast<int>(nFaces_t::PEN));
+                //tmpElm.vtx.reserve ( static_cast<int>(nVertices_t::PEN));
+                //tmpElm.face.reserve (static_cast<int>(nFaces_t::PEN));
+                tmpElm.nVertices = static_cast<int>(nVertices_t::PEN);
+                tmpElm.nFaces = static_cast<int>(nFaces_t::PEN);
                 break;
             default:
                 cout << "elm[" << e << "].type = " << static_cast<int>(tmpElm.type) << endl;
@@ -159,7 +169,8 @@ void Grid::read_elm ()
                 break;
         }
 
-        for (unsigned int i=0; i<tmpElm.vtx.capacity(); ++i)
+        tmpElm.vtx.reserve (tmpElm.nVertices);
+        for (unsigned int i=0; i<tmpElm.nVertices; ++i)
         {
             in >> tempi;
             tmpElm.vtx.push_back(tempi-1);

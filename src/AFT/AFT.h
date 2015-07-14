@@ -39,6 +39,8 @@ namespace AFT
         vector<int> e;
         vector <int> nei;
         //vector <Edge> neiEdge;
+        CVector centroid(const vector<Point>& points);
+        double qualityScore (const vector<Point>& points, double aveTriArea);
     };
     
     struct FrontMember
@@ -85,9 +87,9 @@ namespace AFT
     void eraseFromFrontList (vector<FrontMember>& frontList);
     void addToFrontList (int edge, vector<FrontMember>& frontList);
     void eraseExistingEdgeFromFrontList (int ie, vector<FrontMember>& frontList);
-    void advanceFront (vector<FrontMember>& frontList, vector<Point>& points, double aveMeshSize,
+    void advanceFront (vector<FrontMember>& frontList, vector<Point>& points, double aveTriArea,
                        vector<Edge>& edges, vector<Triangle>& triangles, TriangleADT& triangleADT,
-                       PointADT& pointADT, EdgeADT& edgeADT, EdgeADT& edge0ADT, EdgeADT& edge1ADT, int newGridId, const Point& meshCenter);
+                       PointADT& pointADT, EdgeADT& edgeADT, EdgeADT& edge01ADT, int newGridId);
     
     // Edge
     Edge createEdge (int indexA, int indexB, int belonging, bool newlyCreated);
@@ -95,6 +97,7 @@ namespace AFT
     bool checkEdgeIntersection (const Point& closestPoint, const Point& frontListPoint, EdgeADT& edgeADT);
     int checkNumberOfEdgeIntersection (const Point& closestPoint, const Point& frontListPoint, EdgeADT& edgeADT);
     void knowParentTriangles (vector<Edge>& edges, const vector<Triangle>& triangles);
+    void addToEdgeList (Edge& edge, int iP1, int iP2, vector<Edge>& edges, EdgeADT& edgeADT, vector<Point>& points);
     
     // Intersection
     bool doIntersect (const CVector& p1, const CVector& q1, const CVector& p2, const CVector& q2);
@@ -119,11 +122,16 @@ namespace AFT
     
     // Point
     int findClosestPoint (FrontMember& fm, int terminal, const vector<Point>& points, const vector<Edge>& edges, bool& pointFound);
-    void createNewPoint (bool& newPointSuccess, vector<FrontMember>& frontList, double aveMeshSize, vector<Point>& points,
-                       vector<Edge>& edges, vector<Triangle>& triangles, TriangleADT& triangleADT, PointADT& pointADT,
-                        EdgeADT& edgeADT, EdgeADT& edge0ADT, EdgeADT& edge1ADT, const Point& meshCenter, const int newGridId);
+    void createTriWithNewPoint (Point& crP, vector<FrontMember>& frontList, vector<Point>& points,
+                        vector<Edge>& edges, vector<Triangle>& triangles, TriangleADT& triangleADT, PointADT& pointADT,
+                        EdgeADT& edgeADT, const int newGridId);
     void getTwoNormalPoints (int it0, int it1, const vector<Point>& points, Point& crP1, Point& crP2, double pdis);
-    bool rayCasting (const Point& farPoint, const Point& p, EdgeADT& edgeADT);
+    bool rayCasting (const Point& p, EdgeADT& edgeADT);
+    bool candidateNewPoint (Point& crP, double& scoreNP, double aveTriArea, vector<FrontMember>& frontList, double pdisAveTri, vector<Point>& points,
+                        vector<Edge>& edges, vector<Triangle>& triangles, TriangleADT& triangleADT, PointADT& pointADT,
+                        EdgeADT& edgeADT, EdgeADT& edge01ADT);
+    void addToPointList (Point& p, vector<Point>& points, PointADT& pointADT);
+    double getPointDistance (double r);
     
     // FModules
     void F1 (int iCPX, int iCPY, bool& YChecked, bool& XChecked, int terminal, vector<FrontMember>& frontList, vector<Edge>& edges,
@@ -133,7 +141,7 @@ namespace AFT
     void F3 (int iCPX, int iCPY, bool& YChecked, bool& XChecked, int terminal, vector<FrontMember>& frontList, vector<Edge>& edges,
              vector<Triangle>& triangles, TriangleADT& triangleADT, EdgeADT& edgeADT, int newGridId, const vector<Point>& points);
     
-    double getAveCellSize (const vector<Edge>& edges, const vector<Point>& points);
+    double getAveTriArea (const vector<Edge>& edges, const vector<Point>& points);
     void aft (vector<Grid>& gr, Grid& finalGrid);
     void outputTriangles (const vector<Point>& points, const vector<Triangle>& triangles);
     bool faceExists (const Face& nf, const vector<Face>& face, const vector<Point>& point, int& index);

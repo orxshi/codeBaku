@@ -16,6 +16,8 @@ Cell::Cell()
     }
     fringeBou = fringeBou_t::UNDEFINED;
     nTrims = 0;
+    nVertices = 0;
+    nFaces = 0;
 }
 
 Cell::Cell (const Cell& other)
@@ -64,6 +66,8 @@ Cell::Cell (const Cell& other)
     bc = other.bc;
     fringeBou = other.fringeBou;
     nTrims = other.nTrims;
+    nVertices = other.nVertices;
+    nFaces = other.nFaces;
 }
 
 Cell& Cell::operator= (const Cell& other)
@@ -112,6 +116,8 @@ Cell& Cell::operator= (const Cell& other)
     bc = other.bc;
     fringeBou = other.fringeBou;
     nTrims = other.nTrims;
+    nVertices = other.nVertices;
+    nFaces = other.nFaces;
 }
 
 Cell::Cell (Cell&& other) :
@@ -150,7 +156,9 @@ type(move(other.type)),
 vtx(move(other.vtx)),
 bc(move(other.bc)),
 fringeBou(move(other.fringeBou)),
-nTrims(move(other.nTrims))
+nTrims(move(other.nTrims)),
+nVertices(move(other.nVertices)),
+nFaces(move(other.nFaces))
 {    
     donor = NULL;
     

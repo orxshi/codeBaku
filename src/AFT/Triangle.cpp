@@ -771,5 +771,61 @@ namespace AFT
         vec.idx = triangles.size() - 1;
         triangleADT.insert (vec, triangleADT.root, tmpBool);
     }
+    
+    CVector Triangle::centroid(const vector<Point>& points)
+    {
+        CVector cent;
+        for (int i=0; i<N_DIM; ++i)
+        {
+            cent[i] = (points[p[0]].dim[i] + points[p[1]].dim[i] + points[p[2]].dim[i]) / 3.;
+        }
+        
+        return cent;
+    }
+    
+    double Triangle::qualityScore (const vector<Point>& points, double aveTriArea)
+    {
+        // low score is better
+        
+        double a = mag( points[p[0]].dim - points[p[1]].dim );
+        double b = mag( points[p[0]].dim - points[p[2]].dim );
+        double c = mag( points[p[1]].dim - points[p[2]].dim );
+        
+        // skewness
+        double s = 0.5 * (a + b + c);        
+        double r = (a*b*c) / (4. * sqrt( s*(s-a)*(s-b)*(s-c) ) );
+        double areaEqui = 3*sqrt(3.)/4. * pow(r, 2.);
+        double areaCurrent = areaTriangle (*this, points);
+        double skew = (1. - areaCurrent/areaEqui);
+        double devAveArea = fabs(areaCurrent - aveTriArea) / aveTriArea;
+        
+        if (devAveArea >= 1.) // 2x of aveTriArea
+        {
+            devAveArea = 1.;
+        }
+        
+        // aspect ratio // scales over 2
+        double lon = max (max(a, b), c);        
+        double sho = min (min(a, b), c);
+        double aR = lon/sho;
+        
+        if (aR > 3.)
+        {
+            aR = 1.;
+        }
+        
+        // coeffs
+        double cSkew = 20.;
+        double cAA = 60.;
+        double cAR = 20./3.; // because ar scales over 3 but others over 1
+        
+        /*cout << "skew = " << skew << endl;
+        cout << "devAveArea = " << devAveArea << endl;
+        cout << "aR = " << aR << endl;
+        cout << "areaCurrent = " << areaCurrent << endl;
+        cout << "aveTriArea = " << aveTriArea << endl;*/
+        
+        return (cSkew*skew + cAA*devAveArea + cAR*aR); // percentage
+    }
 }
 

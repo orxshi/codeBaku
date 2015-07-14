@@ -143,4 +143,14 @@ namespace AFT
             }
         }
     }
+    
+    void addToEdgeList (Edge& edge, int iP1, int iP2, vector<Edge>& edges, EdgeADT& edgeADT, vector<Point>& points)
+    {
+        bool tempBool;
+        
+        edges.push_back (edge);
+        ADT::ADTPoint vec = edgeADT.createADTPoint (points[iP1], points[iP2]);
+        vec.idx = edges.size() - 1;
+        edgeADT.insert (vec, edgeADT.root, tempBool);
+    }
 }

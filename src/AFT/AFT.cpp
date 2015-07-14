@@ -11,7 +11,7 @@ namespace AFT
         int phys = 1;
         Grid newGrid (gr[0].mainDir, newGridId);        
         //finalGrid.id = finalGridId;
-        double aveCellSize;
+        double aveTriArea;
         Point meshCenter;
         meshCenter.dim[0] = 0.5;
         meshCenter.dim[1] = 0.;
@@ -25,6 +25,7 @@ namespace AFT
         EdgeADT edgeADT;
         EdgeADT edge0ADT;
         EdgeADT edge1ADT;
+        EdgeADT edge01ADT;
         TriangleADT triangleADT;
         PointADT pointADT;
         cout << "done!" << endl;
@@ -46,7 +47,7 @@ namespace AFT
         cout << "Preparing... " << flush;
         setPointsEdges (gr, points, edges, newGridId);
         createFrontList (edges, frontList, points);
-        aveCellSize = getAveCellSize (edges, points);
+        aveTriArea = getAveTriArea (edges, points);
         cout << "done!" << endl;
         
         cout << "Building trees... " << flush;        
@@ -64,12 +65,13 @@ namespace AFT
         edge0ADT.build (points, mesh0Edges);
         edge1ADT.build (points, mesh1Edges);
         edgeADT.build (points, edges);
+        edge01ADT.build (points, edges);
         triangleADT.build (edgeADT);
         pointADT.build (points);
         cout << "done!" << endl;
         
         cout << "Advancing front... " << flush;
-        advanceFront (frontList, points, aveCellSize, edges, triangles, triangleADT, pointADT, edgeADT, edge0ADT, edge1ADT, newGridId, meshCenter);
+        advanceFront (frontList, points, aveTriArea, edges, triangles, triangleADT, pointADT, edgeADT, edge01ADT, newGridId);
         cout << "done!" << endl;
         
         cout << "Neighborhood... " << flush;
@@ -113,7 +115,7 @@ namespace AFT
         cout << "done!" << endl;
     }
     
-    double getAveCellSize (const vector<Edge>& edges, const vector<Point>& points)
+    double getAveTriArea (const vector<Edge>& edges, const vector<Point>& points)
     {
         double x,y,size=0.;
         
@@ -130,6 +132,6 @@ namespace AFT
         size /= edges.size();
         size *= 2.;
         
-        return size;
+        return ( sqrt(3.)/4.*sqrt(size) );
     }
 }

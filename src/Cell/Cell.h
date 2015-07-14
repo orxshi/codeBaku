@@ -40,6 +40,8 @@ struct Cell
     iBlank_t iBlank;
     int belonging;
     int nTrims;
+    int nVertices;
+    int nFaces;
     vector <int> nei;
     double Mach;
     double sigma;

@@ -8,6 +8,8 @@ void Grid::set_faceVertices (Face& face, const Cell& elm, const int index)
 
             switch (index)
             {
+                
+                
                 case 0:
                     face.vtx.push_back ( elm.vtx[0] );
                     face.vtx.push_back ( elm.vtx[3] );
@@ -56,6 +58,8 @@ void Grid::set_faceVertices (Face& face, const Cell& elm, const int index)
 
             switch (index)
             {
+                
+                
                 case 0:
                     face.vtx.push_back ( elm.vtx[0] ); 
                     face.vtx.push_back ( elm.vtx[2] ); 
@@ -86,6 +90,8 @@ void Grid::set_faceVertices (Face& face, const Cell& elm, const int index)
 
         switch(index)
         {
+            
+            
             case 0:
                 face.vtx.push_back ( elm.vtx[0] ); 
                 face.vtx.push_back ( elm.vtx[1] ); 
@@ -150,11 +156,27 @@ void Grid::set_connectivity()
 
     for (unsigned int e=n_bou_elm; e<cell.size(); ++e)
     {
-        for (unsigned int j=0; j<cell[e].face.capacity(); ++j)
+        cell[e].face.reserve (cell[e].nFaces);
+        
+        for (unsigned int j=0; j<cell[e].nFaces; ++j)
         {
             sig = 0;
 
             Face tmpFace;
+            
+            if (cell[e].type == elmType_t::HEX)
+            {
+                tmpFace.vtx.reserve (6*4);                            
+            }
+            else if (cell[e].type == elmType_t::TET)
+            {
+                tmpFace.vtx.reserve (4*3);
+            }
+            else if (cell[e].type == elmType_t::PEN)
+            {
+                tmpFace.vtx.reserve (5*4);
+            }
+            
             set_faceVertices (tmpFace, cell[e], j);
 
             for (unsigned int nei: bt[tmpFace.vtx[0]].a)
