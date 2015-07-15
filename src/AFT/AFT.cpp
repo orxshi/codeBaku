@@ -12,10 +12,10 @@ namespace AFT
         Grid newGrid (gr[0].mainDir, newGridId);        
         //finalGrid.id = finalGridId;
         double aveTriArea;
-        Point meshCenter;
-        meshCenter.dim[0] = 0.5;
-        meshCenter.dim[1] = 0.;
-        meshCenter.dim[2] = 0.;
+        //Point meshCenter;
+        //meshCenter.dim[0] = 0.5;
+        //meshCenter.dim[1] = 0.;
+        //meshCenter.dim[2] = 0.;
         vector<Point> points;
         vector<Edge> edges;
         vector<Edge> mesh0Edges;
@@ -133,5 +133,41 @@ namespace AFT
         size *= 2.;
         
         return ( sqrt(3.)/4.*sqrt(size) );
+    }
+    
+    void construct (int iCPX, bool isNewPoint, bool A_CPX_exists, bool B_CPX_exists, int iA_CPX, int iB_CPX, int iA, int iB, vector<FrontMember>& frontList,
+             vector<Edge>& edges, vector<Triangle>& triangles, TriangleADT& triangleADT, EdgeADT& edgeADT, int newGridId, const vector<Point>& points)
+    {
+        int iFrontEdge = frontList.front().edge;
+        
+        if (!A_CPX_exists)
+        {
+            Edge tmpEdge = createEdge (iA, iCPX, newGridId, true);
+            addToEdgeList (tmpEdge, iA, iCPX, edges, edgeADT, points);
+            iA_CPX = edges.size() - 1;
+            addToFrontList (iA_CPX, frontList);
+        }
+        else
+        {
+            eraseExistingEdgeFromFrontList (iA_CPX, frontList);
+        }
+        
+        if (!B_CPX_exists)
+        {
+            Edge tmpEdge = createEdge (iB, iCPX, newGridId, true);
+            addToEdgeList (tmpEdge, iB, iCPX, edges, edgeADT, points);
+            iB_CPX = edges.size() - 1;
+            addToFrontList (iB_CPX, frontList);
+        }
+        else
+        {
+            eraseExistingEdgeFromFrontList (iB_CPX, frontList);
+        }
+        
+        Triangle tmpTriangle = createTriangle (iFrontEdge, iA_CPX, iB_CPX, edges, points);
+        addToTriangleList (triangles, tmpTriangle, triangleADT, points);
+        
+        eraseFromFrontList (frontList);
+        sortFrontList (frontList, points, edges);
     }
 }

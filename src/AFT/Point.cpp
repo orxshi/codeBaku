@@ -8,6 +8,7 @@ namespace AFT
         for (unsigned int e=0; e<pointss.size(); ++e)
         {
             this->points[e] = this->createADTPoint (pointss[e].dim, pointss[e].dim);
+            this->points[e].idx = e;
         }
         
         ADT::build();
@@ -58,7 +59,7 @@ namespace AFT
         double tmpDis;
         bool cancel;
         int index = -1;
-        bool cond;
+        //bool cond;
         
         const Edge& frontEdge = edges[ fm.edge ];
         
@@ -66,7 +67,7 @@ namespace AFT
         const int it1 = frontEdge.t[1-terminal];
         
         const Point& t0= points[ it0 ];
-        const Point& t1= points[ it1 ];
+        //const Point& t1= points[ it1 ];
         
         auto func = [&] (unsigned int p)
         {
@@ -348,7 +349,7 @@ namespace AFT
         }
     }
     
-    bool candidateNewPoint (Point& crP, double& scoreNP, double aveTriArea, vector<FrontMember>& frontList, double pdisAveTri, vector<Point>& points,
+    /*bool candidateNewPoint (Point& crP, double& scoreNP, double aveTriArea, vector<FrontMember>& frontList, double pdisAveTri, vector<Point>& points,
                         vector<Edge>& edges, vector<Triangle>& triangles, TriangleADT& triangleADT, PointADT& pointADT,
                         EdgeADT& edgeADT, EdgeADT& edge01ADT)
     {
@@ -470,7 +471,7 @@ namespace AFT
         }
         
         return newPointSuccess;
-    }
+    }*/
     
     void addToPointList (Point& p, vector<Point>& points, PointADT& pointADT)
     {
@@ -482,6 +483,93 @@ namespace AFT
         pointADT.insert (vec, pointADT.root, tempBool);
     }
     
-    
+    bool eligible (int iCPX, bool isNewPoint, int iA, int iB, double aveTriArea, double& score, bool& A_CPX_exists, bool& B_CPX_exists, int& iA_CPX, int& iB_CPX, const vector<FrontMember>& frontList, vector<Edge>& edges, EdgeADT& edgeADT, EdgeADT& edge01ADT, TriangleADT& triangleADT, vector<Point>& points, PointADT& pointADT)
+    {
+        // don't forget to pop back edges
+        
+        bool A_CPX_intersects;
+        bool B_CPX_intersects;
+        
+        const Point& CPX = points[ iCPX ];
+        const FrontMember& frontFirst = frontList.front();
+        int iFrontEdge = frontFirst.edge;
+        //Edge& frontEdge = edges[ iFrontEdge ];
+        //int iA = frontEdge.t[terminal];
+        //int iB = frontEdge.t[1-terminal];
+        const Point& A = points[ iA ];
+        const Point& B = points[ iB ];
+        
+        A_CPX_intersects = checkEdgeIntersection (A, CPX, edgeADT, edges, points, A_CPX_exists, iA_CPX);
+        
+        if (A_CPX_intersects && A_CPX_exists || !A_CPX_intersects)
+        {
+            B_CPX_intersects = checkEdgeIntersection (B, CPX, edgeADT, edges, points, B_CPX_exists, iB_CPX);
+            
+            if (B_CPX_intersects && B_CPX_exists || !B_CPX_intersects)
+            {
+                Edge A_CPX;
+                Edge B_CPX;
+                
+                if (A_CPX_exists) { A_CPX = edges[ iA_CPX ]; }
+                if (B_CPX_exists) { B_CPX = edges[ iB_CPX ]; }
+                
+                if (!A_CPX_exists)
+                {
+                    int dummyID = -1;
+                    A_CPX = createEdge (iA, iCPX, dummyID, true);
+                    edges.push_back (A_CPX);
+                    iA_CPX = edges.size() - 1;
+                }
+                if (!B_CPX_exists)
+                {
+                    int dummyID = -1;
+                    B_CPX = createEdge (iB, iCPX, dummyID, true);
+                    edges.push_back (B_CPX);
+                    iB_CPX = edges.size() - 1;
+                }
+                
+                Triangle tmpTriangle = createTriangle (iFrontEdge, iA_CPX, iB_CPX, edges, points);
+                bool A_B_CPX_intersects = triangleIntersect (tmpTriangle, triangleADT, points);
+                Point tmpCntPnt;
+                tmpCntPnt.dim = tmpTriangle.centroid (points);
+                bool centInsideDomain = rayCasting (tmpCntPnt, edge01ADT);                
+                
+                if (!A_B_CPX_intersects && centInsideDomain)
+                {
+                    if (isNewPoint)
+                    {
+                        if ( rayCasting (CPX, edge01ADT) )
+                        {
+                            if ( !(pointExists (CPX.dim, points)) )
+                            {
+                                double edgeAveTri = sqrt ( (4./sqrt(3.) * aveTriArea) );
+                                double pdisAveTri = getPointDistance (edgeAveTri);
+                                CVector meshDis;
+                                meshDis[0] = 0.7 * pdisAveTri;
+                                meshDis[1] = 0.7 * pdisAveTri;
+                                meshDis[2] = 0.;
+                                
+                                if ( !(pointsNearby (CPX.dim-meshDis, CPX.dim+meshDis, pointADT)) )
+                                {
+                                    score = tmpTriangle.qualityScore (points, aveTriArea);
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                    
+                    score = tmpTriangle.qualityScore (points, aveTriArea);
+                    return true;
+                }
+                else
+                {
+                    if (!A_CPX_exists) {edges.pop_back();}
+                    if (!B_CPX_exists) {edges.pop_back();}
+                }
+            }            
+        }        
+        
+        return false;
+    }
 }
 

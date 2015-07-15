@@ -36,6 +36,11 @@ void ADT::destroy_tree()
 
 void ADT::insert (const ADTPoint& point, Node* node, bool& isInserted)
 {
+    if (point.idx == 6329344)
+    {
+        cout << "idx is really 6329344" << endl;
+        exit(-2);
+    }
     unsigned int j = node->level % ADT_VAR;
     node->key = 0.5 * (node->c[j] + node->d[j]);
 
@@ -175,6 +180,9 @@ void ADT::search (Node* node, const ADTPoint& targetPoint, int& index)
                 searchStack.clear();
             
                 index = node->p.idx;
+                //cout << "node->p.idx = " << node->p.idx << endl;
+                //cout << "node->p.dim[0] = " << node->p.dim[0] << endl;
+                //cout << "node->p.dim[1] = " << node->p.dim[1] << endl;
             
                 if (node != root)
                 {
@@ -221,7 +229,7 @@ int ADT::search (const ADTPoint& targetPoint)
     }
 
     fill (searchStack.begin(), searchStack.end(), nullptr);
-    searchStack.clear();
+    searchStack.clear();    
     
     return i;
 }

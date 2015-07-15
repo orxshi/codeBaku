@@ -2,7 +2,7 @@
 
 namespace AFT
 {
-    bool doIntersect (const CVector& p1, const CVector& q1, const CVector& p2, const CVector& q2)
+    bool doIntersect (const CVector& p1, const CVector& q1, const CVector& p2, const CVector& q2, bool& exactMatch)
     {
         // http://www.geeksforgeeks.org/check-if-two-given-line-segments-intersect/
 
@@ -45,6 +45,7 @@ namespace AFT
             if (o4 == 0 && onSegment(p2, q1, q2)) return true;
 
             unsigned int count = 0;
+            exactMatch = false;
 
             if ( onSegment(p1, p2, q1) ) ++count;
             if ( onSegment(p1, q2, q1) ) ++count;
@@ -57,6 +58,7 @@ namespace AFT
                 {
                     if ( ((q1[0] == p2[0]) && (q1[1] == p2[1])) || ((q1[0] == q2[0]) && (q1[1] == q2[1])) )
                     {
+                        exactMatch = true;
                         return true;
                     }
                 }

@@ -82,7 +82,7 @@ void Grid::identifyIBlank (Grid& gr)
 
         vec.dim[1] = cnt[0];
         vec.dim[3] = cnt[1];
-        vec.dim[5] = cnt[2];*/
+        vec.dim[5] = cnt[2];*/        
         
         return gr.cellADT.search (vec);
     };

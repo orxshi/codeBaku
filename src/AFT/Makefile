@@ -9,7 +9,6 @@ SOURCES=AFT.cpp\
 	Intersection.cpp\
 	Point.cpp\
 	ReBlanking.cpp\
-	FModules.cpp\
 	Front.cpp\
 	NewGrid.cpp\
 	FinalGrid.cpp	

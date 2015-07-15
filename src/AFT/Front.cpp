@@ -93,56 +93,47 @@ namespace AFT
         {
             double scoreA = BIG_POS_NUM;
             double scoreB = BIG_POS_NUM;
-            double scoreNP = BIG_POS_NUM;
+            double scoreNP1 = BIG_POS_NUM;
+            double scoreNP2 = BIG_POS_NUM;
             double score = BIG_POS_NUM;
-            bool CP0Checked = false;
-            bool CP1Checked = false;
+            //bool CP0Checked = false;
+            //bool CP1Checked = false;
             bool pointFound;
-            bool t0_t1_CP0_intersects;
-            bool t0_t1_CP1_intersects;
+            //bool t0_t1_CP0_intersects;
+            //bool t0_t1_CP1_intersects;
+            bool A_CPX_exists;
+            bool B_CPX_exists;
+            int iA_CPX;
+            int iB_CPX;
+            bool elA;
+            bool elB;
+            bool elNP1;
+            bool elNP2;
+            Point cnp1;
+            Point cnp2;
+            int iCnp1;
+            int iCnp2;
+            int iChosenPoint;
+            bool isNewPoint;
+            double pdis;
             
             FrontMember& frontFirst = frontList.front();
             Edge& frontEdge = edges [ frontFirst.edge ];
             int it0 = frontEdge.t[0];
             int it1 = frontEdge.t[1];
-            const Point& t0 = points[ it0 ];
-            const Point& t1 = points[ it1 ];
+            //const Point& t0 = points[ it0 ];
+            //const Point& t1 = points[ it1 ];
             
             frontFirst.CPfound = 0;
             
-            int iCP0 = findClosestPoint (frontFirst, 0, points, edges, pointFound);
-            const Point& CP0 = points[ iCP0 ];
-            
+            int iCP0 = findClosestPoint (frontFirst, 0, points, edges, pointFound);            
             if (pointFound)
             {
-                Triangle tmpTriangle;
-                
-                tmpTriangle.p.push_back (it0);
-                tmpTriangle.p.push_back (it1);
-                tmpTriangle.p.push_back (iCP0);
-
-                //disA = charTriangleLength (tmpTriangle, points);                
-
-                t0_t1_CP0_intersects = triangleIntersect (tmpTriangle, triangleADT, points);
-                Point tmpCntPnt;
-                tmpCntPnt.dim = tmpTriangle.centroid(points);
-                bool centInsideDomain = rayCasting (tmpCntPnt, edge01ADT);
-                
-                if (t0_t1_CP0_intersects || !centInsideDomain)
-                {
-                    scoreA = tmpTriangle.qualityScore (points, aveTriArea);
-                    frontFirst.ignore.push_back (iCP0);
-                    CP0Checked = true;
-                }
+                elA = eligible (iCP0, false, it0, it1, aveTriArea, scoreA, A_CPX_exists, B_CPX_exists, iA_CPX,
+                                iB_CPX, frontList, edges, edgeADT, edge01ADT, triangleADT, points, pointADT);
             }
-            else
-            {
-                CP0Checked = true;
-            }
-
+            
             int iCP1 = findClosestPoint (frontFirst, 1, points, edges, pointFound);
-            const Point& CP1 = points[ iCP1 ];
-
             /*if (frontFirst.CPfound == 0)
             {                
                 cout << "no close points found to each terminal" << endl;
@@ -164,52 +155,30 @@ namespace AFT
                 //outputTriangles (points, triangles);
                 outputTrianglesVTK (points, triangles, "../out");
                 exit(-2);
-            }*/
-            
+            }*/            
             if (pointFound)
             {
-                Triangle tmpTriangle;
-                
-                tmpTriangle.p.push_back (it0);
-                tmpTriangle.p.push_back (it1);
-                tmpTriangle.p.push_back (iCP1);
-
-                //disB = charTriangleLength (tmpTriangle, points);                
-
-                t0_t1_CP1_intersects = triangleIntersect (tmpTriangle, triangleADT, points);
-                Point tmpCntPnt;
-                tmpCntPnt.dim = tmpTriangle.centroid(points);
-                bool centInsideDomain = rayCasting (tmpCntPnt, edge01ADT);
-
-                if (t0_t1_CP1_intersects || !centInsideDomain)
-                {
-                    scoreB = tmpTriangle.qualityScore (points, aveTriArea);
-                    frontFirst.ignore.push_back (iCP1);
-                    CP1Checked = true;
-                }
-            }
-            else
-            {
-                CP1Checked = true;
-            }
+                elB = eligible (iCP1, false, it0, it1, aveTriArea, scoreB, A_CPX_exists, B_CPX_exists, iA_CPX,
+                                iB_CPX, frontList, edges, edgeADT, edge01ADT, triangleADT, points, pointADT);
+            }              
             
-            Point canNewPoint;
-            double edgeAveTri = sqrt ( (4./sqrt(3.) * aveTriArea) );
-            double pdisAveTri = getPointDistance (edgeAveTri);
-            bool newPointSuccess = candidateNewPoint (canNewPoint, scoreNP, aveTriArea, frontList, pdisAveTri, points, edges, triangles, triangleADT, pointADT, edgeADT, edge01ADT);
+            //
+            getTwoNormalPoints (it0, it1, points, cnp1, cnp2, pdis);
+            points.push_back (cnp1); iCnp1 = points.size() - 1;
+            points.push_back (cnp2); iCnp2 = points.size() - 1;
             
-            if (!CP0Checked)
-            {
-                score = min (score, scoreA);
-            }
-            if (!CP1Checked)
-            {
-                score = min (score, scoreB);
-            }
-            if (newPointSuccess)
-            {
-                score = min (score, scoreNP);
-            }
+            elNP1 = eligible (iCnp1, true, it0, it1, aveTriArea, scoreNP1, A_CPX_exists, B_CPX_exists, iA_CPX,
+                              iB_CPX, frontList, edges, edgeADT, edge01ADT, triangleADT, points, pointADT);
+            elNP2 = eligible (iCnp2, true, it0, it1, aveTriArea, scoreNP2, A_CPX_exists, B_CPX_exists, iA_CPX,
+                              iB_CPX, frontList, edges, edgeADT, edge01ADT, triangleADT, points, pointADT);
+            points.pop_back();
+            points.pop_back();
+            //
+            
+            if (elA) { score = min (score, scoreA); }
+            if (elB) { score = min (score, scoreB); }
+            if (elNP1) { score = min (score, scoreNP1); }
+            if (elNP2) { score = min (score, scoreNP2); }
             
             if (score == BIG_POS_NUM)
             {
@@ -217,21 +186,55 @@ namespace AFT
                 cout << "score = " << score << endl;
                 cout << "scoreA = " << scoreA << endl;
                 cout << "scoreB = " << scoreB << endl;
-                cout << "scoreNP = " << scoreNP << endl;
+                cout << "scoreNP1 = " << scoreNP1 << endl;
+                cout << "scoreNP2 = " << scoreNP2 << endl;
+                
+                cout << "t0 ID = " << it0 << endl;
+                cout << "t1 ID = " << it1 << endl;
+                
+                cout << "t0.dim[0] = " << points[it0].dim[0] << endl;
+                cout << "t0.dim[1] = " << points[it0].dim[1] << endl;
+                
+                cout << "t1.dim[0] = " << points[it1].dim[0] << endl;
+                cout << "t1.dim[1] = " << points[it1].dim[1] << endl;
+                
+                cout << "triangles.size() = " << triangles.size() << endl;
+                
+                cout << "belonging = " << frontEdge.belonging << endl;
+                cout << "newlyCreated = " << frontEdge.newlyCreated << endl;
+                
+                //outputTriangles (points, triangles);
+                outputTrianglesVTK (points, triangles, "../out");
+                
                 exit(-2);
             }
             else if (score == scoreA)
             {
-                F1 (iCP0, iCP1, CP1Checked, CP0Checked, 0, frontList, edges, triangles, edgeADT, triangleADT, newGridId, points);
+                iChosenPoint = iCP0;
+                isNewPoint = false;
             }
             else if (score == scoreB)
             {
-                F1 (iCP1, iCP0, CP0Checked, CP1Checked, 1, frontList, edges, triangles, edgeADT, triangleADT, newGridId, points);
+                iChosenPoint = iCP1;
+                isNewPoint = false;
             }
-            else if (score == scoreNP)
+            else if (score == scoreNP1)
             {
-                createTriWithNewPoint (canNewPoint, frontList, points, edges, triangles, triangleADT, pointADT, edgeADT, newGridId);
+                iChosenPoint = iCnp1;
+                isNewPoint = true;
+                points.push_back (cnp1);
+                iCnp1 = points.size() - 1;
             }
+            else if (score == scoreNP2)
+            {
+                iChosenPoint = iCnp2;
+                isNewPoint = true;
+                points.push_back (cnp2);
+                iCnp2 = points.size() - 1;
+            }
+            
+            construct (iChosenPoint, isNewPoint, A_CPX_exists, B_CPX_exists, iA_CPX, iB_CPX, it0,
+                       it1, frontList, edges, triangles, triangleADT, edgeADT, newGridId, points);
                                     
             /*bool useNewPoint = false;
             //createNewPoint (useNewPoint, frontList, aveMeshSize, points, edges, triangles, triangleADT, pointADT, edgeADT, edge0ADT, edge1ADT, meshCenter, newGridId);            

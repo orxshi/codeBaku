@@ -94,13 +94,13 @@ namespace AFT
     // Edge
     Edge createEdge (int indexA, int indexB, int belonging, bool newlyCreated);
     int edgeExists (const int ip1, const int ip2, const vector<Point>& points, const vector<Edge>& edges, bool& exists);
-    bool checkEdgeIntersection (const Point& closestPoint, const Point& frontListPoint, EdgeADT& edgeADT);
+    bool checkEdgeIntersection (const Point& closestPoint, const Point& frontListPoint, EdgeADT& edgeADT, const vector<Edge>& edges, const vector<Point>& points, bool& exactMatch, int& result);
     int checkNumberOfEdgeIntersection (const Point& closestPoint, const Point& frontListPoint, EdgeADT& edgeADT);
     void knowParentTriangles (vector<Edge>& edges, const vector<Triangle>& triangles);
-    void addToEdgeList (Edge& edge, int iP1, int iP2, vector<Edge>& edges, EdgeADT& edgeADT, vector<Point>& points);
+    void addToEdgeList (Edge& edge, int iP1, int iP2, vector<Edge>& edges, EdgeADT& edgeADT, const vector<Point>& points);
     
     // Intersection
-    bool doIntersect (const CVector& p1, const CVector& q1, const CVector& p2, const CVector& q2);
+    bool doIntersect (const CVector& p1, const CVector& q1, const CVector& p2, const CVector& q2, bool& exactMatch);
     int orientation (const CVector& p, const CVector& q, const CVector& r);
     bool onSegment (const CVector& p, const CVector& q, const CVector& r);
     
@@ -127,19 +127,20 @@ namespace AFT
                         EdgeADT& edgeADT, const int newGridId);
     void getTwoNormalPoints (int it0, int it1, const vector<Point>& points, Point& crP1, Point& crP2, double pdis);
     bool rayCasting (const Point& p, EdgeADT& edgeADT);
-    bool candidateNewPoint (Point& crP, double& scoreNP, double aveTriArea, vector<FrontMember>& frontList, double pdisAveTri, vector<Point>& points,
-                        vector<Edge>& edges, vector<Triangle>& triangles, TriangleADT& triangleADT, PointADT& pointADT,
-                        EdgeADT& edgeADT, EdgeADT& edge01ADT);
+    //bool candidateNewPoint (Point& crP, double& scoreNP, double aveTriArea, vector<FrontMember>& frontList, double pdisAveTri, vector<Point>& points,
+    //                    vector<Edge>& edges, vector<Triangle>& triangles, TriangleADT& triangleADT, PointADT& pointADT,
+    //                    EdgeADT& edgeADT, EdgeADT& edge01ADT);
     void addToPointList (Point& p, vector<Point>& points, PointADT& pointADT);
     double getPointDistance (double r);
+    bool eligible (int iCPX, bool isNewPoint, int iA, int iB, double aveTriArea, double& score, bool& A_CPX_exists, bool& B_CPX_exists, int& iA_CPX, int& iB_CPX, const vector<FrontMember>& frontList, vector<Edge>& edges, EdgeADT& edgeADT, EdgeADT& edge01ADT, TriangleADT& triangleADT, vector<Point>& points, PointADT& pointADT);
     
     // FModules
-    void F1 (int iCPX, int iCPY, bool& YChecked, bool& XChecked, int terminal, vector<FrontMember>& frontList, vector<Edge>& edges,
-             vector<Triangle>& triangles, EdgeADT& edgeADT, TriangleADT& triangleADT, int newGridId, const vector<Point>& points);
-    void F2 (int iCPX, int iCPY, int iA_CPX, bool& YChecked, bool& XChecked, int terminal, vector<FrontMember>& frontList,
-             vector<Edge>& edges, vector<Triangle>& triangles, TriangleADT& triangleADT, EdgeADT& edgeADT, int newGridId, const vector<Point>& points);
-    void F3 (int iCPX, int iCPY, bool& YChecked, bool& XChecked, int terminal, vector<FrontMember>& frontList, vector<Edge>& edges,
-             vector<Triangle>& triangles, TriangleADT& triangleADT, EdgeADT& edgeADT, int newGridId, const vector<Point>& points);
+    //void F1 (int iCPX, int iCPY, bool& YChecked, bool& XChecked, int terminal, vector<FrontMember>& frontList, vector<Edge>& edges,
+    //         vector<Triangle>& triangles, EdgeADT& edgeADT, TriangleADT& triangleADT, int newGridId, const vector<Point>& points);
+    //void F2 (int iCPX, int iCPY, int iA_CPX, bool& YChecked, bool& XChecked, int terminal, vector<FrontMember>& frontList,
+    //         vector<Edge>& edges, vector<Triangle>& triangles, TriangleADT& triangleADT, EdgeADT& edgeADT, int newGridId, const vector<Point>& points);
+    //void F3 (int iCPX, int iCPY, bool& YChecked, bool& XChecked, int terminal, vector<FrontMember>& frontList, vector<Edge>& edges,
+    //         vector<Triangle>& triangles, TriangleADT& triangleADT, EdgeADT& edgeADT, int newGridId, const vector<Point>& points);
     
     double getAveTriArea (const vector<Edge>& edges, const vector<Point>& points);
     void aft (vector<Grid>& gr, Grid& finalGrid);
@@ -151,6 +152,8 @@ namespace AFT
     void addIntergridCells (const Face& f, const vector<Face>& face, const vector<Cell>& cell, const vector<Point>& pt, Grid& finalGrid, const Grid& newGrid);
     void addCells (const Face& f, const vector<Face>& face, const vector<Cell>& cell, const vector<Point>& pt, Grid& finalGrid);
     void modifyCellVertices (Grid& finalGrid, const Grid& newGrid, const vector<Grid>& gr);
+    void construct (int iCPX, bool isNewPoint, bool A_CPX_exists, bool B_CPX_exists, int iA_CPX, int iB_CPX, int iA, int iB, vector<FrontMember>& frontList,
+             vector<Edge>& edges, vector<Triangle>& triangles, TriangleADT& triangleADT, EdgeADT& edgeADT, int newGridId, const vector<Point>& points);
 };
 
 #endif	/* AFT_H */

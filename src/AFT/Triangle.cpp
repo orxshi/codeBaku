@@ -124,17 +124,19 @@ namespace AFT
             unsigned int count = 0;
             unsigned int reqCount = 2;
 
-            if ( doIntersect (k1.dim, k2.dim, p1.dim, p2.dim) ) {++count;} if (count==reqCount) return true;
-            if ( doIntersect (k1.dim, k2.dim, p1.dim, p3.dim) ) {++count;} if (count==reqCount) return true;            
-            if ( doIntersect (k1.dim, k2.dim, p2.dim, p3.dim) ) {++count;} if (count==reqCount) return true;            
+            bool dummyEM;
+            
+            if ( doIntersect (k1.dim, k2.dim, p1.dim, p2.dim, dummyEM) ) {++count;} if (count==reqCount) return true;
+            if ( doIntersect (k1.dim, k2.dim, p1.dim, p3.dim, dummyEM) ) {++count;} if (count==reqCount) return true;            
+            if ( doIntersect (k1.dim, k2.dim, p2.dim, p3.dim, dummyEM) ) {++count;} if (count==reqCount) return true;            
 
-            if ( doIntersect (k1.dim, k3.dim, p1.dim, p2.dim) ) {++count;} if (count==reqCount) return true;            
-            if ( doIntersect (k1.dim, k3.dim, p1.dim, p3.dim) ) {++count;} if (count==reqCount) return true;            
-            if ( doIntersect (k1.dim, k3.dim, p2.dim, p3.dim) ) {++count;} if (count==reqCount) return true;            
+            if ( doIntersect (k1.dim, k3.dim, p1.dim, p2.dim, dummyEM) ) {++count;} if (count==reqCount) return true;            
+            if ( doIntersect (k1.dim, k3.dim, p1.dim, p3.dim, dummyEM) ) {++count;} if (count==reqCount) return true;            
+            if ( doIntersect (k1.dim, k3.dim, p2.dim, p3.dim, dummyEM) ) {++count;} if (count==reqCount) return true;            
 
-            if ( doIntersect (k2.dim, k3.dim, p1.dim, p2.dim) ) {++count;} if (count==reqCount) return true;            
-            if ( doIntersect (k2.dim, k3.dim, p1.dim, p3.dim) ) {++count;} if (count==reqCount) return true;            
-            if ( doIntersect (k2.dim, k3.dim, p2.dim, p3.dim) ) {++count;} if (count==reqCount) return true;            
+            if ( doIntersect (k2.dim, k3.dim, p1.dim, p2.dim, dummyEM) ) {++count;} if (count==reqCount) return true;            
+            if ( doIntersect (k2.dim, k3.dim, p1.dim, p3.dim, dummyEM) ) {++count;} if (count==reqCount) return true;            
+            if ( doIntersect (k2.dim, k3.dim, p2.dim, p3.dim, dummyEM) ) {++count;} if (count==reqCount) return true;            
 
             // if one triangle is inside another one
             if (count <= 1) // count was equal to 1 before.
@@ -218,7 +220,7 @@ namespace AFT
         for (unsigned int d=0; d<ADT_VAR; ++d)
         {
             this->root->c[d] = edgeADT.root->c[d];
-            this->root->d[d] = edgeADT.root->d[d];
+            this->root->d[d] = edgeADT.root->d[d];            
         }
 
         // note that no point assigned to the root
@@ -798,26 +800,29 @@ namespace AFT
         double areaCurrent = areaTriangle (*this, points);
         double skew = (1. - areaCurrent/areaEqui);
         double devAveArea = fabs(areaCurrent - aveTriArea) / aveTriArea;
+        double maxValArea = 2.;
         
-        if (devAveArea >= 1.) // 2x of aveTriArea
+        if (devAveArea > maxValArea)
         {
-            devAveArea = 1.;
+            devAveArea = maxValArea;
         }
         
         // aspect ratio // scales over 2
         double lon = max (max(a, b), c);        
         double sho = min (min(a, b), c);
-        double aR = lon/sho;
+        //double aR = lon/sho;
+        double aR = (lon-sho) / sho;
+        double maxValAR = 2.;
         
-        if (aR > 3.)
+        if (aR > maxValAR)
         {
-            aR = 1.;
+            aR = maxValAR;
         }
         
         // coeffs
         double cSkew = 20.;
-        double cAA = 60.;
-        double cAR = 20./3.; // because ar scales over 3 but others over 1
+        double cAA = 60./maxValArea;
+        double cAR = 20./maxValAR;
         
         /*cout << "skew = " << skew << endl;
         cout << "devAveArea = " << devAveArea << endl;

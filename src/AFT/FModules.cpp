@@ -22,9 +22,33 @@ namespace AFT
         const Point& A = points[ iA ];
         const Point& B = points[ iB ];
         
-        int iA_CPX = edgeExists (iA, iCPX, points, edges, A_CPX_exists);        
+        //int iA_CPX = edgeExists (iA, iCPX, points, edges, A_CPX_exists);        
+        int iA_CPX;
+        bool intersection = checkEdgeIntersection (A, CPX, edgeADT, edges, points, A_CPX_exists, iA_CPX);
+        
+        if (intersection)
+        {
+            if (A_CPX_exists)
+            {
+                Edge& A_CPX = edges[ iA_CPX ];
+                F2 (iCPX, iCPY, iA_CPX, YChecked, XChecked, terminal, frontList, edges, triangles, triangleADT, edgeADT, newGridId, points);
+            }
+            else
+            {
+                frontFirst.ignore.push_back (iCPX);
+                
+                if (!YChecked)
+                {
+                    F1 (iCPY, iCPX, XChecked, YChecked, 1-terminal, frontList, edges, triangles, edgeADT, triangleADT, newGridId, points);
+                }
+            }
+        }
+        else
+        {
+            F3 (iCPX, iCPY, YChecked, XChecked, terminal, frontList, edges, triangles, triangleADT, edgeADT, newGridId, points);
+        }
 
-        if (A_CPX_exists)
+        /*if (A_CPX_exists)
         {
             Edge& A_CPX = edges[ iA_CPX ];
             F2 (iCPX, iCPY, iA_CPX, YChecked, XChecked, terminal, frontList, edges, triangles, triangleADT, edgeADT, newGridId, points);
@@ -46,7 +70,7 @@ namespace AFT
             {
                 F3 (iCPX, iCPY, YChecked, XChecked, terminal, frontList, edges, triangles, triangleADT, edgeADT, newGridId, points);
             }
-        }
+        }*/
     }
     
     void F2 (int iCPX, int iCPY, int iA_CPX, bool& YChecked, bool& XChecked, int terminal, vector<FrontMember>& frontList,
