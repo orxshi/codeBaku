@@ -16,6 +16,8 @@ namespace AFT
         int o2 = orientation(p1, q1, q2);
         int o3 = orientation(p2, q2, p1);
         int o4 = orientation(p2, q2, q1);    
+        
+        
 
         if (o1 == -1 || o2 == -1 || o3 == -1 || o4 == -1)
         {
@@ -31,6 +33,7 @@ namespace AFT
         }
         else if (o1 == 0 && o2 == 0 && o3 == 0 && o4 == 0)
         {
+            
             // Special Cases
             // p1, q1 and p2 are colinear and p2 lies on segment p1q1
             if (o1 == 0 && onSegment(p1, p2, q1)) return true;

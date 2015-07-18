@@ -17,6 +17,7 @@ namespace AFT
         //meshCenter.dim[1] = 0.;
         //meshCenter.dim[2] = 0.;
         vector<Point> points;
+        vector<Point> edgeCenters;
         vector<Edge> edges;
         vector<Edge> mesh0Edges;
         vector<Edge> mesh1Edges;
@@ -28,6 +29,7 @@ namespace AFT
         EdgeADT edge01ADT;
         TriangleADT triangleADT;
         PointADT pointADT;
+        PointADT edgeCenterADT;
         cout << "done!" << endl;
         
         cout << "Trimming/Re-blanking... " << flush;
@@ -45,7 +47,7 @@ namespace AFT
         cout << "done!" << endl;
      
         cout << "Preparing... " << flush;
-        setPointsEdges (gr, points, edges, newGridId);
+        setPointsEdges (gr, points, edges, edgeCenters, newGridId);
         createFrontList (edges, frontList, points);
         aveTriArea = getAveTriArea (edges, points);
         cout << "done!" << endl;
@@ -68,10 +70,11 @@ namespace AFT
         edge01ADT.build (points, edges);
         triangleADT.build (edgeADT);
         pointADT.build (points);
+        edgeCenterADT.build (edgeCenters);
         cout << "done!" << endl;
         
         cout << "Advancing front... " << flush;
-        advanceFront (frontList, points, aveTriArea, edges, triangles, triangleADT, pointADT, edgeADT, edge01ADT, newGridId);
+        advanceFront (frontList, points, aveTriArea, edges, triangles, triangleADT, pointADT, edgeCenterADT, edgeADT, edge01ADT, newGridId, edgeCenters);
         cout << "done!" << endl;
         
         cout << "Neighborhood... " << flush;
@@ -136,7 +139,7 @@ namespace AFT
     }
     
     void construct (int iCPX, bool isNewPoint, bool A_CPX_exists, bool B_CPX_exists, int iA_CPX, int iB_CPX, int iA, int iB, vector<FrontMember>& frontList,
-             vector<Edge>& edges, vector<Triangle>& triangles, TriangleADT& triangleADT, EdgeADT& edgeADT, int newGridId, const vector<Point>& points)
+             vector<Edge>& edges, vector<Triangle>& triangles, TriangleADT& triangleADT, EdgeADT& edgeADT, int newGridId, const vector<Point>& points, vector<Point>& edgeCenters, PointADT& edgeCenterADT)
     {
         int iFrontEdge = frontList.front().edge;
         
@@ -146,6 +149,19 @@ namespace AFT
             addToEdgeList (tmpEdge, iA, iCPX, edges, edgeADT, points);
             iA_CPX = edges.size() - 1;
             addToFrontList (iA_CPX, frontList);
+            
+            /*if (edges.size() == 355+1)
+            {
+                cout << "foundA" << endl;
+                cout << iA << endl;
+                cout << iB << endl;
+                exit(-2);
+            }*/
+            
+            Point cntPoint;
+            cntPoint.belonging = newGridId;
+            cntPoint.dim = 0.5 * (points[tmpEdge.t[0]].dim + points[tmpEdge.t[1]].dim);
+            addToPointList (cntPoint, edgeCenters, edgeCenterADT);
         }
         else
         {
@@ -158,11 +174,58 @@ namespace AFT
             addToEdgeList (tmpEdge, iB, iCPX, edges, edgeADT, points);
             iB_CPX = edges.size() - 1;
             addToFrontList (iB_CPX, frontList);
+            
+            /*if (edges.size() == 355+1)
+            {
+                bool inter;
+                bool inter1;
+                int interi;
+                
+                //inter = checkEdgeIntersection (points[iB], points[iCPX], edgeADT, edges, points, inter1, interi);
+                
+                cout << "foundB" << endl;
+                //cout << iB_CPX << endl;
+                cout << iA << endl;
+                cout << iB << endl;
+                //cout << iCPX << endl;
+                
+                
+                
+                exit(-2);
+            }*/
+            
+            Point cntPoint;
+            cntPoint.belonging = newGridId;
+            cntPoint.dim = 0.5 * (points[tmpEdge.t[0]].dim + points[tmpEdge.t[1]].dim);
+            addToPointList (cntPoint, edgeCenters, edgeCenterADT);
         }
         else
         {
             eraseExistingEdgeFromFrontList (iB_CPX, frontList);
         }
+        
+        /*if (iCPX == 120 || iCPX == 121)
+        {
+            if (iB == 120 || iB == 121)
+            {
+                cout << "foundAB" << endl;
+                //cout << iFrontEdge << endl;
+                //cout << iA_CPX << endl;
+                cout << iB_CPX << endl;
+                cout << B_CPX_exists << endl;
+                //cout << edges[iA_CPX].t[0] << endl;
+                //cout << edges[iA_CPX].t[1] << endl;
+                cout << edges[iB_CPX].t[0] << endl;
+                cout << edges[iB_CPX].t[1] << endl;
+                //cout << points[edges[iB_CPX].t[0]].dim[0] << endl;
+                //cout << points[edges[iB_CPX].t[0]].dim[1] << endl;
+                //cout << points[edges[iB_CPX].t[1]].dim[0] << endl;
+                //cout << points[edges[iB_CPX].t[1]].dim[1] << endl;
+                cout << edges[120].t[0] << endl;
+                cout << edges[120].t[1] << endl;
+                exit(-2);
+            }
+        }*/
         
         Triangle tmpTriangle = createTriangle (iFrontEdge, iA_CPX, iB_CPX, edges, points);
         addToTriangleList (triangles, tmpTriangle, triangleADT, points);

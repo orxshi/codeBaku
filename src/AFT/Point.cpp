@@ -52,183 +52,133 @@ namespace AFT
         return vec;
     }
     
-    int findClosestPoint (FrontMember& fm, int terminal, const vector<Point>& points, const vector<Edge>& edges, bool& pointFound)
+    void findClosestPoint (FrontMember& fm, vector<Edge>& edges, vector<Point>& points)
     {
-        pointFound = false;
-        double dis = BIG_POS_NUM;
+        double dis0;
+        double dis1;        
         double tmpDis;
-        bool cancel;
-        int index = -1;
-        //bool cond;
+        CVector cVec0;
+        CVector cVec1;
+        double disI0;
+        double disI1;        
+        double tmpDisI;
+        CVector cVecI0;
+        CVector cVecI1;
         
-        const Edge& frontEdge = edges[ fm.edge ];
+        Edge& frontEdge = edges[fm.edge];
+        int it0 = frontEdge.t[0];
+        int it1 = frontEdge.t[1];        
+        Point& t0= points[it0];
+        Point& t1= points[it1];
         
-        const int it0 = frontEdge.t[terminal];
-        const int it1 = frontEdge.t[1-terminal];
-        
-        const Point& t0= points[ it0 ];
-        //const Point& t1= points[ it1 ];
-        
-        auto func = [&] (unsigned int p)
-        {
-            cancel = false;
-            for (const int& igr: fm.ignore)
-            {
-                if (p == igr)
-                {
-                    cancel = true;
-                    break;
-                }
-            }
-
-            if (cancel == true)
-            {
-                //continue;
-                return;
-            }
-            else
-            {
-                tmpDis = sqrt( pow(t0.dim[0] - points[p].dim[0],2) + pow(t0.dim[1] - points[p].dim[1],2) );
-
-                if ( tmpDis < dis )
-                {
-                    dis = tmpDis;
-                    index = p;
-                }
-            }
-        };
-        
-        /*if (frontEdge.newlyCreated)
+        if (fm.cloPts.size() < fm.cloPtsMaxSize)
         {
             for (unsigned int p=0; p<points.size(); ++p)
             {
+                Point& pt = points[p];
+                
                 if ( p != it1 && p != it0 )
                 {
-                    func(p);
-                }
-            }
-        }
-        else
-        {
-            for (int p=0; p<points.size(); ++p)
-            {
-                if (points[p].belonging != frontEdge.belonging)
-                {
-                    func(p);
-                }
-            }
-        }*/
-        
-        for (unsigned int p=0; p<points.size(); ++p)
-        {
-            if ( p != it1 && p != it0 )
-            {
-                func(p);
-            }
-        }
-        
-        if (index != -1)
-        {
-            ++fm.CPfound;
-            pointFound = true;
-        }
-        
-        /*if ( t0.newlyCreated )
-        {
-            for (int p=0; p<points.size(); ++p)
-            {
-                if (points[p].belonging != t0.belonging)
-                {
-                    if ( p != it1 )
+                    cVec0 = pt.dim - t0.dim;
+                    cVec1 = pt.dim - t1.dim;
+                    dis0 = mag (cVec0);
+                    dis1 = mag (cVec1);                    
+                    tmpDis = min (dis0, dis1);
+                    
+                    if ( fm.cloPts.size() == 0 )
                     {
-                        cancel = false;
-                        for (const int& igr: fm.ignore)
+                        fm.cloPts.push_back(p);
+                    }
+                    else
+                    {
+                        int size = fm.cloPts.size();
+                        
+                        for (int i=0; i<fm.cloPts.size(); ++i)
                         {
-                            if ( p == igr )
+                            cVecI0 = points[fm.cloPts[i]].dim - t0.dim;
+                            cVecI1 = points[fm.cloPts[i]].dim - t1.dim;
+                            disI0 = mag (cVecI0);
+                            disI1 = mag (cVecI1); 
+                            tmpDisI = min (disI0, disI1);
+
+                            if (tmpDis < tmpDisI)
                             {
-                                cancel = true;
+                                fm.cloPts.insert(fm.cloPts.begin() + i, p);
+
+                                if (fm.cloPts.size() > fm.cloPtsMaxSize)
+                                {
+                                    fm.cloPts.pop_back();
+                                }
+
                                 break;
                             }
                         }
                         
-                        if (cancel == true)
+                        if (size == fm.cloPts.size()) // nothing inserted
                         {
-                            continue;
-                        }
-                        else
-                        {
-                            tmpDis = sqrt( pow(t0.dim[0] - points[p].dim[0],2) + pow(t0.dim[1] - points[p].dim[1],2) );
-
-                            if ( tmpDis < dis )
+                            if (fm.cloPts.size() < fm.cloPtsMaxSize) // still not full
                             {
-                                dis = tmpDis;
-                                index = p;
+                                fm.cloPts.push_back(p);
                             }
-                            
                         }
                     }
                 }
-            }
-            
-            if (index != -1)
-            {
-                ++fm.CPfound;
-                pointFound = true;
             }
         }
-        else
+        else if (fm.cloPts.size() == fm.cloPtsMaxSize)
         {
-            for (int p=0; p<points.size(); ++p)
+            int p = points.size() - 1;
+            Point& pt = points[p];
+            
+            for (int i: fm.cloPts)
             {
-                if ( (p != it1) && (p != it0) )
+                if (p == i)
                 {
-                    cancel = false;
-                    for (const int& igr: fm.ignore)
-                    {
-                        if ( p == igr )
-                        {
-                            cancel = true;
-                            break;
-                        }
-                    }
+                    return;
+                }
+            }
+                
+            if (pt.newlyCreated && p != it1 && p != it0 )
+            {
+                cVec0 = pt.dim - t0.dim;
+                cVec1 = pt.dim - t1.dim;
+                dis0 = mag (cVec0);
+                dis1 = mag (cVec1);                    
+                tmpDis = min (dis0, dis1);
+                
+                for (int i=0; i<fm.cloPts.size(); ++i)
+                {
+                    cVecI0 = points[fm.cloPts[i]].dim - t0.dim;
+                    cVecI1 = points[fm.cloPts[i]].dim - t1.dim;
+                    disI0 = mag (cVecI0);
+                    disI1 = mag (cVecI1); 
+                    tmpDisI = min (disI0, disI1);
                     
-                    if (cancel == true)
+                    if (tmpDis < tmpDisI)
                     {
-                        continue;
-                    }
-                    else
-                    {
-                        tmpDis = sqrt( pow(t0.dim[0] - points[p].dim[0],2) + pow(t0.dim[1] - points[p].dim[1],2) );
-
-                        if ( tmpDis < dis )
-                        {
-                            dis = tmpDis;
-                            index = p;
-                        }
+                        fm.cloPts.insert(fm.cloPts.begin() + i, p);
+                        fm.cloPts.pop_back();
+                        break;
                     }
                 }
             }
-            
-            if (index != -1)
-            {
-                ++fm.CPfound;
-                pointFound = true;
-            }
-        }*/
-        
-        return index;
+        }
     }
     
-    bool pointsNearby (const CVector& range1, const CVector& range2, PointADT& pointADT)
+    bool pointsNearby (const CVector& range1, const CVector& range2, PointADT& pointADT, PointADT& edgeCenterADT)
     {
-        int result = -1;
+        int result1 = -1;
+        int result2 = -1;
         
         ADT::ADTPoint vec = pointADT.createADTPoint (range1, range2);
-
+        
         pointADT.searchForNIntersections = false;
-        result = pointADT.search (vec);
+        result1 = pointADT.search (vec);
+        
+        edgeCenterADT.searchForNIntersections = false;
+        result2 = edgeCenterADT.search (vec);
 
-        if (result != -1)
+        if (result1 != -1 || result2 != -1)
         {
             return true;
         }
@@ -257,40 +207,7 @@ namespace AFT
         return (0.5 * r * 1.73205080757); // weird number is tan(60)
     }
     
-    void createTriWithNewPoint (Point& crP, vector<FrontMember>& frontList, vector<Point>& points,
-                        vector<Edge>& edges, vector<Triangle>& triangles, TriangleADT& triangleADT, PointADT& pointADT,
-                        EdgeADT& edgeADT, const int newGridId)
-    {
-        FrontMember& frontFirst = frontList.front();
-        int iFrontEdge = frontFirst.edge;
-        Edge& frontEdge = edges[iFrontEdge];
-        int it0 = frontEdge.t[0];
-        int it1 = frontEdge.t[1];
-        
-        crP.belonging = newGridId;
-        crP.newlyCreated = true;            
-        addToPointList (crP, points, pointADT);
-        int iCrP = points.size() - 1;
-
-        Edge tmpEdge1 = createEdge (iCrP, it0, newGridId, true);
-        addToEdgeList (tmpEdge1, iCrP, it0, edges, edgeADT, points);
-        int iTmpEdge1 = edges.size() - 1;
-
-        Edge tmpEdge2 = createEdge (iCrP, it1, newGridId, true);
-        addToEdgeList (tmpEdge2, iCrP, it1, edges, edgeADT, points);
-        int iTmpEdge2 = edges.size() - 1;
-
-        Triangle tmpTriangle;
-        tmpTriangle = createTriangle (iFrontEdge, iTmpEdge1, iTmpEdge2, edges, points);
-        addToTriangleList (triangles, tmpTriangle, triangleADT, points);
-
-        eraseFromFrontList (frontList);
-        addToFrontList (iTmpEdge2, frontList);
-        addToFrontList (iTmpEdge1, frontList);
-        sortFrontList (frontList, points, edges);
-
-        return;
-    }
+    
 
     void getTwoNormalPoints (int it0, int it1, const vector<Point>& points, Point& crP1, Point& crP2, double pdis)
     {
@@ -349,129 +266,7 @@ namespace AFT
         }
     }
     
-    /*bool candidateNewPoint (Point& crP, double& scoreNP, double aveTriArea, vector<FrontMember>& frontList, double pdisAveTri, vector<Point>& points,
-                        vector<Edge>& edges, vector<Triangle>& triangles, TriangleADT& triangleADT, PointADT& pointADT,
-                        EdgeADT& edgeADT, EdgeADT& edge01ADT)
-    {
-        Triangle tmpTriangle;
-        Point crP1;
-        Point crP2;
-        double pdis;
-        
-        FrontMember& frontFirst = frontList.front();
-        int iFrontEdge = frontFirst.edge;
-        Edge& frontEdge = edges[iFrontEdge];
-        int it0 = frontEdge.t[0];
-        int it1 = frontEdge.t[1];
-        
-        bool newPointSuccess = true;
-
-        getTwoNormalPoints (it0, it1, points, crP1, crP2, pdis);
-
-        points.push_back (crP1); int iCrP1 = points.size() - 1;
-        points.push_back (crP2); int iCrP2 = points.size() - 1;
-
-        if (frontEdge.newlyCreated)
-        {
-            tmpTriangle.p.push_back (it0);
-            tmpTriangle.p.push_back (it1);
-            tmpTriangle.p.push_back (iCrP1);
-
-            bool triIntersects = triangleIntersect (tmpTriangle, triangleADT, points);
-
-            if (!triIntersects)
-            {
-                bool crP1InsideDomain = rayCasting (crP1, edge01ADT);
-                if (crP1InsideDomain)
-                {
-                    crP = crP1;
-                }
-                else
-                {
-                    newPointSuccess = false;
-                }
-            }
-            else
-            {
-                bool crP2InsideDomain = rayCasting (crP2, edge01ADT);
-                if (crP2InsideDomain)
-                {
-                    crP = crP2;
-                }
-                else
-                {
-                    newPointSuccess = false;
-                }
-            }
-        }
-        else
-        {
-            bool crP1InsideDomain = rayCasting (crP1, edge01ADT);
-            bool crP2InsideDomain = rayCasting (crP2, edge01ADT);
-
-            if (crP1InsideDomain)
-            {
-                crP = crP1;
-            }
-            else if (crP2InsideDomain)
-            {
-                crP = crP2;
-            }
-            else
-            {
-                newPointSuccess = false;
-            }
-        }
-
-        points.pop_back(); // erase crP1
-        points.pop_back(); // erase crP2
-
-        if (newPointSuccess)
-        {
-            newPointSuccess = false;
-
-            bool doesPointExist = pointExists (crP.dim, points);
-
-            if (!doesPointExist)
-            {
-                CVector meshDis;
-                meshDis[0] = 0.7 * pdisAveTri;
-                meshDis[1] = 0.7 * pdisAveTri;
-                meshDis[2] = 0.;
-
-                bool pointNearby = pointsNearby (crP.dim-meshDis, crP.dim+meshDis, pointADT);
-
-                if (!pointNearby)
-                {
-                    bool intersection = checkEdgeIntersection (crP, points[it0], edgeADT);
-
-                    if (!intersection)
-                    {
-                        intersection = checkEdgeIntersection (crP, points[it1], edgeADT);
-
-                        if (!intersection)
-                        {
-                            newPointSuccess = true;
-                            points.push_back(crP);
-                            int iNP = points.size() - 1;
-
-                            Triangle tmpTriangle;
-
-                            tmpTriangle.p.push_back (it0);
-                            tmpTriangle.p.push_back (it1);
-                            tmpTriangle.p.push_back (iNP);
-
-                            scoreNP = tmpTriangle.qualityScore (points, aveTriArea);
-                            
-                            points.pop_back();
-                        }
-                    }
-                }
-            }
-        }
-        
-        return newPointSuccess;
-    }*/
+    
     
     void addToPointList (Point& p, vector<Point>& points, PointADT& pointADT)
     {
@@ -483,7 +278,7 @@ namespace AFT
         pointADT.insert (vec, pointADT.root, tempBool);
     }
     
-    bool eligible (int iCPX, bool isNewPoint, int iA, int iB, double aveTriArea, double& score, bool& A_CPX_exists, bool& B_CPX_exists, int& iA_CPX, int& iB_CPX, const vector<FrontMember>& frontList, vector<Edge>& edges, EdgeADT& edgeADT, EdgeADT& edge01ADT, TriangleADT& triangleADT, vector<Point>& points, PointADT& pointADT)
+    bool eligible (int iCPX, bool isNewPoint, int iA, int iB, double aveTriArea, double& score, bool& A_CPX_exists, bool& B_CPX_exists, int& iA_CPX, int& iB_CPX, vector<FrontMember>& frontList, vector<Edge>& edges, EdgeADT& edgeADT, EdgeADT& edge01ADT, TriangleADT& triangleADT, vector<Point>& points, PointADT& pointADT, PointADT& edgeCenterADT)
     {
         // don't forget to pop back edges
         
@@ -491,7 +286,7 @@ namespace AFT
         bool B_CPX_intersects;
         
         const Point& CPX = points[ iCPX ];
-        const FrontMember& frontFirst = frontList.front();
+        FrontMember& frontFirst = frontList.front();
         int iFrontEdge = frontFirst.edge;
         //Edge& frontEdge = edges[ iFrontEdge ];
         //int iA = frontEdge.t[terminal];
@@ -500,11 +295,17 @@ namespace AFT
         const Point& B = points[ iB ];
         
         A_CPX_intersects = checkEdgeIntersection (A, CPX, edgeADT, edges, points, A_CPX_exists, iA_CPX);
-        
+        //cout << "A_CPX_intersects = " << A_CPX_intersects << endl;
         if (A_CPX_intersects && A_CPX_exists || !A_CPX_intersects)
         {
             B_CPX_intersects = checkEdgeIntersection (B, CPX, edgeADT, edges, points, B_CPX_exists, iB_CPX);
-            
+            //cout << "B_CPX_intersects = " << B_CPX_intersects << endl;
+            /*if (B_CPX_intersects)
+            {
+                cout << "edges[iB_CPX].t[0] = " << edges[iB_CPX].t[0] << endl;
+                cout << "edges[iB_CPX].t[0] = " << edges[iB_CPX].t[1] << endl;
+                cout << "iB_CPX = " << iB_CPX << endl;
+            }*/
             if (B_CPX_intersects && B_CPX_exists || !B_CPX_intersects)
             {
                 Edge A_CPX;
@@ -519,6 +320,8 @@ namespace AFT
                     A_CPX = createEdge (iA, iCPX, dummyID, true);
                     edges.push_back (A_CPX);
                     iA_CPX = edges.size() - 1;
+                    
+                    
                 }
                 if (!B_CPX_exists)
                 {
@@ -528,11 +331,28 @@ namespace AFT
                     iB_CPX = edges.size() - 1;
                 }
                 
+                
+                
+                /*// check if potential triangle is degenerated
+                bool degenInter;
+                bool dummyBool;
+
+                degenInter = doIntersect (A.dim, CPX.dim, B.dim, CPX.dim, dummyBool);
+
+                if (degenInter)
+                {
+                    if (!A_CPX_exists) {edges.pop_back();}
+                    if (!B_CPX_exists) {edges.pop_back();}
+                    return false;
+                }*/
+                
                 Triangle tmpTriangle = createTriangle (iFrontEdge, iA_CPX, iB_CPX, edges, points);
                 bool A_B_CPX_intersects = triangleIntersect (tmpTriangle, triangleADT, points);
                 Point tmpCntPnt;
                 tmpCntPnt.dim = tmpTriangle.centroid (points);
                 bool centInsideDomain = rayCasting (tmpCntPnt, edge01ADT);                
+                
+                
                 
                 if (!A_B_CPX_intersects && centInsideDomain)
                 {
@@ -549,25 +369,45 @@ namespace AFT
                                 meshDis[1] = 0.7 * pdisAveTri;
                                 meshDis[2] = 0.;
                                 
-                                if ( !(pointsNearby (CPX.dim-meshDis, CPX.dim+meshDis, pointADT)) )
+                                if ( !(pointsNearby (CPX.dim-meshDis, CPX.dim+meshDis, pointADT, edgeCenterADT)) )
                                 {
                                     score = tmpTriangle.qualityScore (points, aveTriArea);
-                                    return true;
+                                    if (!A_CPX_exists) {edges.pop_back();}
+                                    if (!B_CPX_exists) {edges.pop_back();}
+                                    
+                                    if (score == BIG_POS_NUM)
+                                    {
+                                        return false;
+                                    }
+                                    else
+                                    {
+                                        return true;
+                                    }
                                 }
                             }
                         }
                     }
-                    
-                    score = tmpTriangle.qualityScore (points, aveTriArea);
-                    return true;
+                    else
+                    {
+                        score = tmpTriangle.qualityScore (points, aveTriArea);                        
+                        if (!A_CPX_exists) {edges.pop_back();}
+                        if (!B_CPX_exists) {edges.pop_back();}
+                        
+                        if (score == BIG_POS_NUM)
+                        {
+                            return false;
+                        }
+                        else
+                        {
+                            return true;
+                        }
+                    }
                 }
-                else
-                {
-                    if (!A_CPX_exists) {edges.pop_back();}
-                    if (!B_CPX_exists) {edges.pop_back();}
-                }
+                
+                if (!A_CPX_exists) {edges.pop_back();}
+                if (!B_CPX_exists) {edges.pop_back();}
             }            
-        }        
+        }                
         
         return false;
     }

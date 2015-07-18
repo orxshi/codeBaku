@@ -799,6 +799,7 @@ namespace AFT
         double areaEqui = 3*sqrt(3.)/4. * pow(r, 2.);
         double areaCurrent = areaTriangle (*this, points);
         double skew = (1. - areaCurrent/areaEqui);
+        
         double devAveArea = fabs(areaCurrent - aveTriArea) / aveTriArea;
         double maxValArea = 2.;
         
@@ -828,7 +829,21 @@ namespace AFT
         cout << "devAveArea = " << devAveArea << endl;
         cout << "aR = " << aR << endl;
         cout << "areaCurrent = " << areaCurrent << endl;
-        cout << "aveTriArea = " << aveTriArea << endl;*/
+        cout << "aveTriArea = " << aveTriArea << endl;
+        cout << "cSkew*skew = " << cSkew*skew << endl;
+        cout << "cAA*devAveArea = " << cAA*devAveArea << endl;
+        cout << "cAR*aR = " << cAR*aR << endl;*/
+        
+        cout << "skew = " << skew << endl;
+        cout << "devAveArea = " << devAveArea << endl;
+        cout << "aR = " << aR << endl;
+        cout << "areaCurrent = " << areaCurrent << endl;
+        cout << "score = " << (cSkew*skew + cAA*devAveArea + cAR*aR) << endl;
+        
+        if (skew > 0.75)
+        {
+            return BIG_POS_NUM;
+        }
         
         return (cSkew*skew + cAA*devAveArea + cAR*aR); // percentage
     }

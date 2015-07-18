@@ -8,7 +8,10 @@
 #ifndef POINT_H
 #define	POINT_H
 
+#include <forward_list>
 #include "../Vector/Vector.h"
+
+using std::forward_list;
 
 struct Point
 {

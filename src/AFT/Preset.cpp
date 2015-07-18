@@ -2,7 +2,7 @@
 
 namespace AFT
 {
-    void setPointsEdges (const vector<Grid>& gr, vector<Point>& points, vector<Edge>& edges, int newGridId)
+    void setPointsEdges (const vector<Grid>& gr, vector<Point>& points, vector<Edge>& edges, vector<Point>& edgeCenters, int newGridId)
     {
         vector<int> indices;
         int counter;
@@ -57,8 +57,12 @@ namespace AFT
                                 }
                             }
 
-                            Edge tempEdge = createEdge (indices[0], indices[1], g, false);
+                            Edge tempEdge = createEdge (indices[0], indices[1], g, false);                            
+                            Point cntPoint;
+                            cntPoint.belonging = g;                            
+                            cntPoint.dim = 0.5 * (points[tempEdge.t[0]].dim + points[tempEdge.t[1]].dim);                            
                             edges.push_back (tempEdge);
+                            edgeCenters.push_back (cntPoint);
                         }
                     }
                 //}

@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <memory>
 #include <iomanip>
+#include <deque>
 #include "../Grid/Grid.h"
 
 using std::sort;
@@ -19,6 +20,7 @@ using std::cref;
 using std::unique_ptr;
 using std::setw;
 using std::isfinite;
+using std::deque;
 
 namespace AFT
 {
@@ -49,6 +51,8 @@ namespace AFT
         vector<int> ignore;
         int CPfound;
         bool newPointChecked;
+        int cloPtsMaxSize;
+        deque<int> cloPts;
         
         FrontMember();
     };
@@ -79,7 +83,7 @@ namespace AFT
     };
     
     // Preset
-    void setPointsEdges (const vector<Grid>& gr, vector<Point>& points, vector<Edge>& edges, int newGridId);
+    void setPointsEdges (const vector<Grid>& gr, vector<Point>& points, vector<Edge>& edges, vector<Point>& edgeCenters, int newGridId);
     void createFrontList (const vector<Edge>& edges, vector<FrontMember>& frontList, const vector<Point>& points);
     
     // Front    
@@ -89,7 +93,7 @@ namespace AFT
     void eraseExistingEdgeFromFrontList (int ie, vector<FrontMember>& frontList);
     void advanceFront (vector<FrontMember>& frontList, vector<Point>& points, double aveTriArea,
                        vector<Edge>& edges, vector<Triangle>& triangles, TriangleADT& triangleADT,
-                       PointADT& pointADT, EdgeADT& edgeADT, EdgeADT& edge01ADT, int newGridId);
+                       PointADT& pointADT, PointADT& edgeCenterADT, EdgeADT& edgeADT, EdgeADT& edge01ADT, int newGridId, vector<Point>& edgeCenters);
     
     // Edge
     Edge createEdge (int indexA, int indexB, int belonging, bool newlyCreated);
@@ -121,18 +125,13 @@ namespace AFT
     void fringeToField (Grid& gr, Grid& ogr, int crt);
     
     // Point
-    int findClosestPoint (FrontMember& fm, int terminal, const vector<Point>& points, const vector<Edge>& edges, bool& pointFound);
-    void createTriWithNewPoint (Point& crP, vector<FrontMember>& frontList, vector<Point>& points,
-                        vector<Edge>& edges, vector<Triangle>& triangles, TriangleADT& triangleADT, PointADT& pointADT,
-                        EdgeADT& edgeADT, const int newGridId);
+    void findClosestPoint (FrontMember& fm, vector<Edge>& edges, vector<Point>& points);    
     void getTwoNormalPoints (int it0, int it1, const vector<Point>& points, Point& crP1, Point& crP2, double pdis);
-    bool rayCasting (const Point& p, EdgeADT& edgeADT);
-    //bool candidateNewPoint (Point& crP, double& scoreNP, double aveTriArea, vector<FrontMember>& frontList, double pdisAveTri, vector<Point>& points,
-    //                    vector<Edge>& edges, vector<Triangle>& triangles, TriangleADT& triangleADT, PointADT& pointADT,
-    //                    EdgeADT& edgeADT, EdgeADT& edge01ADT);
+    bool rayCasting (const Point& p, EdgeADT& edgeADT);    
     void addToPointList (Point& p, vector<Point>& points, PointADT& pointADT);
     double getPointDistance (double r);
-    bool eligible (int iCPX, bool isNewPoint, int iA, int iB, double aveTriArea, double& score, bool& A_CPX_exists, bool& B_CPX_exists, int& iA_CPX, int& iB_CPX, const vector<FrontMember>& frontList, vector<Edge>& edges, EdgeADT& edgeADT, EdgeADT& edge01ADT, TriangleADT& triangleADT, vector<Point>& points, PointADT& pointADT);
+    bool eligible (int iCPX, bool isNewPoint, int iA, int iB, double aveTriArea, double& score, bool& A_CPX_exists, bool& B_CPX_exists, int& iA_CPX, int& iB_CPX, vector<FrontMember>& frontList, vector<Edge>& edges, EdgeADT& edgeADT, EdgeADT& edge01ADT, TriangleADT& triangleADT, vector<Point>& points, PointADT& pointADT, PointADT& edgeCenterADT);
+    bool pointsNearby (const CVector& range1, const CVector& range2, PointADT& pointADT, PointADT& edgeCenterADT);
     
     // FModules
     //void F1 (int iCPX, int iCPY, bool& YChecked, bool& XChecked, int terminal, vector<FrontMember>& frontList, vector<Edge>& edges,
@@ -153,7 +152,7 @@ namespace AFT
     void addCells (const Face& f, const vector<Face>& face, const vector<Cell>& cell, const vector<Point>& pt, Grid& finalGrid);
     void modifyCellVertices (Grid& finalGrid, const Grid& newGrid, const vector<Grid>& gr);
     void construct (int iCPX, bool isNewPoint, bool A_CPX_exists, bool B_CPX_exists, int iA_CPX, int iB_CPX, int iA, int iB, vector<FrontMember>& frontList,
-             vector<Edge>& edges, vector<Triangle>& triangles, TriangleADT& triangleADT, EdgeADT& edgeADT, int newGridId, const vector<Point>& points);
+             vector<Edge>& edges, vector<Triangle>& triangles, TriangleADT& triangleADT, EdgeADT& edgeADT, int newGridId, const vector<Point>& points, vector<Point>& edgeCenters, PointADT& edgeCenterADT);
 };
 
 #endif	/* AFT_H */
