@@ -2,11 +2,18 @@
 
 string createOutputDir()
 {
+    string folder = "../out/";
+    
+    struct stat sb;
+    if ( !(stat(folder.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode)) )
+    {
+        mkdir (folder.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+    }
+    
     string outputDir;
     time_t t = time(0);
     struct tm* now = localtime(&t);
     
-    string folder = "../out/";
     string month = std::to_string(now->tm_mon + 1);
     string day = std::to_string(now->tm_mday);
     string year = std::to_string(now->tm_year + 1900);

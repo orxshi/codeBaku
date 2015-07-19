@@ -24,8 +24,6 @@ int main(int argc, char** argv)
     
     string mainDir = createOutputDir();
     
-    
-    
     Grid bg (mainDir, 0);
     bg.read_grid();
     bg.set_grid();

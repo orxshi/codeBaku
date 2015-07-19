@@ -15,6 +15,7 @@
 #include <sys/types.h>
 #include <ctime>
 #include <string>
+#include <sys/stat.h>
 
 using std::ofstream;
 using std::setw;
