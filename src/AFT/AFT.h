@@ -40,9 +40,9 @@ namespace AFT
         vector<int> p;
         vector<int> e;
         vector <int> nei;
-        //vector <Edge> neiEdge;
+        
         CVector centroid(const vector<Point>& points);
-        double qualityScore (const vector<Point>& points, double aveTriArea);
+        double qualityScore (const vector<Point>& points, double aveTriArea, bool verbose);
     };
     
     struct FrontMember
@@ -132,6 +132,7 @@ namespace AFT
     double getPointDistance (double r);
     bool eligible (int iCPX, bool isNewPoint, int iA, int iB, double aveTriArea, double& score, bool& A_CPX_exists, bool& B_CPX_exists, int& iA_CPX, int& iB_CPX, vector<FrontMember>& frontList, vector<Edge>& edges, EdgeADT& edgeADT, EdgeADT& edge01ADT, TriangleADT& triangleADT, vector<Point>& points, PointADT& pointADT, PointADT& edgeCenterADT);
     bool pointsNearby (const CVector& range1, const CVector& range2, PointADT& pointADT, PointADT& edgeCenterADT);
+    bool pointExists (const CVector& range1, const CVector& range2, PointADT& pointADT);
     
     // FModules
     //void F1 (int iCPX, int iCPY, bool& YChecked, bool& XChecked, int terminal, vector<FrontMember>& frontList, vector<Edge>& edges,

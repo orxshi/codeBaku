@@ -77,8 +77,8 @@ int main(int argc, char** argv)
     }
     
     
-    //grs[0].outAllVTK(0);
-    //grs[1].outAllVTK(0);
+    grs[0].outAllVTK(0);
+    grs[1].outAllVTK(0);
     
     
     

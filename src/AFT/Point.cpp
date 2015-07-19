@@ -186,19 +186,20 @@ namespace AFT
         return false;
     }
     
-    bool pointExists (const CVector& p, const vector<Point>& points)
+    bool pointExists (const CVector& range1, const CVector& range2, PointADT& pointADT)
     {
-        for (unsigned int i=0; i<points.size(); ++i)
-        {
-            if ( fabs(p[0] - points[i].dim[0]) < 0.0001 )
-            {
-                if ( fabs(p[1] - points[i].dim[1]) < 0.0001 )
-                {
-                    return true;
-                }
-            }
-        }
+        int result = -1;
+        
+        ADT::ADTPoint vec = pointADT.createADTPoint (range1, range2);
+        
+        pointADT.searchForNIntersections = false;
+        result = pointADT.search (vec);
 
+        if (result != -1)
+        {
+            return true;
+        }
+    
         return false;
     }
     
@@ -266,8 +267,6 @@ namespace AFT
         }
     }
     
-    
-    
     void addToPointList (Point& p, vector<Point>& points, PointADT& pointADT)
     {
         bool tempBool;
@@ -281,6 +280,8 @@ namespace AFT
     bool eligible (int iCPX, bool isNewPoint, int iA, int iB, double aveTriArea, double& score, bool& A_CPX_exists, bool& B_CPX_exists, int& iA_CPX, int& iB_CPX, vector<FrontMember>& frontList, vector<Edge>& edges, EdgeADT& edgeADT, EdgeADT& edge01ADT, TriangleADT& triangleADT, vector<Point>& points, PointADT& pointADT, PointADT& edgeCenterADT)
     {
         // don't forget to pop back edges
+        
+        score = BIG_POS_NUM;
         
         bool A_CPX_intersects;
         bool B_CPX_intersects;
@@ -331,8 +332,6 @@ namespace AFT
                     iB_CPX = edges.size() - 1;
                 }
                 
-                
-                
                 /*// check if potential triangle is degenerated
                 bool degenInter;
                 bool dummyBool;
@@ -350,9 +349,7 @@ namespace AFT
                 bool A_B_CPX_intersects = triangleIntersect (tmpTriangle, triangleADT, points);
                 Point tmpCntPnt;
                 tmpCntPnt.dim = tmpTriangle.centroid (points);
-                bool centInsideDomain = rayCasting (tmpCntPnt, edge01ADT);                
-                
-                
+                bool centInsideDomain = rayCasting (tmpCntPnt, edge01ADT);  
                 
                 if (!A_B_CPX_intersects && centInsideDomain)
                 {
@@ -360,18 +357,30 @@ namespace AFT
                     {
                         if ( rayCasting (CPX, edge01ADT) )
                         {
-                            if ( !(pointExists (CPX.dim, points)) )
+                            CVector meshDis;
+                            meshDis[0] = 1e-10;
+                            meshDis[1] = 1e-10;
+                            meshDis[2] = 0.;
+                            
+                            if ( !(pointExists (CPX.dim-meshDis, CPX.dim+meshDis, pointADT)) )
                             {
                                 double edgeAveTri = sqrt ( (4./sqrt(3.) * aveTriArea) );
                                 double pdisAveTri = getPointDistance (edgeAveTri);
-                                CVector meshDis;
-                                meshDis[0] = 0.7 * pdisAveTri;
-                                meshDis[1] = 0.7 * pdisAveTri;
+                                double pdis = getPointDistance ( mag (A.dim - B.dim) );
+                                meshDis[0] = 0.5 * pdis;
+                                meshDis[1] = 0.5 * pdis;
                                 meshDis[2] = 0.;
                                 
+                                /*if (iA == 60 && iB == 57)
+                                {
+                                    cout << "here here" << endl;
+                                    cout << pointsNearby (CPX.dim-meshDis, CPX.dim+meshDis, pointADT, edgeCenterADT) << endl;
+                                    exit(-2);
+                                }*/
+                                                                
                                 if ( !(pointsNearby (CPX.dim-meshDis, CPX.dim+meshDis, pointADT, edgeCenterADT)) )
                                 {
-                                    score = tmpTriangle.qualityScore (points, aveTriArea);
+                                    score = tmpTriangle.qualityScore (points, aveTriArea, false);
                                     if (!A_CPX_exists) {edges.pop_back();}
                                     if (!B_CPX_exists) {edges.pop_back();}
                                     
@@ -389,7 +398,7 @@ namespace AFT
                     }
                     else
                     {
-                        score = tmpTriangle.qualityScore (points, aveTriArea);                        
+                        score = tmpTriangle.qualityScore (points, aveTriArea, false);                        
                         if (!A_CPX_exists) {edges.pop_back();}
                         if (!B_CPX_exists) {edges.pop_back();}
                         

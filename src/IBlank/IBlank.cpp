@@ -63,6 +63,8 @@ void Grid::setWallDistance (const Solid& sld)
 
 void Grid::identifyIBlank (Grid& gr)
 {
+    #include "IBlank.h"
+    
     function<int(Cell&)> getIndex = [&] (Cell& cll)
     {
         ADT::ADTPoint vec;
@@ -141,7 +143,21 @@ void Grid::identifyIBlank (Grid& gr)
                 }
                 else if (gr.cell[index].iBlank == iBlank_t::UNDEFINED)
                 {
-                    if (gr.cell[index].wallDistance < cell[c].wallDistance)
+                    double var1;
+                    double var2;
+                    
+                    if (accorWallDistance)
+                    {
+                        var1 = gr.cell[index].wallDistance;
+                        var2 = cell[c].wallDistance;
+                    }
+                    else if (accorSize)
+                    {
+                        var1 = gr.cell[index].vol;
+                        var2 = cell[c].vol;
+                    }
+                    
+                    if (var1 < var2)
                     {
                         cell[c].iBlank = iBlank_t::FRINGE;
                         gr.cell[index].iBlank = iBlank_t::FIELD;

@@ -785,67 +785,88 @@ namespace AFT
         return cent;
     }
     
-    double Triangle::qualityScore (const vector<Point>& points, double aveTriArea)
+    double Triangle::qualityScore (const vector<Point>& points, double aveTriArea, bool verbose)
     {
         // low score is better
+        
+        #include "Triangle.h"
         
         double a = mag( points[p[0]].dim - points[p[1]].dim );
         double b = mag( points[p[0]].dim - points[p[2]].dim );
         double c = mag( points[p[1]].dim - points[p[2]].dim );
         
-        // skewness
         double s = 0.5 * (a + b + c);        
         double r = (a*b*c) / (4. * sqrt( s*(s-a)*(s-b)*(s-c) ) );
         double areaEqui = 3*sqrt(3.)/4. * pow(r, 2.);
         double areaCurrent = areaTriangle (*this, points);
+        
+        // skewness
         double skew = (1. - areaCurrent/areaEqui);
         
-        double devAveArea = fabs(areaCurrent - aveTriArea) / aveTriArea;
-        double maxValArea = 2.;
+        if (skew >= maxSkew)
+        {
+            if (verbose)
+            {
+                cout << "skew > maxSkew " << endl;
+                cout << "skew = " << skew << endl;
+                cout << "maxSkew = " << maxSkew << endl;
+                cout << "areaCurrent = " << areaCurrent << endl;
+                cout << "areaEqui = " << areaEqui << endl;
+                cout << "score = " << BIG_POS_NUM << endl;
+            }
+            
+            return BIG_POS_NUM;
+        }
+        
+        // area
+        double areaSmall = min (areaCurrent, aveTriArea);
+        double areaLarge = max (areaCurrent, aveTriArea);        
+        double devAveArea = areaLarge / areaSmall;
+        //double devAveArea = fabs(areaCurrent - aveTriArea) / aveTriArea;
         
         if (devAveArea > maxValArea)
         {
-            devAveArea = maxValArea;
+            if (verbose)
+            {
+                cout << "devAveArea > maxValArea" << endl;
+                cout << "devAveArea = " << devAveArea << endl;
+                cout << "maxValArea = " << maxValArea << endl;
+                cout << "areaCurrent = " << areaCurrent << endl;
+                cout << "aveTriArea = " << aveTriArea << endl;
+                cout << "score = " << BIG_POS_NUM << endl;
+            }
+            
+            return BIG_POS_NUM;
         }
         
-        // aspect ratio // scales over 2
-        double lon = max (max(a, b), c);        
+        // aspect ratio
+        double lon = max (max(a, b), c);
         double sho = min (min(a, b), c);
         //double aR = lon/sho;
         double aR = (lon-sho) / sho;
-        double maxValAR = 2.;
         
         if (aR > maxValAR)
         {
             aR = maxValAR;
         }
         
-        // coeffs
-        double cSkew = 20.;
-        double cAA = 60./maxValArea;
-        double cAR = 20./maxValAR;
+        double rSkew = cSkew*skew;
+        double rArea = cAA*devAveArea;
+        double rAR = cAR*aR;
+        double score = rSkew + rArea + rAR;
         
-        /*cout << "skew = " << skew << endl;
-        cout << "devAveArea = " << devAveArea << endl;
-        cout << "aR = " << aR << endl;
-        cout << "areaCurrent = " << areaCurrent << endl;
-        cout << "aveTriArea = " << aveTriArea << endl;
-        cout << "cSkew*skew = " << cSkew*skew << endl;
-        cout << "cAA*devAveArea = " << cAA*devAveArea << endl;
-        cout << "cAR*aR = " << cAR*aR << endl;*/
-        
-        cout << "skew = " << skew << endl;
-        cout << "devAveArea = " << devAveArea << endl;
-        cout << "aR = " << aR << endl;
-        cout << "areaCurrent = " << areaCurrent << endl;
-        cout << "score = " << (cSkew*skew + cAA*devAveArea + cAR*aR) << endl;
-        
-        if (skew > 0.75)
+        if (verbose)
         {
-            return BIG_POS_NUM;
+            cout << "skew = " << skew << endl;
+            cout << "devAveArea = " << devAveArea << endl;
+            cout << "aR = " << aR << endl;
+            cout << "rSkew = " << rSkew << endl;
+            cout << "rArea = " << rArea << endl;
+            cout << "rAR = " << rAR << endl;
+            cout << "score = " << score << endl;
         }
         
-        return (cSkew*skew + cAA*devAveArea + cAR*aR); // percentage
+        return score;
     }
 }
 
