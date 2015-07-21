@@ -157,22 +157,22 @@ namespace AFT
             
             if (score == BIG_POS_NUM)
             {
-                //cout << "frontFirst.cloPts.size()1 = " << frontFirst.cloPts.size() << endl;
-                //cout << "frontFirst.cloPts[0]()1 = " << frontFirst.cloPts[0] << endl;
+                cout << "frontFirst.cloPts.size()1 = " << frontFirst.cloPts.size() << endl;
+                cout << "frontFirst.cloPts[0]()1 = " << frontFirst.cloPts[0] << endl;
                 frontFirst.cloPts.pop_front();
                 
                 while (frontFirst.cloPts.size() != 0)
                 {
-                    //cout << "frontFirst.cloPts.size() = " << frontFirst.cloPts.size() << endl;
-                    //cout << "frontFirst.cloPts[0] = " << frontFirst.cloPts[0] << endl;
+                    cout << "frontFirst.cloPts.size() = " << frontFirst.cloPts.size() << endl;
+                    cout << "frontFirst.cloPts[0] = " << frontFirst.cloPts[0] << endl;
                     
                     elAB = eligible (frontFirst.cloPts.front(), false, it0, it1, aveTriArea, scoreAB, A_CPX_exists, B_CPX_exists, iA_CPX,
                                      iB_CPX, frontList, edges, edgeADT, edge01ADT, triangleADT, points, pointADT, edgeCenterADT);
                     
-                    //cout << "A_CPX_exists = " << A_CPX_exists << endl;
-                    //cout << "B_CPX_exists = " << B_CPX_exists << endl;
-                    //cout << "iA_CPX = " << iA_CPX << endl;
-                    //cout << "iB_CPX = " << iB_CPX << endl;
+                    cout << "A_CPX_exists = " << A_CPX_exists << endl;
+                    cout << "B_CPX_exists = " << B_CPX_exists << endl;
+                    cout << "iA_CPX = " << iA_CPX << endl;
+                    cout << "iB_CPX = " << iB_CPX << endl;
                     
                     if (elAB)
                     {

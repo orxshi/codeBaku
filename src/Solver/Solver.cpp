@@ -54,9 +54,10 @@ Solver::Petsc::Petsc (Grid& gr)
     n = gr.n_in_elm;
     bs = N_VAR;
     xGlobalSize = n*bs;
-    PetscMalloc1 (xGlobalSize, &DX);
+    DX = (double*) malloc (xGlobalSize*sizeof(double));
+    //PetscMalloc1 (xGlobalSize, &DX);
     
-    // set x
+    /*// set x
     VecCreate (world, &x);
     VecSetType (x, VECSTANDARD);
     VecSetSizes (x, PETSC_DECIDE, xGlobalSize);
@@ -77,7 +78,9 @@ Solver::Petsc::Petsc (Grid& gr)
     //MatSetOption(A, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
     //MatCreateBAIJ (world, bs, PETSC_DECIDE, PETSC_DECIDE, n*bs, n*bs, 1, NULL, 3, NULL, &A);
     // specific to pentagonal mesh . change later
-    MatGetOwnershipRange (A, &first, &last);
+    MatGetOwnershipRange (A, &first, &last);*/
+    
+    //KSPCreate (world, &ksp);
 }
 
 void Solver::preSolverCheck (const Grid& gr)

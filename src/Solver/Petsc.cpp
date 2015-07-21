@@ -2,6 +2,28 @@
 
 void Solver::Petsc::solveAxb (Grid& gr)
 {
+    VecCreate (world, &x);
+    VecSetType (x, VECSTANDARD);
+    VecSetSizes (x, PETSC_DECIDE, xGlobalSize);
+    VecGetLocalSize (x, &xLocalSize);
+    VecGetOwnershipRange (x, &vecFirst, &vecLast);
+
+    // set b
+    VecDuplicate (x, &b);
+    
+    // set A
+    MatCreate (world, &A);    
+    //MatSetType (A, MATSEQBAIJ);
+    MatSetType (A, MATMPIAIJ);
+    MatSetSizes (A, PETSC_DECIDE, PETSC_DECIDE, xGlobalSize, xGlobalSize);
+    //MatSeqBAIJSetPreallocation (A, bs, 4, NULL);
+    //MatSeqAIJSetPreallocation (A, 4*bs, NULL);    
+    MatMPIAIJSetPreallocation (A, 4*bs, NULL, 4*bs, NULL);
+    //MatSetOption(A, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
+    //MatCreateBAIJ (world, bs, PETSC_DECIDE, PETSC_DECIDE, n*bs, n*bs, 1, NULL, 3, NULL, &A);
+    // specific to pentagonal mesh . change later
+    MatGetOwnershipRange (A, &first, &last);
+    
     double *dx = NULL;
     int nProcs;
     PetscMPIInt rank;
@@ -18,6 +40,7 @@ void Solver::Petsc::solveAxb (Grid& gr)
         Cell& cll = gr.cell[c];
         
         VecSetValue (b, gp, cll.R[i], INSERT_VALUES);
+        // u can use vecsetvalues instead
     }
     
     VecAssemblyBegin (b);
@@ -148,6 +171,8 @@ void Solver::Petsc::solveAxb (Grid& gr)
         
         cll.dQ[i] = DX[gp];
     }
+    
+    finalize();
 }
 
 void Solver::Petsc::finalize()
@@ -155,7 +180,7 @@ void Solver::Petsc::finalize()
     VecDestroy(&x);
     VecDestroy(&b);
     MatDestroy(&A);
-    KSPDestroy(&ksp);
-    PetscFree (DX);
-    DX = NULL;
+    //KSPDestroy(&ksp);
+    //PetscFree (DX);
+    //DX = NULL;
 }

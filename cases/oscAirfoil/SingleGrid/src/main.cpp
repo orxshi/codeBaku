@@ -32,19 +32,19 @@ int main(int argc, char** argv)
     Solver solSteady (gr, "SOLVER-STEADY");
     solSteady.read ("Solver/solSteady.dat");
     
-    Solver solOscAirfoil (gr, "SOLVER-OSC-AIRFOIL");
-    solOscAirfoil.read ("Solver/solOscAirfoil.dat");
+    //Solver solOscAirfoil (gr, "SOLVER-OSC-AIRFOIL");
+    //solOscAirfoil.read ("Solver/solOscAirfoil.dat");
 
     oscInit.read();
     oscInit.init (gr);
 
     // solve steady state
     SMAirfoil sma (solSteady.dt);
-    OscAirfoil oa (solOscAirfoil.dt);
+    //OscAirfoil oa (solOscAirfoil.dt);
     sma.read ("MovingGrid/smAirfoil.dat");
-    oa.read ("MovingGrid/oscAirfoil.dat");
+    //oa.read ("MovingGrid/oscAirfoil.dat");
 
-    Coeffs coeffs (gr, oscInit.rhoInf, oscInit.Mach, oa.MachAirfoil);
+    //Coeffs coeffs (gr, oscInit.rhoInf, oscInit.Mach, oa.MachAirfoil);
     
     sma.getAllFaceVelocities (gr);
     watchSteady.start();
@@ -55,7 +55,7 @@ int main(int argc, char** argv)
     int countr = 0;
     watchOscAirfoil.start();
     
-    // solve osc airfoil
+    /*// solve osc airfoil
     for (solOscAirfoil.time=0.; solOscAirfoil.time<solOscAirfoil.finalTime; solOscAirfoil.time+=solOscAirfoil.dt)
     {
         oa.setAngles (solOscAirfoil.time);
@@ -81,7 +81,7 @@ int main(int argc, char** argv)
         solOscAirfoil.log (gr.logDir);
         sma.log (gr.logDir);
         oa.log (gr.logDir);
-    }
+    }*/
     
     PetscFinalize();
 

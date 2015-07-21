@@ -296,17 +296,25 @@ namespace AFT
         const Point& B = points[ iB ];
         
         A_CPX_intersects = checkEdgeIntersection (A, CPX, edgeADT, edges, points, A_CPX_exists, iA_CPX);
-        //cout << "A_CPX_intersects = " << A_CPX_intersects << endl;
+        cout << "A_CPX_intersects = " << A_CPX_intersects << endl;
+        if (A_CPX_intersects)
+        {
+            cout << "A_CPX_exists = " << A_CPX_exists << endl;
+            cout << "edges[iA_CPX].t[0] = " << edges[iA_CPX].t[0] << endl;
+            cout << "edges[iA_CPX].t[0] = " << edges[iA_CPX].t[1] << endl;
+            cout << "iA_CPX = " << iA_CPX << endl;
+        }
         if (A_CPX_intersects && A_CPX_exists || !A_CPX_intersects)
         {
             B_CPX_intersects = checkEdgeIntersection (B, CPX, edgeADT, edges, points, B_CPX_exists, iB_CPX);
-            //cout << "B_CPX_intersects = " << B_CPX_intersects << endl;
-            /*if (B_CPX_intersects)
+            cout << "B_CPX_intersects = " << B_CPX_intersects << endl;
+            if (B_CPX_intersects)
             {
+                cout << "B_CPX_exists = " << B_CPX_exists << endl;
                 cout << "edges[iB_CPX].t[0] = " << edges[iB_CPX].t[0] << endl;
                 cout << "edges[iB_CPX].t[0] = " << edges[iB_CPX].t[1] << endl;
                 cout << "iB_CPX = " << iB_CPX << endl;
-            }*/
+            }
             if (B_CPX_intersects && B_CPX_exists || !B_CPX_intersects)
             {
                 Edge A_CPX;
@@ -332,19 +340,6 @@ namespace AFT
                     iB_CPX = edges.size() - 1;
                 }
                 
-                /*// check if potential triangle is degenerated
-                bool degenInter;
-                bool dummyBool;
-
-                degenInter = doIntersect (A.dim, CPX.dim, B.dim, CPX.dim, dummyBool);
-
-                if (degenInter)
-                {
-                    if (!A_CPX_exists) {edges.pop_back();}
-                    if (!B_CPX_exists) {edges.pop_back();}
-                    return false;
-                }*/
-                
                 Triangle tmpTriangle = createTriangle (iFrontEdge, iA_CPX, iB_CPX, edges, points);
                 bool A_B_CPX_intersects = triangleIntersect (tmpTriangle, triangleADT, points);
                 Point tmpCntPnt;
@@ -367,8 +362,8 @@ namespace AFT
                                 double edgeAveTri = sqrt ( (4./sqrt(3.) * aveTriArea) );
                                 double pdisAveTri = getPointDistance (edgeAveTri);
                                 double pdis = getPointDistance ( mag (A.dim - B.dim) );
-                                meshDis[0] = 0.5 * pdis;
-                                meshDis[1] = 0.5 * pdis;
+                                meshDis[0] = 0.9 * pdis;
+                                meshDis[1] = 0.9 * pdis;
                                 meshDis[2] = 0.;
                                 
                                 /*if (iA == 60 && iB == 57)
@@ -398,7 +393,7 @@ namespace AFT
                     }
                     else
                     {
-                        score = tmpTriangle.qualityScore (points, aveTriArea, false);                        
+                        score = tmpTriangle.qualityScore (points, aveTriArea, true);
                         if (!A_CPX_exists) {edges.pop_back();}
                         if (!B_CPX_exists) {edges.pop_back();}
                         

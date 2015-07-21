@@ -2,6 +2,7 @@
 
 void Solver::impl (Grid& gr)
 {   
+    Watch wt;
     PetscMPIInt rank;
     MPI_Comm_rank (PETSC_COMM_WORLD, &rank);    
     
@@ -24,7 +25,16 @@ void Solver::impl (Grid& gr)
                 break;
             case 2:
                 MPI_Barrier (PETSC_COMM_WORLD);
+                wt.start();
                 petsc.solveAxb (gr);
+                //FILE *fp;
+                //fp=fopen("../out/petscLog", "w");
+                //PetscMallocDump(fp);
+                PetscLogDouble pld;
+                PetscMallocGetCurrentUsage (&pld);
+                cout << "pld = " << pld << endl;
+                wt.stop();
+                PetscPrintf (this->petsc.world, "%f\n", wt.elapsedTime);
                 MPI_Barrier (PETSC_COMM_WORLD);
                 break;
             default:
