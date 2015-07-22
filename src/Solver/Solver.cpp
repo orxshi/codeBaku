@@ -22,42 +22,20 @@ Solver::Solver (Grid& gr, string instanceName) : petsc(gr)
     glo_nTimeStep = 0;
     nImplicitCalls = 0;    
     this->instanceName = instanceName;
-    
-    
-    
-    /*world = PETSC_COMM_WORLD;
-    n = gr.n_in_elm;
-    bs = N_VAR;
-    
-    // set x
-    VecCreate (world, &x);
-    VecSetType (x, VECSEQ);
-    VecSetSizes (x, PETSC_DECIDE, n*bs);
-    
-    // set b
-    VecDuplicate (x, &b);
-    
-    // set A
-    MatCreate (world, &A);
-    MatSetType (A, MATSEQBAIJ);
-    MatSetSizes (A, PETSC_DECIDE, PETSC_DECIDE, n*bs, n*bs);
-    MatSeqBAIJSetPreallocation (A, bs, 4, NULL);
-    //MatCreateBAIJ (world, bs, PETSC_DECIDE, PETSC_DECIDE, n*bs, n*bs, 1, NULL, 3, NULL, &A);
-    // specific to pentagonal mesh . change later
-    
-    dx = (PetscScalar*)malloc (n * bs * sizeof(PetscScalar));*/
 }
 
 Solver::Petsc::Petsc (Grid& gr)
-{
+{    
     world = PETSC_COMM_WORLD;
+    MPI_Comm_rank (world, &rank);
+    MPI_Comm_size (world, &nProcs);
     n = gr.n_in_elm;
     bs = N_VAR;
     xGlobalSize = n*bs;
     DX = (double*) malloc (xGlobalSize*sizeof(double));
     //PetscMalloc1 (xGlobalSize, &DX);
     
-    /*// set x
+    // set x
     VecCreate (world, &x);
     VecSetType (x, VECSTANDARD);
     VecSetSizes (x, PETSC_DECIDE, xGlobalSize);
@@ -69,18 +47,39 @@ Solver::Petsc::Petsc (Grid& gr)
     
     // set A
     MatCreate (world, &A);    
-    //MatSetType (A, MATSEQBAIJ);
-    MatSetType (A, MATMPIAIJ);
+    MatSetType (A, MATMPIBAIJ);
+    //MatSetType (A, MATMPIAIJ);
     MatSetSizes (A, PETSC_DECIDE, PETSC_DECIDE, xGlobalSize, xGlobalSize);
     //MatSeqBAIJSetPreallocation (A, bs, 4, NULL);
     //MatSeqAIJSetPreallocation (A, 4*bs, NULL);    
-    MatMPIAIJSetPreallocation (A, 4*bs, NULL, 4*bs, NULL);
+    //MatMPIAIJSetPreallocation (A, 4*bs, NULL, 4*bs, NULL);
+    MatMPIBAIJSetPreallocation (A, bs, 4, NULL, 4, NULL);
     //MatSetOption(A, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
     //MatCreateBAIJ (world, bs, PETSC_DECIDE, PETSC_DECIDE, n*bs, n*bs, 1, NULL, 3, NULL, &A);
     // specific to pentagonal mesh . change later
-    MatGetOwnershipRange (A, &first, &last);*/
+    MatGetOwnershipRange (A, &first, &last);
     
-    //KSPCreate (world, &ksp);
+    KSPCreate (world, &ksp);
+    KSPSetOperators (ksp, A, A);
+    KSPGetPC (ksp, &pc);
+    PCSetType (pc, PCSOR);
+    KSPSetType (ksp, KSPGMRES);
+    KSPSetFromOptions (ksp);
+        
+    localSizes = new int [nProcs];
+    int recvcounts[nProcs];
+    int displs[nProcs];
+    displs[0] = 0;    
+    for (int i=0; i<nProcs; ++i)
+    {
+        recvcounts[i] = 1;
+    }
+    for (int i=1; i<nProcs; ++i)
+    {
+        displs[i] = displs[i-1] + recvcounts[i-1];
+    }
+    
+    MPI_Allgatherv (&xLocalSize, 1, MPI_INT, localSizes, recvcounts, displs, MPI_INT, world);
 }
 
 void Solver::preSolverCheck (const Grid& gr)

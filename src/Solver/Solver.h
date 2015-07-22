@@ -34,6 +34,9 @@ struct Solver
         PetscInt vecFirst, vecLast;
         PetscInt first, last;
         double* DX;
+        int nProcs;
+        PetscMPIInt rank;
+        int* localSizes;
         
         Petsc (Grid& gr);
         void solveAxb (Grid& gr);
