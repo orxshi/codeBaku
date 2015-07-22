@@ -42,7 +42,7 @@ namespace AFT
         vector <int> nei;
         
         CVector centroid(const vector<Point>& points);
-        double qualityScore (const vector<Point>& points, double aveTriArea, bool verbose);
+        double qualityScore (const vector<Point>& points, double aveTriArea, bool verbose, bool& passed);
     };
     
     struct FrontMember
@@ -79,6 +79,7 @@ namespace AFT
         virtual bool compareFunction (const Node* node, const ADTPoint& targetPoint);
         virtual bool doCubesOverlap (const Node* node, const ADTPoint& targetPoint);        
         void build (const vector<Point>& pointss);
+        void build ();
         ADTPoint createADTPoint (const CVector& a, const CVector& b);
     };
     
@@ -117,7 +118,7 @@ namespace AFT
     void findNeighbors (const vector<Edge>& edges, vector<Triangle>& triangles);
     void circleCenter(const CVector& A, const CVector& B, const CVector& C, CVector& cnt, double& radius);
     void flip (vector<Triangle>& triangles, vector<Edge>& edges, const vector<Point>& points);
-    void outputTrianglesVTK (const vector<Point>& points, const vector<Triangle>& triangles, string dir);
+    void outputTrianglesVTK (const vector<Point>& points, const vector<Triangle>& triangles, string dir, string fileName);
     void addToTriangleList(vector<Triangle>& triangles, const Triangle& tmpTriangle, TriangleADT& triangleADT, const vector<Point>& points);
     
     // Reblanking
@@ -132,7 +133,7 @@ namespace AFT
     double getPointDistance (double r);
     bool eligible (int iCPX, bool isNewPoint, int iA, int iB, double aveTriArea, double& score, bool& A_CPX_exists, bool& B_CPX_exists, int& iA_CPX, int& iB_CPX, vector<FrontMember>& frontList, vector<Edge>& edges, EdgeADT& edgeADT, EdgeADT& edge01ADT, TriangleADT& triangleADT, vector<Point>& points, PointADT& pointADT, PointADT& edgeCenterADT);
     bool pointsNearby (const CVector& range1, const CVector& range2, PointADT& pointADT, PointADT& edgeCenterADT);
-    bool pointExists (const CVector& range1, const CVector& range2, PointADT& pointADT);
+    bool pointExists (const Point& p, PointADT& pointADT, int& result);
     
     // FModules
     //void F1 (int iCPX, int iCPY, bool& YChecked, bool& XChecked, int terminal, vector<FrontMember>& frontList, vector<Edge>& edges,
@@ -149,8 +150,8 @@ namespace AFT
     void createCells (double offsetZ, const vector<Point>& points, Grid& newGrid, const vector<Triangle>& triangles, int phys, int newGridId);
     bool pointExistsForCreateCells(const Point& p, const vector<Point>& points, int& index);
     void createFinalGrid (Grid& finalGrid, const vector<Grid>& gr, const Grid& newGrid);
-    void addIntergridCells (const Face& f, const vector<Face>& face, const vector<Cell>& cell, const vector<Point>& pt, Grid& finalGrid, const Grid& newGrid);
-    void addCells (const Face& f, const vector<Face>& face, const vector<Cell>& cell, const vector<Point>& pt, Grid& finalGrid);
+    void addIntergridCells (const Face& f, const vector<Face>& face, const vector<Cell>& cell, const vector<Point>& pt, Grid& finalGrid, const Grid& newGrid, PointADT& fgp, PointADT& fgcc, PointADT& fgfc);
+    void addCells (const Face& f, const vector<Face>& face, const vector<Cell>& cell, const vector<Point>& pt, Grid& finalGrid, PointADT& fgp, PointADT& fgcc);
     void modifyCellVertices (Grid& finalGrid, const Grid& newGrid, const vector<Grid>& gr);
     void construct (int iCPX, bool isNewPoint, bool A_CPX_exists, bool B_CPX_exists, int iA_CPX, int iB_CPX, int iA, int iB, vector<FrontMember>& frontList,
              vector<Edge>& edges, vector<Triangle>& triangles, TriangleADT& triangleADT, EdgeADT& edgeADT, int newGridId, const vector<Point>& points, vector<Point>& edgeCenters, PointADT& edgeCenterADT);

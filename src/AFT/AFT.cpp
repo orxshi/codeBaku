@@ -77,6 +77,10 @@ namespace AFT
         advanceFront (frontList, points, aveTriArea, edges, triangles, triangleADT, pointADT, edgeCenterADT, edgeADT, edge01ADT, newGridId, edgeCenters);
         cout << "done!" << endl;
         
+        cout << "Outputing unflipped triangles... " << flush;        
+        outputTrianglesVTK (points, triangles, gr[0].mainDir, "tri.vtk");
+        cout << "done!" << endl;
+        
         cout << "Neighborhood... " << flush;
         knowParentTriangles (edges, triangles);
         findNeighbors (edges, triangles);
@@ -86,8 +90,8 @@ namespace AFT
         flip (triangles, edges, points);
         cout << "done!" << endl;
         
-        cout << "Outputing triangles... " << flush;
-        outputTriangles (points, triangles);
+        cout << "Outputing flipped triangles... " << flush;        
+        outputTrianglesVTK (points, triangles, gr[0].mainDir, "triFlip.vtk");
         cout << "done!" << endl;
         
         cout << "Creating cells... " << flush;
@@ -111,8 +115,7 @@ namespace AFT
         cout << "done!" << endl;
         
         cout << "Reading input of final grid... " << flush;
-        cout << "FINAL GRID READ INPUT AND PRINT INPUT IS NOT SET IN AFT(...)" << endl;
-        exit(-2);
+        cout << "FINAL GRID READ INPUT AND PRINT INPUT IS NOT SET IN AFT(...)" << endl;        
         //finalGrid.read_input();
         //finalGrid.printInput();
         cout << "done!" << endl;

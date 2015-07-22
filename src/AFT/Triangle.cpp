@@ -385,11 +385,12 @@ namespace AFT
         out.close();
     }
     
-    void outputTrianglesVTK (const vector<Point>& points, const vector<Triangle>& triangles, string dir)
+    void outputTrianglesVTK (const vector<Point>& points, const vector<Triangle>& triangles, string dir, string fileName)
     {
         int cellListSize = 0;
 
-        string temps = "tri.vtk";
+        string temps = fileName;
+        //string temps = "tri.vtk";
         string slash = "/";
         dir.append (slash);
         dir.append (temps);
@@ -785,11 +786,13 @@ namespace AFT
         return cent;
     }
     
-    double Triangle::qualityScore (const vector<Point>& points, double aveTriArea, bool verbose)
+    double Triangle::qualityScore (const vector<Point>& points, double aveTriArea, bool verbose, bool& passed)
     {
         // low score is better
         
         #include "Triangle.h"
+
+        passed = true;
         
         double a = mag( points[p[0]].dim - points[p[1]].dim );
         double b = mag( points[p[0]].dim - points[p[2]].dim );
@@ -803,6 +806,23 @@ namespace AFT
         // skewness
         double skew = (1. - areaCurrent/areaEqui);
         
+        // area
+        double areaSmall = min (areaCurrent, aveTriArea);
+        double areaLarge = max (areaCurrent, aveTriArea);        
+        double devAveArea = areaLarge / areaSmall;
+        //double devAveArea = fabs(areaCurrent - aveTriArea) / aveTriArea;
+        
+        // aspect ratio
+        double lon = max (max(a, b), c);
+        double sho = min (min(a, b), c);
+        //double aR = lon/sho;
+        double aR = (lon-sho) / sho;
+        
+        double rSkew = cSkew*skew;
+        double rArea = cAA*devAveArea;
+        double rAR = cAR*aR;
+        double score = rSkew + rArea + rAR;
+        
         if (skew >= maxSkew)
         {
             if (verbose)
@@ -811,18 +831,12 @@ namespace AFT
                 cout << "skew = " << skew << endl;
                 cout << "maxSkew = " << maxSkew << endl;
                 cout << "areaCurrent = " << areaCurrent << endl;
-                cout << "areaEqui = " << areaEqui << endl;
-                cout << "score = " << BIG_POS_NUM << endl;
-            }
+                cout << "areaEqui = " << areaEqui << endl;                
+            }            
             
-            return BIG_POS_NUM;
+            passed = false;
+            return score;
         }
-        
-        // area
-        double areaSmall = min (areaCurrent, aveTriArea);
-        double areaLarge = max (areaCurrent, aveTriArea);        
-        double devAveArea = areaLarge / areaSmall;
-        //double devAveArea = fabs(areaCurrent - aveTriArea) / aveTriArea;
         
         if (devAveArea > maxValArea)
         {
@@ -832,28 +846,27 @@ namespace AFT
                 cout << "devAveArea = " << devAveArea << endl;
                 cout << "maxValArea = " << maxValArea << endl;
                 cout << "areaCurrent = " << areaCurrent << endl;
-                cout << "aveTriArea = " << aveTriArea << endl;
-                cout << "score = " << BIG_POS_NUM << endl;
+                cout << "aveTriArea = " << aveTriArea << endl;                
             }
             
-            return BIG_POS_NUM;
+            passed = false;
+            return score;
         }
-        
-        // aspect ratio
-        double lon = max (max(a, b), c);
-        double sho = min (min(a, b), c);
-        //double aR = lon/sho;
-        double aR = (lon-sho) / sho;
         
         if (aR > maxValAR)
         {
-            aR = maxValAR;
+            if (verbose)
+            {
+                cout << "aR > maxValAR" << endl;
+                cout << "aR = " << aR << endl;
+                cout << "maxValAR = " << maxValAR << endl;
+                cout << "lon = " << lon << endl;
+                cout << "sho = " << sho << endl;
+            }
+            
+            passed = false;
+            return score;
         }
-        
-        double rSkew = cSkew*skew;
-        double rArea = cAA*devAveArea;
-        double rAR = cAR*aR;
-        double score = rSkew + rArea + rAR;
         
         if (verbose)
         {

@@ -5,7 +5,7 @@ namespace AFT
     FrontMember::FrontMember()
     {
         newPointChecked = false;
-        cloPtsMaxSize = 50;
+        cloPtsMaxSize = 30;
     }
     
     void sortFrontList (vector<FrontMember>& frontList, const vector<Point>& points, const vector<Edge>& edges)
@@ -91,7 +91,7 @@ namespace AFT
         #include "advanceFront.h"
         
         while (!frontList.empty())
-        {
+        {                        
             FrontMember& frontFirst = frontList.front();
             Edge& frontEdge = edges [ frontFirst.edge ];
             int it0 = frontEdge.t[0];
@@ -99,15 +99,24 @@ namespace AFT
             //const Point& t0 = points[ it0 ];
             //const Point& t1 = points[ it1 ];
             
+            double scores[frontFirst.cloPtsMaxSize];
+            int ids[frontFirst.cloPtsMaxSize];
+            bool A_CPX_exists_AB[frontFirst.cloPtsMaxSize];
+            bool B_CPX_exists_AB[frontFirst.cloPtsMaxSize];
+            int iA_CPX_AB[frontFirst.cloPtsMaxSize];
+            int iB_CPX_AB[frontFirst.cloPtsMaxSize];
+            
             findClosestPoint (frontFirst, edges, points);
             
             elAB = eligible (frontFirst.cloPts.front(), false, it0, it1, aveTriArea, scoreAB, A_CPX_exists, B_CPX_exists, iA_CPX,
                             iB_CPX, frontList, edges, edgeADT, edge01ADT, triangleADT, points, pointADT, edgeCenterADT);
 
-            A_CPX_exists_AB = A_CPX_exists;
-            B_CPX_exists_AB = B_CPX_exists;
-            iA_CPX_AB = iA_CPX;
-            iB_CPX_AB = iB_CPX;
+            A_CPX_exists_AB[0] = A_CPX_exists;
+            B_CPX_exists_AB[0] = B_CPX_exists;
+            iA_CPX_AB[0] = iA_CPX;
+            iB_CPX_AB[0] = iB_CPX;
+            scores[0] = scoreAB;
+            ids[0] = frontFirst.cloPts.front();
             
             //
             getTwoNormalPoints (it0, it1, points, cnp1, cnp2, pdis);
@@ -141,7 +150,7 @@ namespace AFT
             
             if (elAB && elNP1)
             {
-                if ( fabs(scoreAB-scoreNP1) < tolPreferExistingPoint )
+                if ( (scoreAB-scoreNP1) < tolPreferExistingPoint )
                 {
                     score = scoreAB;
                 }
@@ -149,7 +158,7 @@ namespace AFT
             
             if (elAB && elNP2)
             {
-                if ( fabs(scoreAB-scoreNP2) < tolPreferExistingPoint )
+                if ( (scoreAB-scoreNP2) < tolPreferExistingPoint )
                 {
                     score = scoreAB;
                 }
@@ -157,22 +166,30 @@ namespace AFT
             
             if (score == BIG_POS_NUM)
             {
-                cout << "frontFirst.cloPts.size()1 = " << frontFirst.cloPts.size() << endl;
-                cout << "frontFirst.cloPts[0]()1 = " << frontFirst.cloPts[0] << endl;
+                //cout << "frontFirst.cloPts.size()1 = " << frontFirst.cloPts.size() << endl;
+                //cout << "frontFirst.cloPts[0]()1 = " << frontFirst.cloPts[0] << endl;
                 frontFirst.cloPts.pop_front();
                 
                 while (frontFirst.cloPts.size() != 0)
                 {
-                    cout << "frontFirst.cloPts.size() = " << frontFirst.cloPts.size() << endl;
-                    cout << "frontFirst.cloPts[0] = " << frontFirst.cloPts[0] << endl;
+                    //cout << "frontFirst.cloPts.size() = " << frontFirst.cloPts.size() << endl;
+                    //cout << "frontFirst.cloPts[0] = " << frontFirst.cloPts[0] << endl;
                     
                     elAB = eligible (frontFirst.cloPts.front(), false, it0, it1, aveTriArea, scoreAB, A_CPX_exists, B_CPX_exists, iA_CPX,
                                      iB_CPX, frontList, edges, edgeADT, edge01ADT, triangleADT, points, pointADT, edgeCenterADT);
+                                        
+                    int i = frontFirst.cloPtsMaxSize - frontFirst.cloPts.size();
+                    A_CPX_exists_AB[i] = A_CPX_exists;
+                    B_CPX_exists_AB[i] = B_CPX_exists;
+                    iA_CPX_AB[i] = iA_CPX;
+                    iB_CPX_AB[i] = iB_CPX;
+                    scores[i] = scoreAB;
+                    ids[i] = frontFirst.cloPts.front();
                     
-                    cout << "A_CPX_exists = " << A_CPX_exists << endl;
+                    /*cout << "A_CPX_exists = " << A_CPX_exists << endl;
                     cout << "B_CPX_exists = " << B_CPX_exists << endl;
                     cout << "iA_CPX = " << iA_CPX << endl;
-                    cout << "iB_CPX = " << iB_CPX << endl;
+                    cout << "iB_CPX = " << iB_CPX << endl;*/
                     
                     if (elAB)
                     {
@@ -190,46 +207,65 @@ namespace AFT
                 
                 if (frontFirst.cloPts.size() == 0)
                 {
-                    cout << "none of the ways work in AFT::advanceFront(...)" << endl;
+                    double tmpScore = BIG_POS_NUM;                    
+                    for (int i=0; i<frontFirst.cloPtsMaxSize; ++i)
+                    {
+                        if (scores[i] < tmpScore)
+                        {
+                            iChosenPoint = ids[i];
+                            isNewPoint = false;
+                            elAB = true;
+                            A_CPX_exists = A_CPX_exists_AB[i];
+                            B_CPX_exists = B_CPX_exists_AB[i];
+                            iA_CPX = iA_CPX_AB[i];
+                            iB_CPX = iB_CPX_AB[i];
+                            tmpScore = scores[i];
+                        }
+                    }
                     
-                    cout << "score = " << score << endl;
-                    cout << "scoreAB = " << scoreAB << endl;
-                    cout << "scoreNP1 = " << scoreNP1 << endl;
-                    cout << "scoreNP2 = " << scoreNP2 << endl;
-
-                    cout << "t0 ID = " << it0 << endl;
-                    cout << "t1 ID = " << it1 << endl;
-
-                    cout << "t0Belo = " << points[it0].belonging << endl;
-                    cout << "t1Belo = " << points[it1].belonging << endl;
-
-                    cout << "t0.dim[0] = " << points[it0].dim[0] << endl;
-                    cout << "t0.dim[1] = " << points[it0].dim[1] << endl;
-
-                    cout << "t1.dim[0] = " << points[it1].dim[0] << endl;
-                    cout << "t1.dim[1] = " << points[it1].dim[1] << endl;
-
-                    cout << "triangles.size() = " << triangles.size() << endl;
+                    if (!elAB)
+                    {
+                        cout << "none of the ways work in AFT::advanceFront(...)" << endl;
                     
-                    cout << "edgeID = " << frontFirst.edge << endl;
-                    cout << "edges.size() = " << edges.size() << endl;
-                    
-                    cout << "newlyCreated = " << frontEdge.newlyCreated << endl;
+                        cout << "score = " << score << endl;
+                        cout << "scoreAB = " << scoreAB << endl;
+                        cout << "scoreNP1 = " << scoreNP1 << endl;
+                        cout << "scoreNP2 = " << scoreNP2 << endl;
 
-                    //outputTriangles (points, triangles);
-                    outputTrianglesVTK (points, triangles, "../out");
+                        cout << "t0 ID = " << it0 << endl;
+                        cout << "t1 ID = " << it1 << endl;
 
-                    exit(-2);
+                        cout << "t0Belo = " << points[it0].belonging << endl;
+                        cout << "t1Belo = " << points[it1].belonging << endl;
+
+                        cout << "t0.dim[0] = " << points[it0].dim[0] << endl;
+                        cout << "t0.dim[1] = " << points[it0].dim[1] << endl;
+
+                        cout << "t1.dim[0] = " << points[it1].dim[0] << endl;
+                        cout << "t1.dim[1] = " << points[it1].dim[1] << endl;
+
+                        cout << "triangles.size() = " << triangles.size() << endl;
+
+                        cout << "edgeID = " << frontFirst.edge << endl;
+                        cout << "edges.size() = " << edges.size() << endl;
+
+                        cout << "newlyCreated = " << frontEdge.newlyCreated << endl;
+
+                        //outputTriangles (points, triangles);
+                        outputTrianglesVTK (points, triangles, "../out", "tri.vtk");
+
+                        exit(-2);
+                    }
                 }
             }
             else if (score == scoreAB)
             {
                 iChosenPoint = frontFirst.cloPts.front();
                 isNewPoint = false;
-                A_CPX_exists = A_CPX_exists_AB;
-                B_CPX_exists = B_CPX_exists_AB;
-                iA_CPX = iA_CPX_AB;
-                iB_CPX = iB_CPX_AB;
+                A_CPX_exists = A_CPX_exists_AB[0];
+                B_CPX_exists = B_CPX_exists_AB[0];
+                iA_CPX = iA_CPX_AB[0];
+                iB_CPX = iB_CPX_AB[0];
             }
             else if (score == scoreNP1)
             {

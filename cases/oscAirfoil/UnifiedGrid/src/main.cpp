@@ -81,7 +81,7 @@ int main(int argc, char** argv)
     
     
     
-    AFT::aft (grs, finalGrid);
+    AFT::aft (grs, finalGrid);    
     exit(-2);
     
     /*Grid gr (mainDir, 0);
