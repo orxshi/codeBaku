@@ -52,10 +52,10 @@ int main(int argc, char** argv)
     solSteady.petsc.finalize();
     watchSteady.stop();    
     
-    int countr = 0;
+    /*int countr = 0;
     watchOscAirfoil.start();
     
-    /*// solve osc airfoil
+    // solve osc airfoil
     for (solOscAirfoil.time=0.; solOscAirfoil.time<solOscAirfoil.finalTime; solOscAirfoil.time+=solOscAirfoil.dt)
     {
         oa.setAngles (solOscAirfoil.time);
@@ -68,20 +68,20 @@ int main(int argc, char** argv)
         
         ++countr;
     }
-    watchOscAirfoil.stop();    
+    watchOscAirfoil.stop();*/
     
     if (rank == MASTER_RANK)
     {
-        gr.outAllTecplot();
+        //gr.outAllTecplot();
         gr.outAllVTK (0);
-        coeffs.out.close();
+        //coeffs.out.close();
         log (mainDir, watchSteady.elapsedTime, "elapsedTimeSteady", watchSteady.unit);
-        log (mainDir, watchOscAirfoil.elapsedTime, "elapsedTimeOscAirfoil", watchOscAirfoil.unit);
+        //log (mainDir, watchOscAirfoil.elapsedTime, "elapsedTimeOscAirfoil", watchOscAirfoil.unit);
         solSteady.log (gr.logDir);
-        solOscAirfoil.log (gr.logDir);
+        //solOscAirfoil.log (gr.logDir);
         sma.log (gr.logDir);
-        oa.log (gr.logDir);
-    }*/
+        //oa.log (gr.logDir);
+    }
     
     PetscFinalize();
 

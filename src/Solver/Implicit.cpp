@@ -2,9 +2,7 @@
 
 void Solver::impl (Grid& gr)
 {   
-    Watch wt;
-    PetscMPIInt rank;
-    MPI_Comm_rank (PETSC_COMM_WORLD, &rank);    
+    //Watch wt;
     
     preSolverCheck (gr);
     
@@ -24,18 +22,18 @@ void Solver::impl (Grid& gr)
                 gauss_seidel (gr);
                 break;
             case 2:
-                MPI_Barrier (PETSC_COMM_WORLD);
-                wt.start();
+                //MPI_Barrier (PETSC_COMM_WORLD);
+                //wt.start();
                 petsc.solveAxb (gr);
                 //FILE *fp;
                 //fp=fopen("../out/petscLog", "w");
                 //PetscMallocDump(fp);
-                PetscLogDouble pld;
-                PetscMallocGetCurrentUsage (&pld);
-                cout << "pld = " << pld << endl;
-                wt.stop();
-                PetscPrintf (this->petsc.world, "%f\n", wt.elapsedTime);
-                MPI_Barrier (PETSC_COMM_WORLD);
+                //PetscLogDouble pld;
+                //PetscMallocGetCurrentUsage (&pld);
+                //cout << "pld = " << pld << endl;
+                //wt.stop();
+                //PetscPrintf (this->petsc.world, "%f\n", wt.elapsedTime);
+                //MPI_Barrier (PETSC_COMM_WORLD);
                 break;
             default:
                 cout << "undefined linear solver in Solver::impl(...)" << endl;
@@ -46,10 +44,10 @@ void Solver::impl (Grid& gr)
         diff_to_cons_prim (gr);
         set_residual (gr);
         
-        if (rank == MASTER_RANK) { outRes(gr.outputDir); }
+        if (petsc.rank == MASTER_RANK) { outRes(gr.outputDir); }
         gr.apply_BCs();
         
-        if (verbose && rank == MASTER_RANK)
+        if (verbose && petsc.rank == MASTER_RANK)
         {
             cout << left << setw(10) << fixed << time;
             cout << setw(10) << nTimeStep;

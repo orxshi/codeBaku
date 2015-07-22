@@ -29,14 +29,15 @@ struct Solver
         MPI_Comm world;
         PetscInt n;
         PetscInt bs;
-        PetscInt xGlobalSize;
-        PetscInt xLocalSize;
-        PetscInt vecFirst, vecLast;
-        PetscInt first, last;
+        PetscInt vecGlobalSize;
+        PetscInt vecLocalSize;
+        PetscInt vecLocBeg, vecLocEnd;
+        PetscInt matLocBeg, matLocEnd;
         double* DX;
         int nProcs;
         PetscMPIInt rank;
         int* localSizes;
+        int matLocalSize;
         
         Petsc (Grid& gr);
         void solveAxb (Grid& gr);

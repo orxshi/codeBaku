@@ -3,9 +3,9 @@
 void Solver::Petsc::solveAxb (Grid& gr)
 {
     // set values of b
-    int ind[xLocalSize];
-    double val[xLocalSize];
-    for (PetscInt gp=first; gp<last; ++gp)
+    int ind[vecLocalSize];
+    double val[vecLocalSize];
+    for (PetscInt gp=vecLocBeg; gp<vecLocEnd; ++gp)
     {
         PetscInt brow = static_cast <int> (floor(gp/bs));
         PetscInt c = brow + gr.n_bou_elm;
@@ -13,17 +13,17 @@ void Solver::Petsc::solveAxb (Grid& gr)
         
         Cell& cll = gr.cell[c];
         
-        ind[gp-first] = gp;
-        val[gp-first] = cll.R[i];
+        ind[gp-vecLocBeg] = gp;
+        val[gp-vecLocBeg] = cll.R[i];
     }
         
-    VecSetValues (b, xLocalSize, ind, val, INSERT_VALUES);
+    VecSetValues (b, vecLocalSize, ind, val, INSERT_VALUES);
     
     VecAssemblyBegin (b);
     VecAssemblyEnd (b);
     
     // set values of A
-    for (PetscInt brow=first/bs; brow<last/bs; ++brow)
+    for (PetscInt brow=matLocBeg/bs; brow<matLocEnd/bs; ++brow)
     {
         PetscInt c = brow + gr.n_bou_elm;
         
@@ -140,7 +140,7 @@ void Solver::Petsc::solveAxb (Grid& gr)
     VecRestoreArray (x, &dx);
     //
     
-    for (PetscInt gp=0; gp<xGlobalSize; ++gp)
+    for (PetscInt gp=0; gp<vecGlobalSize; ++gp)
     {
         PetscInt brow = static_cast <int> (floor(gp/bs));
         PetscInt c = brow + gr.n_bou_elm;
@@ -157,7 +157,9 @@ void Solver::Petsc::finalize()
     VecDestroy(&b);
     MatDestroy(&A);
     KSPDestroy(&ksp);
-    PetscFree (DX);
+    //PetscFree (DX);
+    delete DX;
+    //free (DX);
     DX = NULL;
     delete [] localSizes;
 }

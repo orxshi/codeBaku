@@ -31,16 +31,18 @@ Solver::Petsc::Petsc (Grid& gr)
     MPI_Comm_size (world, &nProcs);
     n = gr.n_in_elm;
     bs = N_VAR;
-    xGlobalSize = n*bs;
-    DX = (double*) malloc (xGlobalSize*sizeof(double));
+    vecGlobalSize = n*bs;
+    //DX = (double*) malloc (vecGlobalSize*sizeof(double));
     //PetscMalloc1 (xGlobalSize, &DX);
+    DX = new double [vecGlobalSize];
     
     // set x
     VecCreate (world, &x);
     VecSetType (x, VECSTANDARD);
-    VecSetSizes (x, PETSC_DECIDE, xGlobalSize);
-    VecGetLocalSize (x, &xLocalSize);
-    VecGetOwnershipRange (x, &vecFirst, &vecLast);
+    VecSetBlockSize(x, bs);
+    VecSetSizes (x, PETSC_DECIDE, vecGlobalSize);
+    VecGetLocalSize (x, &vecLocalSize);
+    VecGetOwnershipRange (x, &vecLocBeg, &vecLocEnd);
 
     // set b
     VecDuplicate (x, &b);
@@ -49,7 +51,7 @@ Solver::Petsc::Petsc (Grid& gr)
     MatCreate (world, &A);    
     MatSetType (A, MATMPIBAIJ);
     //MatSetType (A, MATMPIAIJ);
-    MatSetSizes (A, PETSC_DECIDE, PETSC_DECIDE, xGlobalSize, xGlobalSize);
+    MatSetSizes (A, PETSC_DECIDE, PETSC_DECIDE, vecGlobalSize, vecGlobalSize);
     //MatSeqBAIJSetPreallocation (A, bs, 4, NULL);
     //MatSeqAIJSetPreallocation (A, 4*bs, NULL);    
     //MatMPIAIJSetPreallocation (A, 4*bs, NULL, 4*bs, NULL);
@@ -57,7 +59,8 @@ Solver::Petsc::Petsc (Grid& gr)
     //MatSetOption(A, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
     //MatCreateBAIJ (world, bs, PETSC_DECIDE, PETSC_DECIDE, n*bs, n*bs, 1, NULL, 3, NULL, &A);
     // specific to pentagonal mesh . change later
-    MatGetOwnershipRange (A, &first, &last);
+    MatGetOwnershipRange (A, &matLocBeg, &matLocEnd);
+    MatGetLocalSize (A, &matLocalSize, NULL);
     
     KSPCreate (world, &ksp);
     KSPSetOperators (ksp, A, A);
@@ -79,7 +82,7 @@ Solver::Petsc::Petsc (Grid& gr)
         displs[i] = displs[i-1] + recvcounts[i-1];
     }
     
-    MPI_Allgatherv (&xLocalSize, 1, MPI_INT, localSizes, recvcounts, displs, MPI_INT, world);
+    MPI_Allgatherv (&vecLocalSize, 1, MPI_INT, localSizes, recvcounts, displs, MPI_INT, world);
 }
 
 void Solver::preSolverCheck (const Grid& gr)
