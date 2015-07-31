@@ -114,11 +114,11 @@ namespace AFT
         finalGrid.outAllVTK(0);
         cout << "done!" << endl;
         
-        cout << "Reading input of final grid... " << flush;
-        cout << "FINAL GRID READ INPUT AND PRINT INPUT IS NOT SET IN AFT(...)" << endl;        
+        //cout << "Reading input of final grid... " << flush;
+        //cout << "FINAL GRID READ INPUT AND PRINT INPUT IS NOT SET IN AFT(...)" << endl;        
         //finalGrid.read_input();
         //finalGrid.printInput();
-        cout << "done!" << endl;
+        //cout << "done!" << endl;
     }
     
     double getAveTriArea (const vector<Edge>& edges, const vector<Point>& points)

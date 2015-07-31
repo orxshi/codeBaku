@@ -216,12 +216,15 @@ namespace AFT
     {
         this->root = new TriangleADT::Node();
         this->root->level = 0;
+        this->root->p.idx = -1;
 
         for (unsigned int d=0; d<ADT_VAR; ++d)
         {
             this->root->c[d] = edgeADT.root->c[d];
             this->root->d[d] = edgeADT.root->d[d];            
         }
+        
+        
 
         // note that no point assigned to the root
     }

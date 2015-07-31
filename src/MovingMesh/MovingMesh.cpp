@@ -122,6 +122,23 @@ void MovingGrid::checkGCL(const Grid& gr)
         {
             cout << "GCL not satisfied in getMovingFaceVelocity(...)" << endl;
             cout << fabs(sum) << endl;
+            
+            /*for (int iF: gr.cell[e].face)
+            {
+                const Face& f = gr.face[iF];
+                
+                cout << "size = " << gr.cell[e].face.size() << endl;
+                cout << "e = " << e << endl;
+                
+                cout << "f.vb[0] = " << f.vb[0] << endl;
+                cout << "f.vb[1] = " << f.vb[1] << endl;
+                cout << "f.vb[2] = " << f.vb[2] << endl;
+                
+                cout << "f.area[0] = " << f.area[0] << endl;
+                cout << "f.area[1] = " << f.area[1] << endl;
+                cout << "f.area[2] = " << f.area[2] << endl;
+            }*/
+            
             exit(-2);
         }
     }

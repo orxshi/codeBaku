@@ -157,8 +157,14 @@ void ADT::search (Node* node, const ADTPoint& targetPoint, int& index)
 {
     if (node != NULL)
     {
+        //cout << "node->p.dim[0] = " << node->p.dim[0] << endl;
+        //cout << "node->p.dim[1] = " << node->p.dim[1] << endl;
+        
+        //cout << "targetPoint.dim[0] = " << targetPoint.dim[0] << endl;
+        //cout << "targetPoint.dim[1] = " << targetPoint.dim[1] << endl;
+        
         // check whether the point is inside the element
-        if ( doCubesOverlap (node, targetPoint) && compareFunction (node, targetPoint) )
+        if ((node->p.idx!=-1) && doCubesOverlap (node, targetPoint) && compareFunction (node, targetPoint) )
         {
             if (searchForNIntersections)
             {
@@ -227,6 +233,30 @@ int ADT::search (const ADTPoint& targetPoint)
     {
         search (root, targetPoint, i);
     }
+    /*else
+    {
+        cout << "no overlap" << endl;
+        cout << "root->c[0] = " << root->c[0] << endl;
+        cout << "root->c[1] = " << root->c[1] << endl;
+        cout << "root->c[2] = " << root->c[2] << endl;
+        cout << "root->c[3] = " << root->c[3] << endl;
+        cout << "root->c[4] = " << root->c[4] << endl;
+        cout << "root->c[5] = " << root->c[5] << endl;
+        
+        cout << "root->d[0] = " << root->d[0] << endl;
+        cout << "root->d[1] = " << root->d[1] << endl;
+        cout << "root->d[2] = " << root->d[2] << endl;
+        cout << "root->d[3] = " << root->d[3] << endl;
+        cout << "root->d[4] = " << root->d[4] << endl;
+        cout << "root->d[5] = " << root->d[5] << endl;
+        
+        cout << "targetPoint.dim[0] = " << targetPoint.dim[0] << endl;
+        cout << "targetPoint.dim[1] = " << targetPoint.dim[1] << endl;
+        cout << "targetPoint.dim[2] = " << targetPoint.dim[2] << endl;
+        cout << "targetPoint.dim[2] = " << targetPoint.dim[3] << endl;
+        cout << "targetPoint.dim[2] = " << targetPoint.dim[4] << endl;
+        cout << "targetPoint.dim[2] = " << targetPoint.dim[5] << endl;
+    }*/
 
     fill (searchStack.begin(), searchStack.end(), nullptr);
     searchStack.clear();    

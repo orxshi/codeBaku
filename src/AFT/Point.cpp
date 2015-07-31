@@ -202,6 +202,14 @@ namespace AFT
         
         ADT::ADTPoint vec = pointADT.createADTPoint (p.dim-meshDis, p.dim+meshDis);
         
+        /*cout << "p.dim[0] = " << p.dim[0] << endl;
+        cout << "p.dim[1] = " << p.dim[1] << endl;
+        cout << "p.dim[2] = " << p.dim[2] << endl;
+        
+        cout << "vec.dim[0] = " << vec.dim[0] << endl;
+        cout << "vec.dim[1] = " << vec.dim[1] << endl;
+        cout << "vec.dim[2] = " << vec.dim[2] << endl;*/
+        
         pointADT.searchForNIntersections = false;
         result = pointADT.search (vec);
 

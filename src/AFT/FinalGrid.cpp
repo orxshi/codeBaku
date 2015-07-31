@@ -15,7 +15,7 @@ namespace AFT
         int counter = 0;
         for (int d=0; d<N_DIM; ++d)
         {
-            if ( fabs(p0.dim[d] - p1.dim[d]) < 0.0001 )
+            if ( fabs(p0.dim[d] - p1.dim[d]) < 1e-10 )
             {
                 ++counter;
             }
@@ -182,6 +182,7 @@ namespace AFT
     
     void addGhostCells (const Face& f, const vector<Face>& face, const vector<Cell>& cell, const vector<Point>& pt, Grid& finalGrid, PointADT& fgp, PointADT& fgcc)
     {
+        //int nExists = 0;
         const Cell* GC;
         GC = &cell[ f.nei[1] ];
             
@@ -216,9 +217,43 @@ namespace AFT
             // create new point
             Point p = pt[ f.vtx[v] ];
 
+            //int pointIndex1;
             int pointIndex;
             //bool ptExists = pointExistsForCreateCells(p, finalGrid.pt, pointIndex);
             bool ptExists = pointExists (p, fgp, pointIndex);
+                        
+            /*if (ptExists != ptExists1)
+            {
+                cout << "not equal" << endl;
+                cout << "ptExists1 = " << ptExists1 << endl;
+                cout << "ptExists = " << ptExists << endl;
+                
+                cout << "p.dim[0] = " << p.dim[0] << endl;
+                cout << "p.dim[1] = " << p.dim[1] << endl;
+                cout << "p.dim[2] = " << p.dim[2] << endl;
+                
+                cout << "pointIndex1 = " << pointIndex1 << endl;
+                cout << "pointIndex = " << pointIndex << endl;
+                exit(-2);
+            }*/
+            
+            //if (f.vtx[v] == 8)
+            /*{
+                cout << "exists = " << ptExists << endl;
+                cout << "pointIndex = " << pointIndex << endl;
+                
+                cout << "p.dim[0] = " << p.dim[0] << endl;
+                cout << "p.dim[1] = " << p.dim[1] << endl;
+                cout << "p.dim[2] = " << p.dim[2] << endl;
+                
+                //cout << "finalGrid.pt[3].dim[0] = " << finalGrid.pt[3].dim[0] << endl;
+                //cout << "finalGrid.pt[3].dim[1] = " << finalGrid.pt[3].dim[1] << endl;
+                //cout << "finalGrid.pt[3].dim[2] = " << finalGrid.pt[3].dim[2] << endl;
+                cout << "finalGrid.pt.size() = " << finalGrid.pt.size() << endl;
+                cout << "fgp.sizeTree = " << fgp.sizeTree << endl;
+                //exit(-2);
+                cin.ignore();
+            }*/
 
             if (!ptExists)
             {
@@ -227,6 +262,22 @@ namespace AFT
                 pointIndex = finalGrid.pt.size() - 1;
                 addToPointADT (p, fgp, pointIndex);
             }
+            /*else
+            {
+                cout << "exists" << endl;
+                cout << "point = " << f.vtx[v] << endl;
+                cout << "pointIndex = " << pointIndex << endl;
+                
+                cout << "p.dim[0] = " << p.dim[0] << endl;
+                cout << "p.dim[1] = " << p.dim[1] << endl;
+                cout << "p.dim[2] = " << p.dim[2] << endl;
+                
+                cout << "finalGrid.pt[3].dim[0] = " << finalGrid.pt[3].dim[0] << endl;
+                cout << "finalGrid.pt[3].dim[1] = " << finalGrid.pt[3].dim[1] << endl;
+                cout << "finalGrid.pt[3].dim[2] = " << finalGrid.pt[3].dim[2] << endl;
+                
+                exit(-2);
+            }*/
 
             refFace.vtx.push_back( pointIndex );
             
@@ -244,6 +295,9 @@ namespace AFT
         
         refC = NULL;        
         GC = NULL;
+        
+        //cout << "nExists = " << nExists << endl;
+        //cin.ignore();
     }
     
     void addCells (const Face& f, const vector<Face>& face, const vector<Cell>& cell, const vector<Point>& pt, Grid& finalGrid, PointADT& fgp, PointADT& fgcc)
@@ -268,10 +322,10 @@ namespace AFT
 
         for (int i=0; i<neiSize; ++i)
         {
-            CExists[i] = cellExistsForCreateCells (*LRC[i], finalGrid.cell, iRefC[i]);            
-            //Point cellCent;
-            //cellCent.dim = (*LRC[i]).cnt;            
-            //CExists[i] = pointExists (cellCent, fgcc, iRefC[i]);
+            //CExists[i] = cellExistsForCreateCells (*LRC[i], finalGrid.cell, iRefC[i]);            
+            Point cellCent;
+            cellCent.dim = (*LRC[i]).cnt;            
+            CExists[i] = pointExists (cellCent, fgcc, iRefC[i]);
 
             if (!CExists[i])
             {
@@ -300,35 +354,10 @@ namespace AFT
         {
             // create new point
             Point p = pt[ f.vtx[v] ];
-            
-            /*if (p.dim[0] < 1.02029 && p.dim[0] > 1.02027)
-            {
-                if (p.dim[1] < -0.229586 && p.dim[1] > -0.229588)
-                {
-                    cout << "found" << endl;
-                    cout << p.dim[0] << endl;
-                    cout << p.dim[1] << endl;
-                    cout << p.dim[2] << endl;
-                    cin.ignore();
-                }
-            }*/
 
             int pointIndex = -1;
-            bool ptExists = pointExistsForCreateCells(p, finalGrid.pt, pointIndex);
-            //bool ptExists = pointExists (p, fgp, pointIndex);
-            
-            /*if (p.dim[0] < 1.02029 && p.dim[0] > 1.02027)
-            {
-                if (p.dim[1] < -0.229586 && p.dim[1] > -0.229588)
-                {
-                    cout << pointExists << endl;
-                    cout << pointIndex << endl;
-                    cout << finalGrid.pt[0].dim[0] << endl;
-                    cout << finalGrid.pt[0].dim[1] << endl;
-                    cout << finalGrid.pt[0].dim[2] << endl;
-                    cin.ignore();
-                }
-            }*/
+            //bool ptExists = pointExistsForCreateCells(p, finalGrid.pt, pointIndex);
+            bool ptExists = pointExists (p, fgp, pointIndex);
 
             if (!ptExists)
             {
@@ -347,9 +376,10 @@ namespace AFT
         }
     }
     
-    void modifyCellVertices (Grid& finalGrid, const Grid& newGrid, const vector<Grid>& gr)
+    void modifyCellVertices (Grid& finalGrid, const Grid& newGrid, const vector<Grid>& gr, PointADT& fgp)
     {
         bool match;
+        int pointIndex;
         
         for (int ic=finalGrid.n_bou_elm; ic<finalGrid.cell.size(); ++ic)
         {
@@ -357,7 +387,36 @@ namespace AFT
             
             for (int& v: c.vtx)
             {
-                for (int ip=0; ip<finalGrid.pt.size(); ++ip)
+                if (c.belonging == 0 || c.belonging == 1)
+                {
+                    match = pointExists (gr[c.belonging].pt[v], fgp, pointIndex);
+                }
+                else if (c.belonging == 2)
+                {
+                    match = pointExists (newGrid.pt[v], fgp, pointIndex);
+                }
+                else
+                {
+                    cout << "!!! Error: c.belonging != 0 || c.belonging != 1 || c.belonging != 2 in modifyCellVertices(...)" << endl;
+                    cout << "!!! Error: c.belonging = " << c.belonging << endl;
+                    exit(-2);
+                }
+                
+                if (match)
+                {
+                    v = pointIndex;
+                }
+                else
+                {
+                    cout << "!!! Error: no match in modifyCellVertices(...)" << endl;
+                    cout << "!!! Error: c.belonging = " << c.belonging << endl;
+                    cout << "!!! Error: dim[0] = " << gr[c.belonging].pt[v].dim[0] << endl;
+                    cout << "!!! Error: dim[1] = " << gr[c.belonging].pt[v].dim[1] << endl;
+                    cout << "!!! Error: dim[2] = " << gr[c.belonging].pt[v].dim[2] << endl;
+                    exit(-2);
+                }
+                
+                /*for (int ip=0; ip<finalGrid.pt.size(); ++ip)
                 {
                     Point& p = finalGrid.pt[ip];
                     
@@ -392,7 +451,7 @@ namespace AFT
                     cout << "!!! Error: dim[1] = " << gr[c.belonging].pt[v].dim[1] << endl;
                     cout << "!!! Error: dim[2] = " << gr[c.belonging].pt[v].dim[2] << endl;
                     exit(-2);
-                }
+                }*/
             }
             
             c.belonging = finalGrid.id;
@@ -421,49 +480,33 @@ namespace AFT
 
         for (int i=0; i<neiSize; ++i)
         {
-            CExists[i] = cellExistsForCreateCells (*LRC[i], finalGrid.cell, iRefC[i]);
-            //Point cellCent;
-            //cellCent.dim = (*LRC[i]).cnt;            
-            //CExists[i] = pointExists (cellCent, fgcc, iRefC[i]);
+            //CExists[i] = cellExistsForCreateCells (*LRC[i], finalGrid.cell, iRefC[i]);
+            Point cellCent;
+            cellCent.dim = (*LRC[i]).cnt;            
+            CExists[i] = pointExists (cellCent, fgcc, iRefC[i]);
 
             if (!CExists[i])
             {
                 int faceIndex;
-                bool existsInNewgrid = faceExistsForCreateCells (newFace, newGrid.face, faceIndex);
+                //bool existsInNewgrid = faceExistsForCreateCells (newFace, newGrid.face, faceIndex);
                 //bool existsInNewgrid = cellExistsForCreateCells (*LRC[i], newGrid.cell, iRefC[i]);
-                //Point faceCent;
-                //faceCent.dim = newFace.cnt;
-                //bool existsInNewgrid = pointExists (faceCent, fgfc, faceIndex);
+                Point faceCent;
+                faceCent.dim = newFace.cnt;
+                bool existsInNewgrid = pointExists (faceCent, fgfc, faceIndex);
                 
                 Cell newCell;                
                 if (!existsInNewgrid)
                 {
-                    /*for (int ff=0; ff<newGrid.face.size(); ++ff)
-                    {
-                        if (newGrid.face[ff].cnt[0] < -6.98640 && newGrid.face[ff].cnt[0] > -6.98642)
-                        {
-                            cout << "found" << endl;
-                            cout << newGrid.face[ff].cnt[0] << endl;
-                            cout << newGrid.face[ff].cnt[1] << endl;
-                            cout << newGrid.face[ff].cnt[2] << endl;
-                        }
-                    }
-                    
-                    cin.ignore();*/
-                    
                     cout << "!existsInNewgrid in addIntergridCell(...)" << endl;
-                    /*cout << "dim[0] = " << newFace.cnt[0] << endl;
-                    cout << "dim[1] = " << newFace.cnt[1] << endl;
-                    cout << "dim[2] = " << newFace.cnt[2] << endl;*/
                     exit(-2);
                     //newCell = *LRC[i];
                 }
                 else
                 {
-                    bool tmpBool = cellExistsForCreateCells (newGrid.cell[newGrid.face[faceIndex].nei[0]], finalGrid.cell, iRefC[i]);                    
-                    //Point cellCent;
-                    //cellCent.dim = newGrid.cell[newGrid.face[faceIndex].nei[0]].cnt;
-                    //bool tmpBool = pointExists (cellCent, fgcc, iRefC[i]);
+                    //bool tmpBool = cellExistsForCreateCells (newGrid.cell[newGrid.face[faceIndex].nei[0]], finalGrid.cell, iRefC[i]);                    
+                    Point cellCent;
+                    cellCent.dim = newGrid.cell[newGrid.face[faceIndex].nei[0]].cnt;
+                    bool tmpBool = pointExists (cellCent, fgcc, iRefC[i]);
                     
                     if (tmpBool)
                     {
@@ -493,18 +536,6 @@ namespace AFT
                 Point cellCent;
                 cellCent.dim = newCell.cnt;
                 addToPointADT (cellCent, fgcc, iRefC[i]);
-                
-                /*if (f.cnt[0] < 13.2413 && f.cnt[0] > 13.2411)
-                {
-                    if (f.cnt[1] < 3.04122 && f.cnt[1] > 3.04120)
-                    {
-                        cout << i << endl;
-                        cout << iRefC[i] << endl;
-
-                        cin.ignore();
-                    }
-
-                }*/
             }
             
             honolulu:;
@@ -529,8 +560,8 @@ namespace AFT
             Point p = pt[ f.vtx[v] ];
 
             int pointIndex;
-            bool ptExists = pointExistsForCreateCells(p, finalGrid.pt, pointIndex);
-            //bool ptExists = pointExists (p, fgp, pointIndex);
+            //bool ptExists = pointExistsForCreateCells(p, finalGrid.pt, pointIndex);
+            bool ptExists = pointExists (p, fgp, pointIndex);
 
             if (!ptExists)
             {
@@ -561,35 +592,42 @@ namespace AFT
                     for (int ic=finalGrid.n_bou_elm; ic<finalGrid.cell.size(); ++ic)
                     {
                         Cell& cll = finalGrid.cell[ic];
-
-                        counter = 0;
-                        for (int fv: f.vtx)
+                        
+                        if (cll.face.size() != cll.nFaces)
                         {
-                            for (int cv: cll.vtx)
+                            counter = 0;
+                            for (int fv: f.vtx)
                             {
-                                if ( cv == fv )
+                                for (int cv: cll.vtx)
                                 {
-                                    ++counter;
-                                    break;
+                                    if ( cv == fv )
+                                    {
+                                        ++counter;
+                                        break;
+                                    }
                                 }
                             }
-                        }
 
-                        if (counter == f.vtx.size())
-                        {
-                            f.nei.push_back(ic);
-                            finalGrid.cell[f.nei[0]].nei.push_back(ic);
-                            cll.nei.push_back(f.nei[0]);
-                            int tmp = f.nei[0];
-                            f.nei[0] = f.nei[1];
-                            f.nei[1] = tmp;
-                            break;
+                            if (counter == f.vtx.size())
+                            {
+                                f.nei.push_back(ic);
+                                finalGrid.cell[f.nei[0]].nei.push_back(ic);
+                                cll.nei.push_back(f.nei[0]);
+                                int tmp = f.nei[0];
+                                f.nei[0] = f.nei[1];
+                                f.nei[1] = tmp;
+                                
+                                cll.face.push_back (&f - &finalGrid.face.front());
+                                
+                                break;
+                            }
                         }
                     }
-
+                    
                     if (counter != f.vtx.size())
                     {
                         cout << "!!! Error: counter != f.vtx.size() in findOtherNeiOfGhostsFaces(...)" << endl;
+                        //cout << "face: " << &f - &finalGrid.face.front() << endl;
                         exit(-2);
                     }
                 }
@@ -603,52 +641,54 @@ namespace AFT
         }
     }
     
-    void buildPointADTforFinalGrid (PointADT& pADT, double minX, double maxX, double minY, double maxY, double minZ, double maxZ)
+    void buildPointADTforFinalGrid (PointADT& pADT, const vector<Grid>& gr)
     {
         pADT.root = new PointADT::Node();
-        pADT.root->level = 0;        
+        pADT.root->level = 0;
+        pADT.root->p.idx = -1;
         
-        pADT.root->c[0] = minX;
-        pADT.root->d[0] = maxX;
-        
-        pADT.root->c[1] = minY;
-        pADT.root->d[1] = maxY;
-        
-        pADT.root->c[2] = minZ;
-        pADT.root->d[2] = maxZ;
-        
-    }
-    
-    void createFinalGrid (Grid& finalGrid, const vector<Grid>& gr, const Grid& newGrid)
-    {
-        double minX, minY, minZ;
-        double maxX, maxY, maxZ;
-        
-        minX = BIG_POS_NUM; minY = BIG_POS_NUM; minZ = BIG_POS_NUM;
-        maxX = BIG_NEG_NUM; maxY = BIG_NEG_NUM; maxZ = BIG_NEG_NUM;
+        for (int d=0; d<ADT_VAR; ++d)
+        {
+            pADT.root->c[d] = BIG_POS_NUM;
+            pADT.root->d[d] = BIG_NEG_NUM;
+        }
         
         for (const Grid& g: gr)
         {
             for (const Point& p: g.pt)
             {
-                minX = min (p.dim[0], minX);
-                maxX = max (p.dim[0], maxX);
-                
-                minY = min (p.dim[1], minY);
-                maxY = max (p.dim[1], maxY);
-                
-                minZ = min (p.dim[2], minZ);
-                maxZ = max (p.dim[2], maxZ);
+                for (int d=0; d<ADT_DIM; ++d)
+                {
+                    pADT.root->c[2*d] = min (p.dim[d], pADT.root->c[2*d]);
+                    pADT.root->d[2*d] = max (p.dim[d], pADT.root->d[2*d]);
+                }
             }
         }
         
+        
+        for (int d=0; d<ADT_DIM; ++d)
+        {
+            pADT.root->c[2*d+1] = pADT.root->c[2*d];
+            pADT.root->d[2*d+1] = pADT.root->d[2*d];
+        }
+    }
+    
+    void createFinalGrid (Grid& finalGrid, const vector<Grid>& gr, const Grid& newGrid)
+    {
         PointADT fgp; // final grid points
         PointADT fgcc; // final grid cell centers
         PointADT ngfc; // new grid face centers
         
-        buildPointADTforFinalGrid (fgp, minX, maxX, minY, maxY, minZ, maxZ);
-        buildPointADTforFinalGrid (fgcc, minX, maxX, minY, maxY, minZ, maxZ);
+        cout << "Building fgp..." << flush;
+        buildPointADTforFinalGrid (fgp, gr);
+        cout << " done" << endl;
         
+        cout << "Building fgcc..." << flush;
+        buildPointADTforFinalGrid (fgcc, gr);
+        cout << " done" << endl;
+        
+        
+        cout << "Building ngfc..." << flush;
         ngfc.points.reserve (newGrid.face.size());
         
         for (int iF=0; iF<newGrid.face.size(); ++iF)                
@@ -660,11 +700,7 @@ namespace AFT
         }
         
         ngfc.build();
-        
-        
-        
-        
-        
+        cout << " done" << endl;        
         
         for (const Grid& g: gr)
         {
@@ -676,6 +712,8 @@ namespace AFT
         }
         
         cout << "added ghost cells of normal grids" << endl;
+        //cout << "finalGrid.cell.size() = " << finalGrid.cell.size() << endl;
+        //cout << "finalGrid.pt.size() = " << finalGrid.pt.size() << endl;
         
         for (const Face& f: newGrid.face)
         {
@@ -684,6 +722,8 @@ namespace AFT
         }
         
         cout << "added ghost cells of new grid" << endl;
+        //cout << "finalGrid.cell.size() = " << finalGrid.cell.size() << endl;
+        //cout << "finalGrid.pt.size() = " << finalGrid.pt.size() << endl;        
         
         finalGrid.n_bou_elm = finalGrid.cell.size();
         
@@ -729,13 +769,18 @@ namespace AFT
         
         cout << "added new grid cells" << endl;
         
-        modifyCellVertices (finalGrid, newGrid, gr);
+        cout << "Modifying cell Vertices..." << flush;
+        modifyCellVertices (finalGrid, newGrid, gr, fgp);
+        cout << " done!" << endl;
+        
+        cout << "Finding Ghosts Faces..." << flush;
         findOtherNeiOfGhostsFaces (finalGrid);
+        cout << " done!" << endl;
         
         finalGrid.totalNElms = finalGrid.cell.size();
         finalGrid.n_in_elm = finalGrid.totalNElms - finalGrid.n_bou_elm;
         
-        cout << finalGrid.n_bou_elm << endl;
-        cout << finalGrid.n_in_elm << endl;
+        cout << "finalGrid.n_bou_elm = " << finalGrid.n_bou_elm << endl;
+        cout << "finalGrid.n_in_elm = " << finalGrid.n_in_elm << endl;
     }
 }

@@ -12,15 +12,15 @@
 
 int main(int argc, char** argv)
 {
-    //PetscInitialize (&argc, &argv, NULL, NULL);
+    PetscInitialize (&argc, &argv, NULL, NULL);
     
     Watch watchSteady;
     Watch watchOscAirfoil;
     
-    /*PetscMPIInt rank, n_procs;
+    PetscMPIInt rank, n_procs;
     MPI_Comm world = PETSC_COMM_WORLD;
     MPI_Comm_rank (world, &rank);
-    MPI_Comm_size (world, &n_procs);*/
+    MPI_Comm_size (world, &n_procs);
     
     string mainDir = createOutputDir();
     
@@ -72,48 +72,38 @@ int main(int argc, char** argv)
                 grs[i].identifyIBlank (grs[j]);
             }
         }
-    }
+    }    
     
+    //grs[0].outAllVTK(0);
+    //grs[1].outAllVTK(0);    
     
-    grs[0].outAllVTK(0);
-    grs[1].outAllVTK(0);
+    AFT::aft (grs, finalGrid);
     
-    
-    
-    
-    AFT::aft (grs, finalGrid);    
-    exit(-2);
-    
-    /*Grid gr (mainDir, 0);
-    OscInit oscInit;
-    
-    gr.read_grid();
-    gr.set_grid();
+    finalGrid.readInput();
+    finalGrid.leastSquaresCoeffs();
+    oscInit.init (finalGrid);
 
-    Solver solSteady (gr, "SOLVER-STEADY");
+    Solver solSteady (finalGrid, "SOLVER-STEADY");
     solSteady.read ("Solver/solSteady.dat");
     
-    Solver solOscAirfoil (gr, "SOLVER-OSC-AIRFOIL");
-    solOscAirfoil.read ("Solver/solOscAirfoil.dat");
-
-    oscInit.read();
-    oscInit.init (gr);
+    //Solver solOscAirfoil (gr, "SOLVER-OSC-AIRFOIL");
+    //solOscAirfoil.read ("Solver/solOscAirfoil.dat");
 
     // solve steady state
     SMAirfoil sma (solSteady.dt);
-    OscAirfoil oa (solOscAirfoil.dt);
+    //OscAirfoil oa (solOscAirfoil.dt);
     sma.read ("MovingGrid/smAirfoil.dat");
-    oa.read ("MovingGrid/oscAirfoil.dat");
+    //oa.read ("MovingGrid/oscAirfoil.dat");
 
-    Coeffs coeffs (gr, oscInit.rhoInf, oscInit.Mach, oa.MachAirfoil);
+    //Coeffs coeffs (gr, oscInit.rhoInf, oscInit.Mach, oa.MachAirfoil);
     
-    sma.getAllFaceVelocities (gr);
+    sma.getAllFaceVelocities (finalGrid);
     watchSteady.start();
-    (solSteady.implicit) ? solSteady.impl(gr) : solSteady.expl(gr);
+    (solSteady.implicit) ? solSteady.impl(finalGrid) : solSteady.expl(finalGrid);
     solSteady.petsc.finalize();
     watchSteady.stop();    
     
-    int countr = 0;
+    /*int countr = 0;
     watchOscAirfoil.start();
     
     // solve osc airfoil
@@ -129,22 +119,22 @@ int main(int argc, char** argv)
         
         ++countr;
     }
-    watchOscAirfoil.stop();    
+    watchOscAirfoil.stop(); */   
     
     if (rank == MASTER_RANK)
     {
-        gr.outAllTecplot();
-        gr.outAllVTK (0);
-        coeffs.out.close();
+        //gr.outAllTecplot();
+        finalGrid.outAllVTK (0);
+        //coeffs.out.close();
         log (mainDir, watchSteady.elapsedTime, "elapsedTimeSteady", watchSteady.unit);
-        log (mainDir, watchOscAirfoil.elapsedTime, "elapsedTimeOscAirfoil", watchOscAirfoil.unit);
-        solSteady.log (gr.logDir);
-        solOscAirfoil.log (gr.logDir);
-        sma.log (gr.logDir);
-        oa.log (gr.logDir);
+        //log (mainDir, watchOscAirfoil.elapsedTime, "elapsedTimeOscAirfoil", watchOscAirfoil.unit);
+        solSteady.log (finalGrid.logDir);
+        //solOscAirfoil.log (gr.logDir);
+        sma.log (finalGrid.logDir);
+        //oa.log (gr.logDir);
     }
     
-    PetscFinalize();*/
+    PetscFinalize();
 
     return 0;
 }

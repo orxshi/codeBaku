@@ -152,7 +152,7 @@ namespace AFT
     void createFinalGrid (Grid& finalGrid, const vector<Grid>& gr, const Grid& newGrid);
     void addIntergridCells (const Face& f, const vector<Face>& face, const vector<Cell>& cell, const vector<Point>& pt, Grid& finalGrid, const Grid& newGrid, PointADT& fgp, PointADT& fgcc, PointADT& fgfc);
     void addCells (const Face& f, const vector<Face>& face, const vector<Cell>& cell, const vector<Point>& pt, Grid& finalGrid, PointADT& fgp, PointADT& fgcc);
-    void modifyCellVertices (Grid& finalGrid, const Grid& newGrid, const vector<Grid>& gr);
+    void modifyCellVertices (Grid& finalGrid, const Grid& newGrid, const vector<Grid>& gr, PointADT& fgp);
     void construct (int iCPX, bool isNewPoint, bool A_CPX_exists, bool B_CPX_exists, int iA_CPX, int iB_CPX, int iA, int iB, vector<FrontMember>& frontList,
              vector<Edge>& edges, vector<Triangle>& triangles, TriangleADT& triangleADT, EdgeADT& edgeADT, int newGridId, const vector<Point>& points, vector<Point>& edgeCenters, PointADT& edgeCenterADT);
 };
