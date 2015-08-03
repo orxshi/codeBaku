@@ -34,7 +34,6 @@ SOURCES=BoundaryConditions/BoundaryConditions.cpp\
         Limiter/Limiter.cpp\
 	Point/Point.cpp\
 	MovingMesh/MovingMesh.cpp\
-	Solid/Solid.cpp\
 	Coeffs/Coeffs.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
 #EXECUTABLE=codeBaku

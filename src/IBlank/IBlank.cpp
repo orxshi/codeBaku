@@ -41,7 +41,7 @@ void Grid::CellADT::build (const Grid& gr)
     ADT::build();
 }
 
-void Grid::setWallDistance (const Solid& sld)
+void Grid::setWallDistance (int phys)
 {
     for (int c=0; c<cell.size(); ++c)
     {
@@ -49,7 +49,7 @@ void Grid::setWallDistance (const Solid& sld)
         
         for (int g=0; g<n_bou_elm; ++g)
         {
-            if (cell[g].phys == sld.phys)
+            if (cell[g].phys == phys)
             {
                 CVector tmpv = cell[g].cnt - cell[c].cnt;
 
@@ -88,7 +88,7 @@ void Grid::identifyIBlank (Grid& gr)
         
         return gr.cellADT.search (vec);
     };
-            
+
     for (int c=n_bou_elm; c<cell.size(); ++c)
     {
         int index;        
@@ -98,12 +98,12 @@ void Grid::identifyIBlank (Grid& gr)
             index = getIndex (cell[c]);
             
             if (index == -1)
-            {     
+            {
                 bool insideHole;
                 
                 if (gr.nHoles > 0)
                 {
-                    for (int i=0; i<nHoles; ++i)
+                    for (int i=0; i<gr.nHoles; ++i)
                     {
                         for (int j=0; j<N_DIM; ++j)
                         {
@@ -218,6 +218,13 @@ void Grid::identifyIBlank (Grid& gr)
                     else
                     {
                         cout << "second undefined behavior in Grid::identifyIBlank(...)" << endl;
+                        cout << "iBlank = " << static_cast<int>(gr.cell[index].iBlank) << endl;
+                        cout << "bc = " << static_cast<int>(cell[c].bc) << endl;
+                        cout << "cell[c].cnt[0] = " << cell[c].cnt[0] << endl;
+                        cout << "cell[c].cnt[1] = " << cell[c].cnt[1] << endl;
+                        cout << "cell[c].cnt[2] = " << cell[c].cnt[2] << endl;
+                        cout << "cell[c].belonging = " << cell[c].belonging << endl;
+                        cout << "c = " << c << endl;
                         exit(-2);
                     }
                 }

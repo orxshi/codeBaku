@@ -516,7 +516,7 @@ namespace AFT
             
             const int ip0 = tri.p[0];
             const int ip1 = tri.p[1];
-            const int ip2 = tri.p[2];
+            const int ip2 = tri.p[2];            
             const CVector& pd0 = points[ ip0 ].dim;
             const CVector& pd1 = points[ ip1 ].dim;
             const CVector& pd2 = points[ ip2 ].dim;
@@ -681,6 +681,14 @@ namespace AFT
 
                             neiEdge.t[0] = iExclusivePoint;
                             neiEdge.t[1] = iOwnExclusivePoint;
+                            
+                            /*if (triangles[171].p[0] != 178 || triangles[171].p[2] != 14)
+                            {
+                                cout << t << endl;
+                                cout << triangles[171].p[0] << endl;
+                                cout << triangles[171].p[2] << endl;
+                                exit(-2);
+                            }*/
                         }
                     }
                 }
@@ -705,6 +713,8 @@ namespace AFT
 
         if (xDelta_a == 0.)
         {
+            //cout << "xDelta_a = 0" << endl;
+            
             yDelta_a = C[1] - A[1];
             xDelta_a = C[0] - A[0];
 
@@ -713,17 +723,23 @@ namespace AFT
 
             if (xDelta_b == 0.)
             {
+                //cout << "xDelta_b = 0" << endl;
+                
                 yDelta_b = B[1] - A[1];
                 xDelta_b = B[0] - A[0];
             }
         }
         else
         {
+            //cout << "xDelta_a != 0" << endl;
+            
             yDelta_b = C[1] - B[1];
             xDelta_b = C[0] - B[0];
 
             if (xDelta_b == 0.)
             {
+                //cout << "xDelta_b = 0" << endl;
+                
                 yDelta_b = C[1] - A[1];
                 xDelta_b = C[0] - A[0];
             }
@@ -734,14 +750,26 @@ namespace AFT
 
         if (xDelta_a == 0. || xDelta_b == 0.)
         {
-            cout << "yesso: " << endl;
-            cin.ignore();
+            cout << "yesso" << endl;
+            exit(-2);
+            //cin.ignore();
         }
 
         if (aSlope == bSlope)
         {
-            cout << "norto: " << endl;
-            cin.ignore();
+            cout << "aSlope = bSlope" << endl;
+            cout << "aSlope =" << aSlope << endl;
+            cout << "yDelta_a =" << yDelta_a << endl;
+            cout << "xDelta_a =" << xDelta_a << endl;
+            cout << "yDelta_b =" << yDelta_b << endl;
+            cout << "xDelta_b =" << xDelta_b << endl;
+            cout << "A[0] =" << A[0] << endl;
+            cout << "A[1] =" << A[1] << endl;
+            cout << "B[0] =" << B[0] << endl;
+            cout << "B[1] =" << B[1] << endl;
+            cout << "C[0] =" << C[0] << endl;
+            cout << "C[1] =" << C[1] << endl;
+            exit(-2);
         }
 
         cnt[0] = (aSlope*bSlope*(A[1] - C[1]) + bSlope*(A[0] + B[0]) - aSlope*(B[0]+C[0])) / (2.* (bSlope-aSlope));

@@ -90,7 +90,7 @@ namespace AFT
         flip (triangles, edges, points);
         cout << "done!" << endl;
         
-        cout << "Outputing flipped triangles... " << flush;        
+        cout << "Outputing flipped triangles... " << flush;    
         outputTrianglesVTK (points, triangles, gr[0].mainDir, "triFlip.vtk");
         cout << "done!" << endl;
         
@@ -98,21 +98,21 @@ namespace AFT
         createCells (offsetZ, points, newGrid, triangles, phys, newGridId);
         cout << "done!" << endl;
         
-        cout << "Outputing new grid... " << flush;
+        /*cout << "Outputing new grid... " << flush;
         //newGrid.createOutputDir( gr[0].mainDir );
         //newGrid.outAllTecplot();
         newGrid.outAllVTK(0);
-        cout << "done!" << endl;
+        cout << "done!" << endl;*/
         
         cout << "Creating final grid... " << flush;
         createFinalGrid (finalGrid, gr, newGrid);
         //finalGrid.createOutputDir( gr[0].mainDir );
         cout << "done!" << endl;
         
-        cout << "Outputing final grid... " << flush;        
+        /*cout << "Outputing final grid... " << flush;        
         //finalGrid.outAllTecplot();
         finalGrid.outAllVTK(0);
-        cout << "done!" << endl;
+        cout << "done!" << endl;*/
         
         //cout << "Reading input of final grid... " << flush;
         //cout << "FINAL GRID READ INPUT AND PRINT INPUT IS NOT SET IN AFT(...)" << endl;        

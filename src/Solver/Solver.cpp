@@ -55,7 +55,7 @@ Solver::Petsc::Petsc (Grid& gr)
     //MatSeqBAIJSetPreallocation (A, bs, 4, NULL);
     //MatSeqAIJSetPreallocation (A, 4*bs, NULL);    
     //MatMPIAIJSetPreallocation (A, 4*bs, NULL, 4*bs, NULL);
-    MatMPIBAIJSetPreallocation (A, bs, 4, NULL, 4, NULL);
+    MatMPIBAIJSetPreallocation (A, bs, 5, NULL, 5, NULL);
     //MatSetOption(A, MAT_NEW_NONZERO_ALLOCATION_ERR, PETSC_FALSE);
     //MatCreateBAIJ (world, bs, PETSC_DECIDE, PETSC_DECIDE, n*bs, n*bs, 1, NULL, 3, NULL, &A);
     // specific to pentagonal mesh . change later
@@ -87,14 +87,14 @@ Solver::Petsc::Petsc (Grid& gr)
 
 void Solver::preSolverCheck (const Grid& gr)
 {
-    string reason = "nothing";
+    //string reason = "nothing";
     
     for (const Cell& cll: gr.cell)
     {
         if (cll.iBlank == iBlank_t::UNDEFINED)
         {
-            reason = "iBlank is undefined in Solver::preSolverCheck(...)";
-            break;
+            cout << "iBlank is undefined in Solver::preSolverCheck(...)" << endl;
+            exit(-2);
         }
     }
 }

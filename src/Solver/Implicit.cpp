@@ -4,7 +4,7 @@ void Solver::impl (Grid& gr)
 {   
     //Watch wt;
     
-    preSolverCheck (gr);
+    //preSolverCheck (gr);
     
     string dir = gr.outputDir;
     string temps = "res.dat";
@@ -23,8 +23,8 @@ void Solver::impl (Grid& gr)
                 break;
             case 2:
                 //MPI_Barrier (PETSC_COMM_WORLD);
-                //wt.start();
-                petsc.solveAxb (gr);
+                //wt.start();                
+                petsc.solveAxb (gr);                
                 //FILE *fp;
                 //fp=fopen("../out/petscLog", "w");
                 //PetscMallocDump(fp);

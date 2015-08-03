@@ -6,9 +6,6 @@ Coeffs::Coeffs (const Grid& gr, double rhoRef, double MachAir, double MachAirfoi
     this->MachAirfoil = MachAirfoil;
     this->MachAir = MachAir;
     totalArea = 0.;
-    dynPres = 0.;    
-    dynPresSet = false;
-    totalAreaSet = false;
     
     string dir = gr.outputDir;
     string temps = "lift.dat";
@@ -16,33 +13,21 @@ Coeffs::Coeffs (const Grid& gr, double rhoRef, double MachAir, double MachAirfoi
     dir.append (slash);
     dir.append (temps);
     out.open (dir);
+    
+    for (const Cell& cll: gr.cell)
+    {
+        if (cll.bc == BC::SLIP_WALL)
+        {
+            totalArea += mag (gr.face[cll.face[0]].area);
+        }
+    }
+            
+    double MachRef = MachAir - MachAirfoil;
+    dynPres = 0.5 * rhoRef * pow(MachRef,2.) * totalArea; // includes area too
 }
 
 void Coeffs::getCoeffs (const Grid& gr)
 {
-    if (!totalAreaSet)
-    {
-        for (const Cell& cll: gr.cell)
-        {
-            if (cll.bc == BC::SLIP_WALL)
-            {
-                totalArea += mag (gr.face[cll.face[0]].area);
-            }
-        }
-        
-        totalAreaSet = true;
-    }
-    
-    if (!dynPresSet)
-    {
-        // includes area too!
-        
-        MachRef = MachAir - MachAirfoil;
-        dynPres = 0.5 * rhoRef * pow(MachRef,2.) * totalArea;
-        
-        dynPresSet = true;
-    }
-    
     CVector F;
     F[0] = 0.;
     F[1] = 0.;

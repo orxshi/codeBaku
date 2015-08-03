@@ -125,7 +125,7 @@ struct Grid
     void outAllTecplot();
     void outAllUnsteady(string title);
     void log();
-    void setWallDistance (const Solid& sld);
+    void setWallDistance (int phys);
     void outAllVTK (int time);
 };
 

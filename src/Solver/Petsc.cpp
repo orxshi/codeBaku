@@ -20,7 +20,7 @@ void Solver::Petsc::solveAxb (Grid& gr)
     VecSetValues (b, vecLocalSize, ind, val, INSERT_VALUES);
     
     VecAssemblyBegin (b);
-    VecAssemblyEnd (b);
+    VecAssemblyEnd (b);    
     
     // set values of A
     for (PetscInt brow=matLocBeg/bs; brow<matLocEnd/bs; ++brow)
@@ -40,7 +40,7 @@ void Solver::Petsc::solveAxb (Grid& gr)
             }
         }
         
-        MatSetValuesBlocked (A, 1, &idxm, 1, &idxn, v, INSERT_VALUES);
+        MatSetValuesBlocked (A, 1, &idxm, 1, &idxn, v, INSERT_VALUES);        
         
         for (int nn=0; nn<cll.nei.size(); ++nn)
         {

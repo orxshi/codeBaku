@@ -593,8 +593,8 @@ namespace AFT
                     {
                         Cell& cll = finalGrid.cell[ic];
                         
-                        if (cll.face.size() != cll.nFaces)
-                        {
+                        //if (cll.face.size() != cll.nFaces)
+                        //{
                             counter = 0;
                             for (int fv: f.vtx)
                             {
@@ -621,7 +621,7 @@ namespace AFT
                                 
                                 break;
                             }
-                        }
+                        //}
                     }
                     
                     if (counter != f.vtx.size())
