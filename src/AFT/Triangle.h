@@ -8,12 +8,13 @@
 #ifndef AFT_TRIANGLE_H
 #define	AFT_TRIANGLE_H
 
-#define maxValArea 3.
-#define maxValAR 2.
+//#define maxValArea 3.
+#define maxValAR 0.5
 #define maxSkew 0.75
-#define cSkew 100./3.
-#define cAA (100./3./maxValArea)
-#define cAR (100./3./maxValAR)
+#define nParam 2.
+#define cSkew (100./nParam)
+#define cAR (100./nParam)
+//#define cAA (100./nParam/maxValArea)
 
 #endif	/* AFT_TRIANGLE_H */
 

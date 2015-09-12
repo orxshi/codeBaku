@@ -383,8 +383,10 @@ namespace AFT
                                 double edgeAveTri = sqrt ( (4./sqrt(3.) * aveTriArea) );
                                 double pdisAveTri = getPointDistance (edgeAveTri);
                                 double pdis = getPointDistance ( mag (A.dim - B.dim) );
-                                meshDis[0] = 0.5 * pdis;
-                                meshDis[1] = 0.5 * pdis;
+                                meshDis[0] = 1.0 * pdis;
+                                meshDis[1] = 1.0 * pdis;
+                                //meshDis[0] = pdisAveTri;
+                                //meshDis[1] = pdisAveTri;
                                 meshDis[2] = 0.;
                                 
                                 /*if (iA == 60 && iB == 57)
@@ -396,11 +398,19 @@ namespace AFT
                                                                 
                                 if ( !(pointsNearby (CPX.dim-meshDis, CPX.dim+meshDis, pointADT, edgeCenterADT)) )
                                 {
+                                    cout << "no points nearby" << endl;
+                                    
                                     score = tmpTriangle.qualityScore (points, aveTriArea, false, passed);
+                                    cout << "score = " << score << endl;
+                                    cout << "passed = " << passed << endl;
                                     if (!A_CPX_exists) {edges.pop_back();}
                                     if (!B_CPX_exists) {edges.pop_back();}
                                     
                                     return passed;
+                                }
+                                else
+                                {
+                                    cout << "points nearby" << endl;
                                 }
                             }
                         }

@@ -510,7 +510,12 @@ namespace AFT
 
         // note that rectangular coordiantes are considered not circular
 
+        /*cout << "triangles[171].p[0] = " << triangles[171].p[0] << endl;
+        cout << "triangles[171].p[1] = " << triangles[171].p[1] << endl;
+        cout << "triangles[171].p[2] = " << triangles[171].p[2] << endl;*/
+        
         for (unsigned int t=0; t<triangles.size(); ++t)
+            //for (unsigned int t=0; t<170; ++t)
         {
             Triangle& tri = triangles[t];
             
@@ -521,7 +526,32 @@ namespace AFT
             const CVector& pd1 = points[ ip1 ].dim;
             const CVector& pd2 = points[ ip2 ].dim;
             
+            /*if (t == 3)
+            {
+                cout << "tri.p[0] = " << tri.p[0] << endl;
+                cout << "tri.p[1] = " << tri.p[1] << endl;
+                cout << "tri.p[2] = " << tri.p[2] << endl;
+                
+            }
+            
+            if (tri.p[0] == tri.p[1] || tri.p[0] == tri.p[2] || tri.p[1] == tri.p[2])
+            {
+                cout << "points are same in flip triangles 1" << endl;
+                cout << "tri.p[0] = " << tri.p[0] << endl;
+                cout << "tri.p[1] = " << tri.p[1] << endl;
+                cout << "tri.p[2] = " << tri.p[2] << endl;
+                cout << "t = " << t << endl;
+                exit(-2);
+            }*/
+            
+            
+            
             circleCenter(pd0, pd1, pd2, center, radius);
+            
+            /*if (t == 3)
+                        {
+                            exit(-2);
+                        }*/
 
             if ( true )
             //if ( isfinite(center[0]) && isfinite(center[1]) )
@@ -552,9 +582,32 @@ namespace AFT
                         disExclusivePointCenter = sqrt(
                                 pow(exclusivePoint.dim[0] - center[0],2) + pow(exclusivePoint.dim[1] - center[1],2)
                                 );
-
+                        
+                        /*if (t == 3)
+                        {
+                            cout << "radius = " << radius << endl;
+                        }*/
+                        
+                        
                         if (disExclusivePointCenter <= radius)
                         {
+                            
+                            /*if (t == 3)
+                            {
+                                cout << "radius = " << radius << endl;
+                                cout << "tri.p[0] = " << tri.p[0] << endl;
+                                cout << "tri.p[1] = " << tri.p[1] << endl;
+                                cout << "tri.p[2] = " << tri.p[2] << endl;
+                                cout << "pd0[0] = " << pd0[0] << endl;
+                                cout << "pd0[1] = " << pd0[1] << endl;
+                                cout << "pd1[0] = " << pd1[0] << endl;
+                                cout << "pd1[1] = " << pd1[1] << endl;
+                                cout << "pd2[0] = " << pd2[0] << endl;
+                                cout << "pd2[1] = " << pd2[1] << endl;
+                                cout << "t = " << t << endl;
+                                exit(-2);
+                            }*/
+                            
                             // get own exclusive point
                             for (const int p: tri.p)
                             {
@@ -675,9 +728,48 @@ namespace AFT
                             tri.p[1] = iExclusivePoint;
                             tri.p[2] = iOwnExclusivePoint;
                             
+                            /*if (t == 3)
+                            {
+                                cout << "tri.p[0] = " << tri.p[0] << endl;
+                                cout << "tri.p[1] = " << tri.p[1] << endl;
+                                cout << "tri.p[2] = " << tri.p[2] << endl;
+                                
+                            }
+                            
+                            
+                            
+                            if (tri.p[0] == tri.p[1] || tri.p[0] == tri.p[2] || tri.p[1] == tri.p[2])
+                            {
+                                cout << "points are same in flip triangles" << endl;
+                                cout << "tri.p[0] = " << tri.p[0] << endl;
+                                cout << "tri.p[1] = " << tri.p[1] << endl;
+                                cout << "tri.p[2] = " << tri.p[2] << endl;
+                                cout << "t = " << t << endl;
+                                exit(-2);
+                            }*/
+                            
                             nei.p[0] = iNeiEdgeT1;
                             nei.p[1] = iExclusivePoint;
                             nei.p[2] = iOwnExclusivePoint;
+                            
+                            /*if (t == 3)
+                            {
+                                cout << "nei.p[0] = " << nei.p[0] << endl;
+                                cout << "nei.p[1] = " << nei.p[1] << endl;
+                                cout << "nei.p[2] = " << nei.p[2] << endl;
+                                cout << "iNei = " << iNei << endl;
+                                exit(-2);
+                            }
+                            
+                            if (nei.p[0] == nei.p[1] || nei.p[0] == nei.p[2] || nei.p[1] == nei.p[2])
+                            {
+                                cout << "points are same in flip triangles for nei" << endl;
+                                cout << "nei.p[0] = " << nei.p[0] << endl;
+                                cout << "nei.p[1] = " << nei.p[1] << endl;
+                                cout << "nei.p[2] = " << nei.p[2] << endl;
+                                
+                                exit(-2);
+                            }*/
 
                             neiEdge.t[0] = iExclusivePoint;
                             neiEdge.t[1] = iOwnExclusivePoint;
@@ -703,50 +795,54 @@ namespace AFT
     
     void circleCenter(const CVector& A, const CVector& B, const CVector& C, CVector& cnt, double& radius)
     {
-        // http://stackoverflow.com/questions/4103405/what-is-the-algorithm-for-finding-the-center-of-a-circle-from-three-points
+        // http://paulbourke.net/geometry/circlesphere/
 
         double xDelta_a, yDelta_a;
         double xDelta_b, yDelta_b;
+        double x1, x2, x3;
+        double y1, y2, y3;
+        
+        x1 = A[0];        
+        y1 = A[1];
+        
+        x2 = B[0];        
+        y2 = B[1];
+        
+        x3 = C[0];
+        y3 = C[1];
 
-        yDelta_a = B[1] - A[1];
-        xDelta_a = B[0] - A[0];
-
-        if (xDelta_a == 0.)
+        if (fabs(x2 - x1) < 1e-5)
         {
-            //cout << "xDelta_a = 0" << endl;
+            // swap p2 and p3
             
-            yDelta_a = C[1] - A[1];
-            xDelta_a = C[0] - A[0];
-
-            yDelta_b = C[1] - B[1];
-            xDelta_b = C[0] - B[0];
-
-            if (xDelta_b == 0.)
-            {
-                //cout << "xDelta_b = 0" << endl;
-                
-                yDelta_b = B[1] - A[1];
-                xDelta_b = B[0] - A[0];
-            }
+            x2 = C[0];            
+            y2 = C[1];
+            
+            x3 = B[0];            
+            y3 = B[1];
         }
         else
         {
-            //cout << "xDelta_a != 0" << endl;
-            
-            yDelta_b = C[1] - B[1];
-            xDelta_b = C[0] - B[0];
-
-            if (xDelta_b == 0.)
+            if (fabs(x2 - x3) < 1e-5)
             {
-                //cout << "xDelta_b = 0" << endl;
+                // swap p1 and p2
                 
-                yDelta_b = C[1] - A[1];
-                xDelta_b = C[0] - A[0];
+                x1 = B[0];            
+                y1 = B[1];
+
+                x2 = A[0];        
+                y2 = A[1];
             }
         }
+        
+        xDelta_a = x2 - x1;
+        yDelta_a = y2 - y1;
+        
+        xDelta_b = x3 - x2;
+        yDelta_b = y3 - y2;
 
-        double aSlope = yDelta_a/xDelta_a;
-        double bSlope = yDelta_b/xDelta_b;
+        double aSlope = yDelta_a / xDelta_a;
+        double bSlope = yDelta_b / xDelta_b;
 
         if (xDelta_a == 0. || xDelta_b == 0.)
         {
@@ -771,16 +867,25 @@ namespace AFT
             cout << "C[1] =" << C[1] << endl;
             exit(-2);
         }
+        
+        /*cout << "aslope = " << aSlope << endl;
+        cout << "bslope = " << bSlope << endl;
+        
+        cout << "xDelta_a = " << xDelta_a << endl;
+        cout << "yDelta_a = " << yDelta_a << endl;
+        
+        cout << "xDelta_b = " << xDelta_b << endl;
+        cout << "yDelta_b = " << yDelta_b << endl;*/
 
-        cnt[0] = (aSlope*bSlope*(A[1] - C[1]) + bSlope*(A[0] + B[0]) - aSlope*(B[0]+C[0])) / (2.* (bSlope-aSlope));
+        cnt[0] = (aSlope*bSlope*(y1 - y3) + bSlope*(x1 + x2) - aSlope*(x2 + x3)) / (2.* (bSlope-aSlope));
 
         if (aSlope != 0.)
         {
-            cnt[1] = -1. * (cnt[0] - (A[0] + B[0]) / 2.) / aSlope +  (A[1] + B[1]) / 2.;
+            cnt[1] = -1. * (cnt[0] - (x1 + x2) / 2.) / aSlope +  (y1 + y2) / 2.;
         }
         else if (bSlope != 0.)
         {
-            cnt[1] = -1. * (cnt[0] - (B[0] + C[0]) / 2.) / bSlope + (B[1] + C[1]) / 2.;
+            cnt[1] = -1. * (cnt[0] - (x2 + x3) / 2.) / bSlope + (y2 + y3) / 2.;
         }
         else
         {
@@ -789,10 +894,25 @@ namespace AFT
             cin.ignore();
         }
 
-        double difX = A[0] - cnt[0];
-        double difY = A[1] - cnt[1];
+        double difX = x1 - cnt[0];
+        double difY = y1 - cnt[1];
 
         radius = sqrt(difX * difX + difY * difY);
+        
+        /*cout << cnt[0] << endl;
+        cout << cnt[1] << endl;
+        
+        cout << A[0] << endl;
+        cout << A[1] << endl;
+        
+        cout << B[0] << endl;
+        cout << B[1] << endl;
+        
+        cout << C[0] << endl;
+        cout << C[1] << endl;
+        
+        cout << radius << endl;*/
+        
     }
     
     void addToTriangleList(vector<Triangle>& triangles, const Triangle& tmpTriangle,
@@ -835,7 +955,7 @@ namespace AFT
         double areaCurrent = areaTriangle (*this, points);
         
         // skewness
-        double skew = (1. - areaCurrent/areaEqui);
+        double skew = 1. - areaCurrent/areaEqui;
         
         // area
         double areaSmall = min (areaCurrent, aveTriArea);
@@ -847,12 +967,14 @@ namespace AFT
         double lon = max (max(a, b), c);
         double sho = min (min(a, b), c);
         //double aR = lon/sho;
-        double aR = (lon-sho) / sho;
+        double aR = 1. - sho/lon; // min:0 (sho<<lon) || max:1 (sho=lon)
+        //double aR = (lon-sho) / sho; // min:0 (lon=sho) || max:1 (lon=2*sho)
         
         double rSkew = cSkew*skew;
-        double rArea = cAA*devAveArea;
+        //double rArea = cAA*devAveArea;
         double rAR = cAR*aR;
-        double score = rSkew + rArea + rAR;
+        //double score = rSkew + rArea + rAR;
+        double score = rSkew + rAR;
         
         if (skew >= maxSkew)
         {
@@ -866,10 +988,11 @@ namespace AFT
             }            
             
             passed = false;
+            cout << "skew" << endl;
             return score;
         }
         
-        if (devAveArea > maxValArea)
+        /*if (devAveArea > maxValArea)
         {
             if (verbose)
             {
@@ -881,8 +1004,9 @@ namespace AFT
             }
             
             passed = false;
+            cout << "devavearea" << endl;
             return score;
-        }
+        }*/
         
         if (aR > maxValAR)
         {
@@ -896,16 +1020,17 @@ namespace AFT
             }
             
             passed = false;
+            cout << "ar" << endl;
             return score;
         }
         
         if (verbose)
         {
             cout << "skew = " << skew << endl;
-            cout << "devAveArea = " << devAveArea << endl;
+            //cout << "devAveArea = " << devAveArea << endl;
             cout << "aR = " << aR << endl;
             cout << "rSkew = " << rSkew << endl;
-            cout << "rArea = " << rArea << endl;
+            //cout << "rArea = " << rArea << endl;
             cout << "rAR = " << rAR << endl;
             cout << "score = " << score << endl;
         }

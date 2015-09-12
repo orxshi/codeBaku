@@ -8,7 +8,7 @@
 #ifndef ADVANCEFRONT_H
 #define	ADVANCEFRONT_H
 
-#define tolPreferExistingPoint 30.
+#define tolPreferExistingPoint 0.0
 double scoreAB;
 double scoreNP1;
 double scoreNP2;

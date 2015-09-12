@@ -580,7 +580,7 @@ namespace AFT
         }
     }
     
-    void findOtherNeiOfGhostsFaces (Grid& finalGrid)
+    void findOtherNeiOfGhostsFaces (Grid& finalGrid, PointADT& fgcc)
     {
         for (Face& f: finalGrid.face)
         {
@@ -588,7 +588,31 @@ namespace AFT
             {
                 if (f.nei.size() == 1)
                 {
-                    int counter;
+                    Point cellCent;
+                    cellCent.dim = f.cnt;
+                    int ic;                    
+                    bool pExists = pointExists (cellCent, fgcc, ic);
+                    
+                    if (pExists)
+                    {
+                        Cell& cll = finalGrid.cell[ic];
+                        
+                        f.nei.push_back(ic);
+                        finalGrid.cell[f.nei[0]].nei.push_back(ic);
+                        cll.nei.push_back(f.nei[0]);
+                        int tmp = f.nei[0];
+                        f.nei[0] = f.nei[1];
+                        f.nei[1] = tmp;
+
+                        cll.face.push_back (&f - &finalGrid.face.front());
+                    }
+                    else
+                    {
+                        cout << "could not find in findOtherNeiOfGhostsFaces (...)" << endl;
+                        exit(-2);
+                    }
+                    
+                    /*int counter;
                     for (int ic=finalGrid.n_bou_elm; ic<finalGrid.cell.size(); ++ic)
                     {
                         Cell& cll = finalGrid.cell[ic];
@@ -629,7 +653,7 @@ namespace AFT
                         cout << "!!! Error: counter != f.vtx.size() in findOtherNeiOfGhostsFaces(...)" << endl;
                         //cout << "face: " << &f - &finalGrid.face.front() << endl;
                         exit(-2);
-                    }
+                    }*/
                 }
                 else
                 {
@@ -774,7 +798,7 @@ namespace AFT
         cout << " done!" << endl;
         
         cout << "Finding Ghosts Faces..." << flush;
-        findOtherNeiOfGhostsFaces (finalGrid);
+        findOtherNeiOfGhostsFaces (finalGrid, fgcc);
         cout << " done!" << endl;
         
         finalGrid.totalNElms = finalGrid.cell.size();

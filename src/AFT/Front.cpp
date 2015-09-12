@@ -1,3 +1,5 @@
+//#include <bits/stl_vector.h>
+
 #include "AFT.h"
 
 namespace AFT
@@ -294,6 +296,18 @@ namespace AFT
             {
                 construct (iChosenPoint, isNewPoint, A_CPX_exists, B_CPX_exists, iA_CPX, iB_CPX, it0,
                            it1, frontList, edges, triangles, triangleADT, edgeADT, newGridId, points, edgeCenters, edgeCenterADT);
+                
+                if (triangles.size() == 130)
+                {
+                    cout << triangles[129].p[0] << endl;
+                    cout << triangles[129].p[1] << endl;
+                    cout << triangles[129].p[2] << endl;
+                    
+                    cout << elAB << endl;
+                    cout << elNP1 << endl;
+                    cout << elNP2 << endl;
+                    exit(-2);
+                }
             }
             
             cout << "frontListSize = " << frontList.size() << endl;
