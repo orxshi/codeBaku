@@ -57,7 +57,188 @@ namespace AFT
         return vec;
     }
     
-    void findClosestPoint (FrontMember& fm, vector<Edge>& edges, vector<Point>& points)
+    void moveNewPt (Point& p, const vector<int>& iPts, double srchRegion, const vector<Point>& points)
+    {
+        CVector d, Dif;
+        double radius;
+        double dif;
+        
+        radius = srchRegion;
+        
+        for (int i=0; i<iPts.size(); ++i)
+        {
+            d = p.dim - points[iPts[i]].dim;
+            dif = radius - mag(d);
+            Dif = dif * norm(d);
+            p.dim += Dif;
+        }
+    }
+    
+    bool srchNearbyPts (const Point& p, const vector<Point>& points, int t0, int t1, PointADT& pointADT, double srchRegion, vector<int>& iPts)
+    {
+        //int it0 = edges[fm.edge].t[0];
+        //int it1 = edges[fm.edge].t[1];        
+        //Point& t0 = points[it0];
+        //Point& t1 = points[it1];        
+        //double d = mag (t0.dim - t1.dim);
+        //double srchRegion = d * coef;
+        
+        CVector range1;
+        range1[0] = p.dim[0] - srchRegion;
+        range1[1] = p.dim[1] - srchRegion;
+        range1[2] = 0.;
+        
+        CVector range2;
+        range2[0] = p.dim[0] + srchRegion;
+        range2[1] = p.dim[1] + srchRegion;
+        range2[2] = 0.;
+        
+        ADT::ADTPoint vec = pointADT.createADTPoint (range1, range2);
+        
+        pointADT.searchForNIntersections = true;
+        pointADT.search (vec);
+        iPts.clear();
+        //iPts = pointADT.ids;
+        
+        CVector d;
+        double radius;
+        double dif;
+        
+        radius = srchRegion;
+        
+        cout << "pointADT.ids.size() = " << pointADT.ids.size()  << endl;
+        
+        for (int i=0; i<pointADT.ids.size(); ++i)
+        {
+            if (pointADT.ids[i] != t0 && pointADT.ids[i] != t1)
+            {
+                cout << "pointADT.ids[i] != t0 && pointADT.ids[i] != t1" << endl;
+                cout << "pointADT.ids[i] = " << pointADT.ids[i] << endl;
+                
+                d = p.dim - points[pointADT.ids[i]].dim;
+                dif = radius - mag(d);
+                
+                cout << "p.dim[1] = " << p.dim[0] << endl;
+                cout << "p.dim[2] = " << p.dim[1] << endl;
+                
+                cout << "points[pointADT.ids[i]].dim[0] = " << points[pointADT.ids[i]].dim[0] << endl;
+                cout << "points[pointADT.ids[i]].dim[1] = " << points[pointADT.ids[i]].dim[1] << endl;
+                
+                cout << "radius = " << radius << endl;
+                cout << "mag(d) = " << mag(d) << endl;
+                cout << "dif = " << dif << endl;
+
+                if (dif > 0.)
+                {
+                    // inside circle
+                    cout << "inside circle" << endl;
+                    iPts.push_back (pointADT.ids[i]);
+                }
+            }
+        }
+        
+        
+        cout << "iPts.size() = " << iPts.size()  << endl;
+        
+        if (iPts.size() > 0)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+        
+        
+        
+        /*if (result == -1)
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }*/
+        
+        /*candPts.clear();
+        candPts.push_back (pointADT.ids[0]);
+        
+        for (int i=1; i<pointADT.ids.size(); ++i)
+        {
+            Point p = points [pointADT.ids[i]];
+            
+            double d1 = mag (p.dim - t0.dim);
+            double d2 = mag (p.dim - t1.dim);
+            if ( min(d1,d2) < candPts.back() )
+            {
+                candPts.push_back (pointADT.ids[i]);
+            }
+            else
+            {
+                candPts.push_front (pointADT.ids[i]);
+            }
+        }*/
+    }
+    
+    void srchCandPts (FrontMember& fm, vector<Edge>& edges, vector<Point>& points, PointADT& pointADT, deque<int>& candPts, double coef)
+    {
+        int it0 = edges[fm.edge].t[0];
+        int it1 = edges[fm.edge].t[1];        
+        Point& t0 = points[it0];
+        Point& t1 = points[it1];        
+        double d = mag (t0.dim - t1.dim);
+        double srchRegion = d * coef;
+        
+        CVector range1;
+        range1[0] = min (t0.dim[0], t1.dim[0]);
+        range1[1] = min (t0.dim[1], t1.dim[1]);
+        range1[0] -= srchRegion;
+        range1[1] -= srchRegion;
+        range1[2] = 0.;
+        
+        CVector range2;
+        range2[0] = max (t0.dim[0], t1.dim[0]);
+        range2[1] = max (t0.dim[1], t1.dim[1]);
+        range2[0] += srchRegion;
+        range2[1] += srchRegion;
+        range2[2] = 0.;
+        
+        ADT::ADTPoint vec = pointADT.createADTPoint (range1, range2);
+        
+        pointADT.searchForNIntersections = true;
+        pointADT.search (vec);
+        
+        candPts.clear();
+        
+        for (int i=0; i<pointADT.ids.size(); ++i)
+        {
+            if ( pointADT.ids[i] != it1 && pointADT.ids[i] != it0 )
+            {
+                const Point& p = points [pointADT.ids[i]];
+
+                double d1 = mag (p.dim - t0.dim);
+                double d2 = mag (p.dim - t1.dim);
+                
+                if ( candPts.empty() )
+                {
+                    candPts.push_back (pointADT.ids[i]);
+                }
+                else
+                {
+                    if ( min(d1,d2) < candPts.back() )
+                    {
+                        candPts.push_back (pointADT.ids[i]);
+                    }
+                    else
+                    {
+                        candPts.push_front (pointADT.ids[i]);
+                    }
+                }
+            }
+        }
+    }
+    
+    /*void findClosestPoint (FrontMember& fm, vector<Edge>& edges, vector<Point>& points)
     {
         double dis0;
         double dis1;        
@@ -168,7 +349,7 @@ namespace AFT
                 }
             }
         }
-    }
+    }*/
     
     bool pointsNearby (const CVector& range1, const CVector& range2, PointADT& pointADT, PointADT& edgeCenterADT)
     {
@@ -295,8 +476,10 @@ namespace AFT
         pointADT.insert (vec, pointADT.root, tempBool);
     }
     
-    bool eligible (int iCPX, bool isNewPoint, int iA, int iB, double aveTriArea, double& score, bool& A_CPX_exists, bool& B_CPX_exists, int& iA_CPX, int& iB_CPX, vector<FrontMember>& frontList, vector<Edge>& edges, EdgeADT& edgeADT, EdgeADT& edge01ADT, TriangleADT& triangleADT, vector<Point>& points, PointADT& pointADT, PointADT& edgeCenterADT)
+    bool eligible (int iCPX, Point& CPX, bool isNewPoint, int iA, int iB, double aveTriArea, double& score, bool& A_CPX_exists, bool& B_CPX_exists, int& iA_CPX, int& iB_CPX, vector<FrontMember>& frontList, vector<Edge>& edges, EdgeADT& edgeADT, EdgeADT& edge01ADT, TriangleADT& triangleADT, vector<Point>& points, PointADT& pointADT, PointADT& edgeCenterADT)
     {
+        
+        
         // don't forget to pop back edges
         
         bool passed;
@@ -305,7 +488,7 @@ namespace AFT
         bool A_CPX_intersects;
         bool B_CPX_intersects;
         
-        const Point& CPX = points[ iCPX ];
+        //Point& CPX = points[ iCPX ];
         FrontMember& frontFirst = frontList.front();
         int iFrontEdge = frontFirst.edge;
         //Edge& frontEdge = edges[ iFrontEdge ];
@@ -382,7 +565,12 @@ namespace AFT
                             {
                                 double edgeAveTri = sqrt ( (4./sqrt(3.) * aveTriArea) );
                                 double pdisAveTri = getPointDistance (edgeAveTri);
-                                double pdis = getPointDistance ( mag (A.dim - B.dim) );
+                                //double pdis = getPointDistance ( mag (A.dim - B.dim) );
+                                double pdis = mag (A.dim - B.dim);
+                                
+                                cout << "iA = " << iA << endl;
+                                cout << "iB = " << iB << endl;
+                                
                                 meshDis[0] = 1.0 * pdis;
                                 meshDis[1] = 1.0 * pdis;
                                 //meshDis[0] = pdisAveTri;
@@ -395,8 +583,10 @@ namespace AFT
                                     cout << pointsNearby (CPX.dim-meshDis, CPX.dim+meshDis, pointADT, edgeCenterADT) << endl;
                                     exit(-2);
                                 }*/
-                                                                
-                                if ( !(pointsNearby (CPX.dim-meshDis, CPX.dim+meshDis, pointADT, edgeCenterADT)) )
+                                
+                                vector<int> iPts;
+                                if ( !srchNearbyPts (CPX, points, iA, iB, pointADT, pdis, iPts) )
+                                //if ( !(pointsNearby (CPX.dim-meshDis, CPX.dim+meshDis, pointADT, edgeCenterADT)) )
                                 {
                                     cout << "no points nearby" << endl;
                                     
@@ -411,6 +601,34 @@ namespace AFT
                                 else
                                 {
                                     cout << "points nearby" << endl;
+                                    moveNewPt (CPX, iPts, pdis, points);
+                                    
+                                    if ( !srchNearbyPts (CPX, points, iA, iB, pointADT, pdis, iPts) )
+                                    {
+                                        if (rayCasting (CPX, edge01ADT))
+                                        {
+                                            int dummyID2 = -1;
+                                            
+                                            Edge A_CPX2 = createEdge (iA, iCPX, dummyID2, true);
+                                            edges.push_back (A_CPX2);
+                                            int iA_CPX2 = edges.size() - 1;
+                                            
+                                            Edge B_CPX2 = createEdge (iB, iCPX, dummyID2, true);
+                                            edges.push_back (B_CPX2);
+                                            int iB_CPX2 = edges.size() - 1;
+                                            
+                                            Triangle tmpTriangle2 = createTriangle (iFrontEdge, iA_CPX2, iB_CPX2, edges, points);
+                                            
+                                            score = tmpTriangle2.qualityScore (points, aveTriArea, false, passed);
+                                            
+                                            edges.pop_back();
+                                            edges.pop_back();
+                                            if (!A_CPX_exists) {edges.pop_back();}
+                                            if (!B_CPX_exists) {edges.pop_back();}
+                                            
+                                            return passed;
+                                        }
+                                    }
                                 }
                             }
                         }

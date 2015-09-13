@@ -47,6 +47,7 @@ struct ADT
     vector<ADTPoint> points;
     int nIntersections;
     bool searchForNIntersections;
+    vector <int> ids;
 
     struct Node
     {

@@ -51,8 +51,8 @@ namespace AFT
         vector<int> ignore;
         int CPfound;
         bool newPointChecked;
-        int cloPtsMaxSize;
-        deque<int> cloPts;
+        //int cloPtsMaxSize;
+        //deque<int> cloPts;
         
         FrontMember();
     };
@@ -126,14 +126,15 @@ namespace AFT
     void fringeToField (Grid& gr, Grid& ogr, int crt);
     
     // Point
-    void findClosestPoint (FrontMember& fm, vector<Edge>& edges, vector<Point>& points);    
+    //void findClosestPoint (FrontMember& fm, vector<Edge>& edges, vector<Point>& points);    
     void getTwoNormalPoints (int it0, int it1, const vector<Point>& points, Point& crP1, Point& crP2, double pdis);
     bool rayCasting (const Point& p, EdgeADT& edgeADT);    
     void addToPointList (Point& p, vector<Point>& points, PointADT& pointADT);
     double getPointDistance (double r);
-    bool eligible (int iCPX, bool isNewPoint, int iA, int iB, double aveTriArea, double& score, bool& A_CPX_exists, bool& B_CPX_exists, int& iA_CPX, int& iB_CPX, vector<FrontMember>& frontList, vector<Edge>& edges, EdgeADT& edgeADT, EdgeADT& edge01ADT, TriangleADT& triangleADT, vector<Point>& points, PointADT& pointADT, PointADT& edgeCenterADT);
+    bool eligible (int iCPX, Point& CPX, bool isNewPoint, int iA, int iB, double aveTriArea, double& score, bool& A_CPX_exists, bool& B_CPX_exists, int& iA_CPX, int& iB_CPX, vector<FrontMember>& frontList, vector<Edge>& edges, EdgeADT& edgeADT, EdgeADT& edge01ADT, TriangleADT& triangleADT, vector<Point>& points, PointADT& pointADT, PointADT& edgeCenterADT);
     bool pointsNearby (const CVector& range1, const CVector& range2, PointADT& pointADT, PointADT& edgeCenterADT);
     bool pointExists (const Point& p, PointADT& pointADT, int& result);
+    void srchCandPts (FrontMember& fm, vector<Edge>& edges, vector<Point>& points, PointADT& pointADT, deque<int>& candPts, double coef);
     
     // FModules
     //void F1 (int iCPX, int iCPY, bool& YChecked, bool& XChecked, int terminal, vector<FrontMember>& frontList, vector<Edge>& edges,

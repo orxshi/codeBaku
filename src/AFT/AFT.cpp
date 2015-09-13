@@ -86,13 +86,13 @@ namespace AFT
         findNeighbors (edges, triangles);
         cout << "done!" << endl;
         
-        cout << "Flipping triangles... " << flush;
+        /*cout << "Flipping triangles... " << flush;
         flip (triangles, edges, points);
         cout << "done!" << endl;
         
         cout << "Flipping triangles... " << flush;
         flip (triangles, edges, points);
-        cout << "done!" << endl;
+        cout << "done!" << endl;*/
         
         cout << "Outputing flipped triangles... " << flush;    
         outputTrianglesVTK (points, triangles, gr[0].mainDir, "triFlip.vtk");

@@ -7,7 +7,7 @@ namespace AFT
     FrontMember::FrontMember()
     {
         newPointChecked = false;
-        cloPtsMaxSize = 30;
+        //cloPtsMaxSize = 30;
     }
     
     void sortFrontList (vector<FrontMember>& frontList, const vector<Point>& points, const vector<Edge>& edges)
@@ -93,7 +93,9 @@ namespace AFT
         #include "advanceFront.h"
         
         while (!frontList.empty())
-        {                        
+        {                     
+            
+            
             FrontMember& frontFirst = frontList.front();
             Edge& frontEdge = edges [ frontFirst.edge ];
             int it0 = frontEdge.t[0];
@@ -101,31 +103,49 @@ namespace AFT
             //const Point& t0 = points[ it0 ];
             //const Point& t1 = points[ it1 ];
             
-            double scores[frontFirst.cloPtsMaxSize];
-            int ids[frontFirst.cloPtsMaxSize];
-            bool A_CPX_exists_AB[frontFirst.cloPtsMaxSize];
-            bool B_CPX_exists_AB[frontFirst.cloPtsMaxSize];
-            int iA_CPX_AB[frontFirst.cloPtsMaxSize];
-            int iB_CPX_AB[frontFirst.cloPtsMaxSize];
+            //findClosestPoint (frontFirst, edges, points);
+            deque<int> candPts;
             
-            findClosestPoint (frontFirst, edges, points);
+            srchCandPts (frontFirst, edges, points, pointADT, candPts, 10);
             
-            elAB = eligible (frontFirst.cloPts.front(), false, it0, it1, aveTriArea, scoreAB, A_CPX_exists, B_CPX_exists, iA_CPX,
+            
+            
+            if (candPts.size() == 0)
+            {
+                cout << "no cand points found" << endl;
+                exit(-2);
+            }
+            
+            double scores[candPts.size()];
+            int ids[candPts.size()];
+            bool A_CPX_exists_AB[candPts.size()];
+            bool B_CPX_exists_AB[candPts.size()];
+            int iA_CPX_AB[candPts.size()];
+            int iB_CPX_AB[candPts.size()];
+            
+            
+            
+            elAB = eligible (candPts.back(), points[candPts.back()], false, it0, it1, aveTriArea, scoreAB, A_CPX_exists, B_CPX_exists, iA_CPX,
                             iB_CPX, frontList, edges, edgeADT, edge01ADT, triangleADT, points, pointADT, edgeCenterADT);
+            
+            
 
             A_CPX_exists_AB[0] = A_CPX_exists;
             B_CPX_exists_AB[0] = B_CPX_exists;
             iA_CPX_AB[0] = iA_CPX;
             iB_CPX_AB[0] = iB_CPX;
             scores[0] = scoreAB;
-            ids[0] = frontFirst.cloPts.front();
+            //ids[0] = frontFirst.cloPts.front();
+            ids[0] = candPts.back();
             
             //
             getTwoNormalPoints (it0, it1, points, cnp1, cnp2, pdis);
             points.push_back (cnp1); iCnp1 = points.size() - 1;
             points.push_back (cnp2); iCnp2 = points.size() - 1;
             
-            elNP1 = eligible (iCnp1, true, it0, it1, aveTriArea, scoreNP1, A_CPX_exists, B_CPX_exists, iA_CPX,
+            
+            
+            elNP1 = eligible (iCnp1, points[iCnp1], true, it0, it1, aveTriArea, scoreNP1, A_CPX_exists, B_CPX_exists, iA_CPX,
                               iB_CPX, frontList, edges, edgeADT, edge01ADT, triangleADT, points, pointADT, edgeCenterADT);
             
             A_CPX_exists_NP1 = A_CPX_exists;
@@ -133,13 +153,16 @@ namespace AFT
             iA_CPX_NP1 = iA_CPX;
             iB_CPX_NP1 = iB_CPX;
             
-            elNP2 = eligible (iCnp2, true, it0, it1, aveTriArea, scoreNP2, A_CPX_exists, B_CPX_exists, iA_CPX,
+            elNP2 = eligible (iCnp2, points[iCnp2], true, it0, it1, aveTriArea, scoreNP2, A_CPX_exists, B_CPX_exists, iA_CPX,
                               iB_CPX, frontList, edges, edgeADT, edge01ADT, triangleADT, points, pointADT, edgeCenterADT);
             
             A_CPX_exists_NP2 = A_CPX_exists;
             B_CPX_exists_NP2 = B_CPX_exists;
             iA_CPX_NP2 = iA_CPX;
             iB_CPX_NP2 = iB_CPX;
+            
+            cnp1 = points[iCnp1];
+            cnp2 = points[iCnp2];
             
             points.pop_back();
             points.pop_back();
@@ -166,27 +189,34 @@ namespace AFT
                 }
             }
             
+            
+            
             if (score == BIG_POS_NUM)
             {
                 //cout << "frontFirst.cloPts.size()1 = " << frontFirst.cloPts.size() << endl;
                 //cout << "frontFirst.cloPts[0]()1 = " << frontFirst.cloPts[0] << endl;
-                frontFirst.cloPts.pop_front();
+                //frontFirst.cloPts.pop_front();
+                int initSize = candPts.size();
+                candPts.pop_back();
                 
-                while (frontFirst.cloPts.size() != 0)
+                //while (frontFirst.cloPts.size() != 0)
+                while (candPts.size() != 0)
                 {
                     //cout << "frontFirst.cloPts.size() = " << frontFirst.cloPts.size() << endl;
                     //cout << "frontFirst.cloPts[0] = " << frontFirst.cloPts[0] << endl;
                     
-                    elAB = eligible (frontFirst.cloPts.front(), false, it0, it1, aveTriArea, scoreAB, A_CPX_exists, B_CPX_exists, iA_CPX,
+                    elAB = eligible (candPts.back(), points[candPts.back()], false, it0, it1, aveTriArea, scoreAB, A_CPX_exists, B_CPX_exists, iA_CPX,
                                      iB_CPX, frontList, edges, edgeADT, edge01ADT, triangleADT, points, pointADT, edgeCenterADT);
                                         
-                    int i = frontFirst.cloPtsMaxSize - frontFirst.cloPts.size();
+                    //int i = frontFirst.cloPtsMaxSize - frontFirst.cloPts.size();
+                    int i = initSize - candPts.size();
                     A_CPX_exists_AB[i] = A_CPX_exists;
                     B_CPX_exists_AB[i] = B_CPX_exists;
                     iA_CPX_AB[i] = iA_CPX;
                     iB_CPX_AB[i] = iB_CPX;
                     scores[i] = scoreAB;
-                    ids[i] = frontFirst.cloPts.front();
+                    //ids[i] = frontFirst.cloPts.front();
+                    ids[i] = candPts.back();
                     
                     /*cout << "A_CPX_exists = " << A_CPX_exists << endl;
                     cout << "B_CPX_exists = " << B_CPX_exists << endl;
@@ -195,22 +225,24 @@ namespace AFT
                     
                     if (elAB)
                     {
-                        iChosenPoint = frontFirst.cloPts.front();
+                        //iChosenPoint = frontFirst.cloPts.front();
+                        iChosenPoint = candPts.back();
                         isNewPoint = false;
                         break;
                     }
                     else
                     {
-                        frontFirst.cloPts.pop_front();
+                        //frontFirst.cloPts.pop_front();
+                        candPts.pop_back();
                     }
                     
                     //cout << "cloPts.size = " << frontFirst.cloPts.size() << endl;
                 }
                 
-                if (frontFirst.cloPts.size() == 0)
+                if (candPts.size() == 0)
                 {
                     double tmpScore = BIG_POS_NUM;                    
-                    for (int i=0; i<frontFirst.cloPtsMaxSize; ++i)
+                    for (int i=0; i<initSize; ++i)
                     {
                         if (scores[i] < tmpScore)
                         {
@@ -262,7 +294,8 @@ namespace AFT
             }
             else if (score == scoreAB)
             {
-                iChosenPoint = frontFirst.cloPts.front();
+                //iChosenPoint = frontFirst.cloPts.front();
+                iChosenPoint = candPts.back();
                 isNewPoint = false;
                 A_CPX_exists = A_CPX_exists_AB[0];
                 B_CPX_exists = B_CPX_exists_AB[0];
@@ -294,20 +327,16 @@ namespace AFT
             
             if (elAB || elNP1 || elNP2)
             {
+                
+                
                 construct (iChosenPoint, isNewPoint, A_CPX_exists, B_CPX_exists, iA_CPX, iB_CPX, it0,
                            it1, frontList, edges, triangles, triangleADT, edgeADT, newGridId, points, edgeCenters, edgeCenterADT);
                 
-                if (triangles.size() == 130)
+                /*if (triangles.size() == 28)
                 {
-                    cout << triangles[129].p[0] << endl;
-                    cout << triangles[129].p[1] << endl;
-                    cout << triangles[129].p[2] << endl;
-                    
-                    cout << elAB << endl;
-                    cout << elNP1 << endl;
-                    cout << elNP2 << endl;
                     exit(-2);
-                }
+                }*/
+                
             }
             
             cout << "frontListSize = " << frontList.size() << endl;

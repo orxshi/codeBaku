@@ -169,6 +169,7 @@ void ADT::search (Node* node, const ADTPoint& targetPoint, int& index)
             if (searchForNIntersections)
             {
                 ++nIntersections;
+                ids.push_back (node->p.idx);
                 
                 searchChildren (node, targetPoint);
 
@@ -215,6 +216,7 @@ int ADT::search (const ADTPoint& targetPoint)
 {
     int i = -1;
     nIntersections = 0;
+    ids.clear();
     
     fill (searchStack.begin(), searchStack.end(), nullptr);
     searchStack.clear();
