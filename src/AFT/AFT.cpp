@@ -30,6 +30,7 @@ namespace AFT
         TriangleADT triangleADT;
         PointADT pointADT;
         PointADT edgeCenterADT;
+        CircleADT circleADT;
         cout << "done!" << endl;
         
         cout << "Trimming/Re-blanking... " << flush;
@@ -64,6 +65,9 @@ namespace AFT
                 mesh1Edges.push_back (e);
             }
         }        
+        
+        exportToGMSH (points, mesh0Edges, mesh1Edges, gr[0].mainDir);
+        
         edge0ADT.build (points, mesh0Edges);
         edge1ADT.build (points, mesh1Edges);
         edgeADT.build (points, edges);
@@ -71,10 +75,11 @@ namespace AFT
         triangleADT.build (edgeADT);
         pointADT.build (points);
         edgeCenterADT.build (edgeCenters);
+        circleADT.build (edgeADT);
         cout << "done!" << endl;
         
         cout << "Advancing front... " << flush;
-        advanceFront (frontList, points, aveTriArea, edges, triangles, triangleADT, pointADT, edgeCenterADT, edgeADT, edge01ADT, newGridId, edgeCenters);
+        advanceFront (frontList, points, aveTriArea, edges, triangles, triangleADT, pointADT, edgeCenterADT, edgeADT, edge01ADT, newGridId, edgeCenters, circleADT);
         cout << "done!" << endl;
         
         cout << "Outputing unflipped triangles... " << flush;        
@@ -145,8 +150,8 @@ namespace AFT
         return ( sqrt(3.)/4.*sqrt(size) );
     }
     
-    void construct (int iCPX, bool isNewPoint, bool A_CPX_exists, bool B_CPX_exists, int iA_CPX, int iB_CPX, int iA, int iB, vector<FrontMember>& frontList,
-             vector<Edge>& edges, vector<Triangle>& triangles, TriangleADT& triangleADT, EdgeADT& edgeADT, int newGridId, const vector<Point>& points, vector<Point>& edgeCenters, PointADT& edgeCenterADT)
+    void construct (int iCPX, bool A_CPX_exists, bool B_CPX_exists, int iA_CPX, int iB_CPX, int iA, int iB, vector<FrontMember>& frontList,
+             vector<Edge>& edges, vector<Triangle>& triangles, TriangleADT& triangleADT, EdgeADT& edgeADT, int newGridId, const vector<Point>& points, vector<Point>& edgeCenters, PointADT& edgeCenterADT, CircleADT& circleADT)
     {
         int iFrontEdge = frontList.front().edge;
         
@@ -156,14 +161,6 @@ namespace AFT
             addToEdgeList (tmpEdge, iA, iCPX, edges, edgeADT, points);
             iA_CPX = edges.size() - 1;
             addToFrontList (iA_CPX, frontList);
-            
-            /*if (edges.size() == 355+1)
-            {
-                cout << "foundA" << endl;
-                cout << iA << endl;
-                cout << iB << endl;
-                exit(-2);
-            }*/
             
             Point cntPoint;
             cntPoint.belonging = newGridId;
@@ -182,25 +179,6 @@ namespace AFT
             iB_CPX = edges.size() - 1;
             addToFrontList (iB_CPX, frontList);
             
-            /*if (edges.size() == 355+1)
-            {
-                bool inter;
-                bool inter1;
-                int interi;
-                
-                //inter = checkEdgeIntersection (points[iB], points[iCPX], edgeADT, edges, points, inter1, interi);
-                
-                cout << "foundB" << endl;
-                //cout << iB_CPX << endl;
-                cout << iA << endl;
-                cout << iB << endl;
-                //cout << iCPX << endl;
-                
-                
-                
-                exit(-2);
-            }*/
-            
             Point cntPoint;
             cntPoint.belonging = newGridId;
             cntPoint.dim = 0.5 * (points[tmpEdge.t[0]].dim + points[tmpEdge.t[1]].dim);
@@ -211,33 +189,275 @@ namespace AFT
             eraseExistingEdgeFromFrontList (iB_CPX, frontList);
         }
         
-        /*if (iCPX == 120 || iCPX == 121)
-        {
-            if (iB == 120 || iB == 121)
-            {
-                cout << "foundAB" << endl;
-                //cout << iFrontEdge << endl;
-                //cout << iA_CPX << endl;
-                cout << iB_CPX << endl;
-                cout << B_CPX_exists << endl;
-                //cout << edges[iA_CPX].t[0] << endl;
-                //cout << edges[iA_CPX].t[1] << endl;
-                cout << edges[iB_CPX].t[0] << endl;
-                cout << edges[iB_CPX].t[1] << endl;
-                //cout << points[edges[iB_CPX].t[0]].dim[0] << endl;
-                //cout << points[edges[iB_CPX].t[0]].dim[1] << endl;
-                //cout << points[edges[iB_CPX].t[1]].dim[0] << endl;
-                //cout << points[edges[iB_CPX].t[1]].dim[1] << endl;
-                cout << edges[120].t[0] << endl;
-                cout << edges[120].t[1] << endl;
-                exit(-2);
-            }
-        }*/
-        
         Triangle tmpTriangle = createTriangle (iFrontEdge, iA_CPX, iB_CPX, edges, points);
-        addToTriangleList (triangles, tmpTriangle, triangleADT, points);
+        addToTriangleList (triangles, tmpTriangle, triangleADT, points, circleADT);
         
         eraseFromFrontList (frontList);
         sortFrontList (frontList, points, edges);
+    }
+    
+    void exportToGMSH (const vector<Point>& points, const vector<Edge>& mesh0Edges, const vector<Edge>& mesh1Edges, string dir)
+    {
+        ofstream out;
+        dir.append ("/exprtGMSH.geo");
+        out.open (dir.c_str());
+        
+        vector <vector <int> > ptConn ((points.size()+1));        
+        
+        if (out.is_open())
+        {
+            out << "Mesh.Algorithm = 6;" << endl;
+            
+            for (int i=0; i<points.size(); ++i)
+            {
+                out << "Point(";
+                out << i;
+                out << ") = {";
+                out << points[i].dim[0];
+                out << ",";
+                out << points[i].dim[1];
+                out << ",";
+                out << points[i].dim[2];
+                out << "};" << endl;
+            }
+            
+            //---------------------------------------------
+            {
+                int start, end;
+                
+                start = 0;
+                end = start + mesh0Edges.size();
+
+                for (int e=start; e<end; ++e) // e for edge
+                {
+                    int p0 = mesh0Edges[e-start].t[0] ;
+                    int p1 = mesh0Edges[e-start].t[1];
+
+                    ptConn[p0].push_back(e);
+                    ptConn[p1].push_back(e);
+                }
+
+                start = mesh0Edges.size();
+                end = start + mesh1Edges.size();
+
+                for (int e=start; e<end; ++e)
+                {
+                    int p0 = mesh1Edges[e-start].t[0];
+                    int p1 = mesh1Edges[e-start].t[1];
+
+                    ptConn[p0].push_back(e);
+                    ptConn[p1].push_back(e);
+                }
+            }
+            //---------------------------------------------
+            
+            out << "Line(";
+            out << 0;
+            out << ") = {";
+            out << mesh0Edges[0].t[0];
+            out << ",";
+            out << mesh0Edges[0].t[1];
+            out << "};" << endl;
+            
+            int last = mesh0Edges[0].t[1];
+            int iLastEdge = 0;
+            
+            for (int i=0; i<mesh0Edges.size()-1; ++i)
+            {
+                // find the edge that last belongs
+                for (int j=0; j<2; ++j)
+                {
+                    if ( ptConn[last][j] != iLastEdge )
+                    {
+                        // found j for iOtherEdge
+                        int iOtherEdge = ptConn[last][j];
+                        iLastEdge = iOtherEdge;             
+                        
+                        // find iOtherEdge.t != it1
+                        for (int k=0; k<2; ++k)
+                        {
+                            if ( mesh0Edges[iOtherEdge].t[k] != last )
+                            {                                
+                                // found k for iOtherEdge.t != it1                                
+                                out << "Line(";
+                                out << i+1;
+                                out << ") = {";
+                                out << last;
+                                out << ",";
+                                out << mesh0Edges[iOtherEdge].t[k];
+                                out << "};" << endl;
+                                
+                                last = mesh0Edges[iOtherEdge].t[k];                                
+                                break;
+                            }
+                        }
+                        
+                        break;
+                    }
+                }
+            }
+            
+            out << "Line(";
+            out << mesh0Edges.size();
+            out << ") = {";
+            out << mesh1Edges[0].t[0];
+            out << ",";
+            out << mesh1Edges[0].t[1];
+            out << "};" << endl;
+            
+            last = mesh1Edges[0].t[1];
+            iLastEdge = mesh0Edges.size();
+            
+            for (int i=0; i<mesh1Edges.size()-1; ++i)
+            {
+                // find the edge that last belongs
+                for (int j=0; j<2; ++j)
+                {
+                    if ( ptConn[last][j] != iLastEdge )
+                    {
+                        // found j for iOtherEdge
+                        int iOtherEdge = ptConn[last][j] - mesh0Edges.size();
+                        iLastEdge = ptConn[last][j];             
+                        
+                        // find iOtherEdge.t != it1
+                        for (int k=0; k<2; ++k)
+                        {
+                            if ( mesh1Edges[iOtherEdge].t[k] != last )
+                            {
+                                // found k for iOtherEdge.t != it1                                
+                                out << "Line(";
+                                out << i+1 + mesh0Edges.size();
+                                out << ") = {";
+                                out << last;
+                                out << ",";
+                                out << mesh1Edges[iOtherEdge].t[k];
+                                out << "};" << endl;
+                                
+                                last = mesh1Edges[iOtherEdge].t[k];
+                                break;
+                            }
+                        }
+                        
+                        break;
+                    }
+                }
+            }
+            
+            out << "Line Loop(1) = {";
+            for (int i=0; i<mesh0Edges.size(); ++i)
+            {
+                out << i;
+                
+                if (i < mesh0Edges.size()-1)
+                {
+                    out << ",";
+                }
+            }
+            out << "};" << endl;
+            
+            out << "Line Loop(2) = {";
+            for (int i=mesh0Edges.size(); i<mesh0Edges.size()+mesh1Edges.size(); ++i)
+            {
+                out << i;
+                
+                if (i < mesh0Edges.size()+mesh1Edges.size()-1)
+                {
+                    out << ",";
+                }
+            }
+            out << "};" << endl;
+            
+            out << "Plane Surface(1) = {1,2};";
+            
+            out.close();
+        }
+        else
+        {
+            cout << "could not open file in AFT::exportToGMSH()" << endl;
+            exit(-2);
+        }
+    }
+    
+    double spacingFnc (double b, double aveTriSize)
+    {
+        // initially assume uniform mesh
+        
+        double h = 2. * aveTriSize / b;
+        
+        return (h/2.);
+    }
+    
+    void Tanemura_Merriam_Helper (int iA, int iB, int& i, vector<Point>& points, deque<int>& pts)
+    {
+        bool found = false;
+        
+        CVector center;
+        double radius;
+        
+        Point& A = points[iA];
+        Point& B = points[iB];
+        
+        Point& CPX = points[pts[i]];
+        triPtsCircums (CPX.dim, A.dim, B.dim, center, radius);
+
+        cout << "i = " << i << endl;
+        cout << "pts[i] = " << pts[i] << endl;
+        cout << "CPX.dim.size() = " << CPX.dim.size() << endl;
+        cout << "CPX.dim[0] = " << CPX.dim[0] << endl;
+        cout << "CPX.dim[1] = " << CPX.dim[1] << endl;
+        cout << "radius = " << radius << endl;
+                    cout << "center[0] = " << center[0] << endl;
+                    cout << "center[1] = " << center[1] << endl;
+        
+        for (int j=0; j<pts.size(); ++j)
+        {
+            if (j != i)
+            {
+                CVector d = points[pts[j]].dim - center;
+                
+                //cout << "mag(d) = " << mag(d) << endl;
+
+                if ( (radius - mag(d)) > 1e-5 )
+                {
+                    cout << "j = " << j << endl;
+                    cout << "pts[j] = " << pts[j] << endl;
+                    cout << "points[pts[j]].dim[0] = " << points[pts[j]].dim[0] << endl;
+                    cout << "points[pts[j]].dim[1] = " << points[pts[j]].dim[1] << endl;
+                    cout << "d[0] = " << d[0] << endl;
+                    cout << "d[1] = " << d[1] << endl;
+                    cout << "mag(d) = " << mag(d) << endl;
+                    cout << "radius2 = " << radius << endl;
+                    
+                    //cin.ignore();
+                    
+                    i = j;
+                    found = true;
+                    break;
+                }
+            }
+        }
+                    
+        if ( found )
+        {
+            Tanemura_Merriam_Helper (iA, iB, i, points, pts);
+        }
+    }
+    
+    int Tanemura_Merriam (int iA, int iB, vector<Point>& points, deque<int>& pts)
+    {
+        if (pts.size() == 0)
+        {
+            cout << "pts.size() == 0 in AFT::Tanemura_Merriam(...)" << endl;
+            exit(-2);
+        }
+        
+        cout << "iA = " << iA << endl;
+        cout << "iB = " << iB << endl;
+        
+        int i = 0;
+        
+        Tanemura_Merriam_Helper (iA, iB, i, points, pts);
+        
+        return i;
     }
 }

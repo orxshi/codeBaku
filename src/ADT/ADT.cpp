@@ -36,11 +36,6 @@ void ADT::destroy_tree()
 
 void ADT::insert (const ADTPoint& point, Node* node, bool& isInserted)
 {
-    if (point.idx == 6329344)
-    {
-        cout << "idx is really 6329344" << endl;
-        exit(-2);
-    }
     unsigned int j = node->level % ADT_VAR;
     node->key = 0.5 * (node->c[j] + node->d[j]);
 

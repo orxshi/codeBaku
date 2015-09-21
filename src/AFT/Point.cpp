@@ -180,14 +180,14 @@ namespace AFT
         }*/
     }
     
-    void srchCandPts (FrontMember& fm, vector<Edge>& edges, vector<Point>& points, PointADT& pointADT, deque<int>& candPts, double coef)
-    {
+    void srchCandPts (FrontMember& fm, vector<Edge>& edges, vector<Point>& points, PointADT& pointADT, deque<int>& candPts, double rho, EdgeADT& edgeADT, EdgeADT& edge01ADT)
+    {cout << "rho = " << rho << endl;
         int it0 = edges[fm.edge].t[0];
         int it1 = edges[fm.edge].t[1];        
         Point& t0 = points[it0];
         Point& t1 = points[it1];        
         double d = mag (t0.dim - t1.dim);
-        double srchRegion = d * coef;
+        double srchRegion = rho;
         
         CVector range1;
         range1[0] = min (t0.dim[0], t1.dim[0]);
@@ -212,29 +212,70 @@ namespace AFT
         
         for (int i=0; i<pointADT.ids.size(); ++i)
         {
-            if ( pointADT.ids[i] != it1 && pointADT.ids[i] != it0 )
-            {
-                const Point& p = points [pointADT.ids[i]];
-
-                double d1 = mag (p.dim - t0.dim);
-                double d2 = mag (p.dim - t1.dim);
+            const Point& p = points [pointADT.ids[i]];
+            
+            if (pointADT.ids[i] != it1 && pointADT.ids[i] != it0 )
+            {cout << "pointADT.ids[i] = " << pointADT.ids[i] << endl;
+                Point tmpCntPnt;
+                tmpCntPnt.dim = cntTriangle3Pts (t0.dim, t1.dim, p.dim);
+                bool cntInsideDomain = rayCasting (tmpCntPnt, edge01ADT);
                 
-                if ( candPts.empty() )
+                if (cntInsideDomain)
                 {
-                    candPts.push_back (pointADT.ids[i]);
-                }
-                else
-                {
-                    if ( min(d1,d2) < candPts.back() )
+                    bool t0_P_exist;
+                    int dummyInt;
+                    
+                    bool t0_p_inter = checkEdgeIntersection (t0, p, edgeADT, edges, points, t0_P_exist, dummyInt);
+                    
+                    if (!t0_p_inter || t0_P_exist)
                     {
-                        candPts.push_back (pointADT.ids[i]);
+                        bool t1_P_exist;
+                        bool t1_p_inter = checkEdgeIntersection (t1, p, edgeADT, edges, points, t1_P_exist, dummyInt);
+                        
+                        if (!t1_p_inter || t1_P_exist)
+                        {
+                            double d1 = mag (p.dim - t0.dim);
+                            double d2 = mag (p.dim - t1.dim);
+
+                            if ( candPts.empty() )
+                            {
+                                candPts.push_back (pointADT.ids[i]);
+                            }
+                            else
+                            {
+                                if ( min(d1,d2) < candPts.back() )
+                                {
+                                    candPts.push_back (pointADT.ids[i]);
+                                }
+                                else
+                                {
+                                    candPts.push_front (pointADT.ids[i]);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            cout << "BBBpointADT.ids.size() = 0 in AFT::srchCandPts(...)" << endl;
+                            
+                        }
                     }
                     else
                     {
-                        candPts.push_front (pointADT.ids[i]);
+                        cout << "AAApointADT.ids.size() = 0 in AFT::srchCandPts(...)" << endl;
+                        
                     }
                 }
+                else
+                {
+                    cout << "CCCpointADT.ids.size() = 0 in AFT::srchCandPts(...)" << endl;
+                }
             }
+        }
+        
+        if (candPts.size() == 0)
+        {
+            cout << "no cand points found in AFT::srchCandPts(...)" << endl;
+            //exit(-2);
         }
     }
     
@@ -409,10 +450,14 @@ namespace AFT
     
     
 
-    void getTwoNormalPoints (int it0, int it1, const vector<Point>& points, Point& crP1, Point& crP2, double pdis)
+    Point getNewPt (const Point& t0, const Point& t1, double aveTriSize, EdgeADT& edge01ADT)
     {
-        double dx = points[it1].dim[0] - points[it0].dim[0];
-        double dy = points[it1].dim[1] - points[it0].dim[1];
+        Point tmpCntPnt;
+        bool cntInsideDomain;
+        Point crP;
+        
+        double dx = t1.dim[0] - t0.dim[0];
+        double dy = t1.dim[1] - t0.dim[1];
         double dz = 0.;
         double length = sqrt( pow(dx,2) + pow(dy,2) + pow(dz,2) );
 
@@ -430,17 +475,26 @@ namespace AFT
         normal2 = norm (normal2);
 
         CVector center;
-        center[0] = 0.5 * (points[it0].dim[0] + points[it1].dim[0]);
-        center[1] = 0.5 * (points[it0].dim[1] + points[it1].dim[1]);
+        center[0] = 0.5 * (t0.dim[0] + t1.dim[0]);
+        center[1] = 0.5 * (t0.dim[1] + t1.dim[1]);
         center[2] = 0.;
+        
+        double s = spacingFnc (length, aveTriSize);
 
-        //Point crP1;
-        //Point crP2;
-
-        pdis = getPointDistance (length);
-
-        crP1.dim = center + (pdis * normal1);
-        crP2.dim = center + (pdis * normal2);
+        crP.dim = center + (s * normal1);
+        
+        tmpCntPnt.dim = cntTriangle3Pts (t0.dim, t1.dim, crP.dim);
+        cntInsideDomain = rayCasting (tmpCntPnt, edge01ADT);
+        
+        if (cntInsideDomain)
+        {
+            return crP;
+        }
+        else
+        {
+            crP.dim = center + (s * normal2);
+            return crP;
+        }
     }
     
     bool rayCasting (const Point& p, EdgeADT& edgeADT)
@@ -476,10 +530,8 @@ namespace AFT
         pointADT.insert (vec, pointADT.root, tempBool);
     }
     
-    bool eligible (int iCPX, Point& CPX, bool isNewPoint, int iA, int iB, double aveTriArea, double& score, bool& A_CPX_exists, bool& B_CPX_exists, int& iA_CPX, int& iB_CPX, vector<FrontMember>& frontList, vector<Edge>& edges, EdgeADT& edgeADT, EdgeADT& edge01ADT, TriangleADT& triangleADT, vector<Point>& points, PointADT& pointADT, PointADT& edgeCenterADT)
+    /*bool eligible (int iCPX, Point& CPX, bool isNewPoint, int iA, int iB, double aveTriArea, double& score, bool& A_CPX_exists, bool& B_CPX_exists, int& iA_CPX, int& iB_CPX, vector<FrontMember>& frontList, vector<Edge>& edges, EdgeADT& edgeADT, EdgeADT& edge01ADT, TriangleADT& triangleADT, vector<Point>& points, PointADT& pointADT, PointADT& edgeCenterADT, CircleADT& circleADT)
     {
-        
-        
         // don't forget to pop back edges
         
         bool passed;
@@ -498,25 +550,11 @@ namespace AFT
         const Point& B = points[ iB ];
         
         A_CPX_intersects = checkEdgeIntersection (A, CPX, edgeADT, edges, points, A_CPX_exists, iA_CPX);
-        //cout << "A_CPX_intersects = " << A_CPX_intersects << endl;
-        if (A_CPX_intersects)
-        {
-            /*cout << "A_CPX_exists = " << A_CPX_exists << endl;
-            cout << "edges[iA_CPX].t[0] = " << edges[iA_CPX].t[0] << endl;
-            cout << "edges[iA_CPX].t[0] = " << edges[iA_CPX].t[1] << endl;
-            cout << "iA_CPX = " << iA_CPX << endl;*/
-        }
+        
         if (A_CPX_intersects && A_CPX_exists || !A_CPX_intersects)
         {
             B_CPX_intersects = checkEdgeIntersection (B, CPX, edgeADT, edges, points, B_CPX_exists, iB_CPX);
-            //cout << "B_CPX_intersects = " << B_CPX_intersects << endl;
-            if (B_CPX_intersects)
-            {
-                /*cout << "B_CPX_exists = " << B_CPX_exists << endl;
-                cout << "edges[iB_CPX].t[0] = " << edges[iB_CPX].t[0] << endl;
-                cout << "edges[iB_CPX].t[0] = " << edges[iB_CPX].t[1] << endl;
-                cout << "iB_CPX = " << iB_CPX << endl;*/
-            }
+            
             if (B_CPX_intersects && B_CPX_exists || !B_CPX_intersects)
             {
                 Edge A_CPX;
@@ -531,8 +569,6 @@ namespace AFT
                     A_CPX = createEdge (iA, iCPX, dummyID, true);
                     edges.push_back (A_CPX);
                     iA_CPX = edges.size() - 1;
-                    
-                    
                 }
                 if (!B_CPX_exists)
                 {
@@ -546,7 +582,7 @@ namespace AFT
                 bool A_B_CPX_intersects = triangleIntersect (tmpTriangle, triangleADT, points);
                 Point tmpCntPnt;
                 tmpCntPnt.dim = tmpTriangle.centroid (points);
-                bool centInsideDomain = rayCasting (tmpCntPnt, edge01ADT);  
+                bool centInsideDomain = rayCasting (tmpCntPnt, edge01ADT);
                 
                 if (!A_B_CPX_intersects && centInsideDomain)
                 {
@@ -577,14 +613,33 @@ namespace AFT
                                 //meshDis[1] = pdisAveTri;
                                 meshDis[2] = 0.;
                                 
-                                /*if (iA == 60 && iB == 57)
-                                {
-                                    cout << "here here" << endl;
-                                    cout << pointsNearby (CPX.dim-meshDis, CPX.dim+meshDis, pointADT, edgeCenterADT) << endl;
-                                    exit(-2);
-                                }*/
+                                //
+                                ADT::ADTPoint vecC;
                                 
-                                vector<int> iPts;
+                                vecC.dim[0] = CPX.dim[0];
+                                vecC.dim[2] = CPX.dim[1];
+                                vecC.dim[4] = CPX.dim[2];
+                                
+                                vecC.dim[1] = vecC.dim[0];
+                                vecC.dim[3] = vecC.dim[2];
+                                vecC.dim[5] = vecC.dim[4];
+                                
+                                circleADT.searchForNIntersections = false;
+                                int res = circleADT.search (vecC);
+                                if (res == -1)
+                                {
+                                    score = tmpTriangle.qualityScore (points, aveTriArea, false, passed);
+                                    if (!A_CPX_exists) {edges.pop_back();}
+                                    if (!B_CPX_exists) {edges.pop_back();}
+                                    cout << "new point passed" << endl;
+                                    cout << "score = " << score << endl;
+                                    cout << "CPX.dim[0]; = " << CPX.dim[0] << endl;
+                                    cout << "CPX.dim[1]; = " << CPX.dim[1] << endl;
+                                    return passed;
+                                }
+                                //
+                                
+                                /*vector<int> iPts;
                                 if ( !srchNearbyPts (CPX, points, iA, iB, pointADT, pdis, iPts) )
                                 //if ( !(pointsNearby (CPX.dim-meshDis, CPX.dim+meshDis, pointADT, edgeCenterADT)) )
                                 {
@@ -629,8 +684,8 @@ namespace AFT
                                             return passed;
                                         }
                                     }
-                                }
-                            }
+                                }*/
+                            /*}
                         }
                     }
                     else
@@ -649,6 +704,197 @@ namespace AFT
         }                
         
         return false;
+    }*/
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    /*bool eligible (int iCPX, Point& CPX, bool isNewPoint, int iA, int iB, double aveTriArea, double& score, bool& A_CPX_exists, bool& B_CPX_exists, int& iA_CPX, int& iB_CPX, vector<FrontMember>& frontList, vector<Edge>& edges, EdgeADT& edgeADT, EdgeADT& edge01ADT, TriangleADT& triangleADT, vector<Point>& points, PointADT& pointADT, PointADT& edgeCenterADT, CircleADT& circleADT)
+    {
+        bool passed;
+        
+        bool A_CPX_intersects;
+        bool B_CPX_intersects;
+        
+        FrontMember& frontFirst = frontList.front();
+        int iFrontEdge = frontFirst.edge;
+        const Point& A = points[ iA ];
+        const Point& B = points[ iB ];
+        
+        //--check circumbound-----------------------------------------------------
+        double aveEdgeSize = sqrt ( (4./sqrt(3.) * aveTriArea) );
+        bool inCircumBound = triQuality (A.dim, B.dim, CPX.dim, aveEdgeSize/2.)
+        
+        if (!inCircumBound)
+        {
+            return false;
+        }
+        
+        //--check A_CPX-----------------------------------------------------
+        A_CPX_intersects = checkEdgeIntersection (A, CPX, edgeADT, edges, points, A_CPX_exists, iA_CPX);
+        
+        if (A_CPX_intersects)
+        {
+            if (!A_CPX_exists)
+            {
+                return false;
+            }
+        }
+        
+        //--check B_CPX-----------------------------------------------------
+        B_CPX_intersects = checkEdgeIntersection (B, CPX, edgeADT, edges, points, B_CPX_exists, iB_CPX);
+        
+        if (B_CPX_intersects)
+        {
+            if (!B_CPX_exists)
+            {
+                return false;
+            }
+        }
+            
+        if (isNewPoint)
+        {
+            if ( rayCasting (CPX, edge01ADT) )
+            {
+                    // check if new point intersects a circumcircle
+                    ADT::ADTPoint vecC;
+
+                    vecC.dim[0] = CPX.dim[0];
+                    vecC.dim[2] = CPX.dim[1];
+                    vecC.dim[4] = CPX.dim[2];
+
+                    vecC.dim[1] = vecC.dim[0];
+                    vecC.dim[3] = vecC.dim[2];
+                    vecC.dim[5] = vecC.dim[4];
+
+                    circleADT.searchForNIntersections = false;
+                    int res = circleADT.search (vecC);
+                    if (res == -1)
+                    {
+                        score = tmpTriangle.qualityScore (points, aveTriArea, false, passed);
+                        if (!A_CPX_exists) {edges.pop_back();}
+                        if (!B_CPX_exists) {edges.pop_back();}
+                        cout << "new point passed" << endl;
+                        cout << "score = " << score << endl;
+                        cout << "CPX.dim[0]; = " << CPX.dim[0] << endl;
+                        cout << "CPX.dim[1]; = " << CPX.dim[1] << endl;
+                        return passed;
+                    }
+            }
+        }
+                       
+                      
+        
+        return true;
+    }*/
+    
+    bool ptCCInter (const Point& CPX, CircleADT& circleADT)
+    {
+        // checks if new point intersects circumcircles
+        
+        ADT::ADTPoint vecC;
+
+        vecC.dim[0] = CPX.dim[0];
+        vecC.dim[2] = CPX.dim[1];
+        vecC.dim[4] = CPX.dim[2];
+
+        vecC.dim[1] = vecC.dim[0];
+        vecC.dim[3] = vecC.dim[2];
+        vecC.dim[5] = vecC.dim[4];
+
+        circleADT.searchForNIntersections = false; // change to true in future
+        int res = circleADT.search (vecC);
+        if (res != -1)
+        {
+            cout << "point intersects a circumcircle in AFT::ptCCInter(...)" << endl;
+            return true;
+            //exit(-2);
+        }
+        
+        return false;
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    bool checkTwoFormingEdges (const Point& CPX, const Point& A, const Point& B, bool& A_CPX_exists, bool& B_CPX_exists, int& iA_CPX, int& iB_CPX,
+            vector<Edge>& edges, EdgeADT& edgeADT, vector<Point>& points)
+    {
+        //--check A_CPX-----------------------------------------------------
+        bool A_CPX_intersects = checkEdgeIntersection (A, CPX, edgeADT, edges, points, A_CPX_exists, iA_CPX);
+        
+        if (A_CPX_intersects)
+        {
+            if (!A_CPX_exists)
+            {
+                cout << "A_CPX_intersects in AFT::checkTwoFormingEdges(...)" << endl;
+                return false;
+            }
+        }
+        
+        //--check B_CPX-----------------------------------------------------
+        bool B_CPX_intersects = checkEdgeIntersection (B, CPX, edgeADT, edges, points, B_CPX_exists, iB_CPX);
+        
+        if (B_CPX_intersects)
+        {
+            if (!B_CPX_exists)
+            {
+                cout << "B_CPX_intersects in AFT::checkTwoFormingEdges(...)" << endl;
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    
+    bool checkCircumBound (const Point& CPX, const Point& A, const Point& B, double rho)
+    {
+        bool inCircumBound = triQuality (A.dim, B.dim, CPX.dim, rho);
+        
+        if (!inCircumBound)
+        {
+            cout << "!inCircumBound in AFT::checkCircumBound(...)" << endl;
+            cout << "rho = " << rho << endl;
+            return false;
+        }
+        
+        return true;
     }
 }
 

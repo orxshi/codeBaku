@@ -88,47 +88,107 @@ namespace AFT
     
     void advanceFront (vector<FrontMember>& frontList, vector<Point>& points, double aveTriArea,
                        vector<Edge>& edges, vector<Triangle>& triangles, TriangleADT& triangleADT,
-                       PointADT& pointADT, PointADT& edgeCenterADT, EdgeADT& edgeADT, EdgeADT& edge01ADT, int newGridId, vector<Point>& edgeCenters)
+                       PointADT& pointADT, PointADT& edgeCenterADT, EdgeADT& edgeADT, EdgeADT& edge01ADT, int newGridId, vector<Point>& edgeCenters, CircleADT& circleADT)
     {
         #include "advanceFront.h"
         
+        double aveEdgeSize = sqrt ( (4./sqrt(3.) * aveTriArea) );
+        double rho = triEdgeCircumradius (aveEdgeSize, aveEdgeSize, aveEdgeSize);
+        
         while (!frontList.empty())
-        {                     
-            
-            
+        {
             FrontMember& frontFirst = frontList.front();
             Edge& frontEdge = edges [ frontFirst.edge ];
             int it0 = frontEdge.t[0];
             int it1 = frontEdge.t[1];
-            //const Point& t0 = points[ it0 ];
-            //const Point& t1 = points[ it1 ];
+            const Point& t0 = points[ it0 ];
+            const Point& t1 = points[ it1 ];
             
-            //findClosestPoint (frontFirst, edges, points);
-            deque<int> candPts;
-            
-            srchCandPts (frontFirst, edges, points, pointADT, candPts, 10);
-            
-            
+            cout << "it0 = " << it0 << endl;
+            cout << "it1 = " << it1 << endl;
+                        
+            // search existing candidate points
+            srchCandPts (frontFirst, edges, points, pointADT, candPts, (2.*rho), edgeADT, edge01ADT);
             
             if (candPts.size() == 0)
             {
-                cout << "no cand points found" << endl;
+                outputTrianglesVTK (points, triangles, "../out", "tri.vtk");
                 exit(-2);
             }
             
-            double scores[candPts.size()];
-            int ids[candPts.size()];
-            bool A_CPX_exists_AB[candPts.size()];
-            bool B_CPX_exists_AB[candPts.size()];
-            int iA_CPX_AB[candPts.size()];
-            int iB_CPX_AB[candPts.size()];
+            // find Delaunay triangle
+            int iCandPt = Tanemura_Merriam (it0, it1, points, candPts);
+            int iCPX = candPts[iCandPt];
+            Point CPX = points[iCPX];
             
+            // check whether forming triangle has a circumradius smaller than threshold radius
+            bool existingPointPass = checkCircumBound (CPX, t0, t1, rho);
             
+            // if circumradius check passed check two forming edges intersections
+            if (existingPointPass)
+            {
+                existingPointPass = checkTwoFormingEdges (CPX, t0, t1, A_CPX_exists, B_CPX_exists, iA_CPX, iB_CPX, edges, edgeADT, points);
+            }
             
-            elAB = eligible (candPts.back(), points[candPts.back()], false, it0, it1, aveTriArea, scoreAB, A_CPX_exists, B_CPX_exists, iA_CPX,
-                            iB_CPX, frontList, edges, edgeADT, edge01ADT, triangleADT, points, pointADT, edgeCenterADT);
+            // construct triangle if all previous stages are passed
+            if (existingPointPass)
+            {
+                construct (iCPX, A_CPX_exists, B_CPX_exists, iA_CPX, iB_CPX, it0,
+                           it1, frontList, edges, triangles, triangleADT, edgeADT, newGridId, points, edgeCenters, edgeCenterADT, circleADT);
+            }
+            else // if existing point doesn't work
+            {
+                // get a point normal to front
+                Point crP = getNewPt (t0, t1, aveTriArea, edge01ADT);
+                
+                // no need to check circumradius for uniform grid
+                // but will be needed in future
+                
+                // check two forming edges intersections
+                bool newPointPass = checkTwoFormingEdges (crP, t0, t1, A_CPX_exists, B_CPX_exists, iA_CPX, iB_CPX, edges, edgeADT, points);
+                
+                if (newPointPass)
+                {
+                    // check if new point intersects circumcircles
+                    if (!ptCCInter (crP, circleADT))
+                    {
+                        // add new point to points list
+                        addToPointList (crP, points, pointADT);
+                        int iCrP = points.size() - 1;
+                        
+                        // construct triangle if all previous stages are passed
+                        construct (iCrP, A_CPX_exists, B_CPX_exists, iA_CPX, iB_CPX, it0,
+                           it1, frontList, edges, triangles, triangleADT, edgeADT, newGridId, points, edgeCenters, edgeCenterADT, circleADT);
+                    }
+                    else
+                    {
+                        cout << "none of the ways work in AFT::advanceFront(...)" << endl;
+                
+                        cout << "it0 = " << it0 << endl;
+                        cout << "it1 = " << it1 << endl;
+                        cout << "iCPX = " << iCPX << endl;
+
+                        outputTrianglesVTK (points, triangles, "../out", "tri.vtk");
+
+                        exit(-2);
+                    }
+                }
+                else
+                {
+                    cout << "none of the ways work in AFT::advanceFront(...)" << endl;
+                
+                    cout << "it0 = " << it0 << endl;
+                    cout << "it1 = " << it1 << endl;
+                    cout << "iCPX = " << iCPX << endl;
+
+                    outputTrianglesVTK (points, triangles, "../out", "tri.vtk");
+
+                    exit(-2);
+                }
+            }
             
-            
+            /*elAB = eligible (candPts.back(), points[candPts.back()], false, it0, it1, aveTriArea, scoreAB, A_CPX_exists, B_CPX_exists, iA_CPX,
+            //                iB_CPX, frontList, edges, edgeADT, edge01ADT, triangleADT, points, pointADT, edgeCenterADT, circleADT);
 
             A_CPX_exists_AB[0] = A_CPX_exists;
             B_CPX_exists_AB[0] = B_CPX_exists;
@@ -139,14 +199,15 @@ namespace AFT
             ids[0] = candPts.back();
             
             //
-            getTwoNormalPoints (it0, it1, points, cnp1, cnp2, pdis);
+            double aveEdgeSize = sqrt ( (4./sqrt(3.) * aveTriArea) );
+            getTwoNormalPoints (it0, it1, points, cnp1, cnp2, pdis, aveEdgeSize);
             points.push_back (cnp1); iCnp1 = points.size() - 1;
             points.push_back (cnp2); iCnp2 = points.size() - 1;
             
             
             
             elNP1 = eligible (iCnp1, points[iCnp1], true, it0, it1, aveTriArea, scoreNP1, A_CPX_exists, B_CPX_exists, iA_CPX,
-                              iB_CPX, frontList, edges, edgeADT, edge01ADT, triangleADT, points, pointADT, edgeCenterADT);
+                              iB_CPX, frontList, edges, edgeADT, edge01ADT, triangleADT, points, pointADT, edgeCenterADT, circleADT);
             
             A_CPX_exists_NP1 = A_CPX_exists;
             B_CPX_exists_NP1 = B_CPX_exists;
@@ -154,7 +215,7 @@ namespace AFT
             iB_CPX_NP1 = iB_CPX;
             
             elNP2 = eligible (iCnp2, points[iCnp2], true, it0, it1, aveTriArea, scoreNP2, A_CPX_exists, B_CPX_exists, iA_CPX,
-                              iB_CPX, frontList, edges, edgeADT, edge01ADT, triangleADT, points, pointADT, edgeCenterADT);
+                              iB_CPX, frontList, edges, edgeADT, edge01ADT, triangleADT, points, pointADT, edgeCenterADT, circleADT);
             
             A_CPX_exists_NP2 = A_CPX_exists;
             B_CPX_exists_NP2 = B_CPX_exists;
@@ -206,7 +267,7 @@ namespace AFT
                     //cout << "frontFirst.cloPts[0] = " << frontFirst.cloPts[0] << endl;
                     
                     elAB = eligible (candPts.back(), points[candPts.back()], false, it0, it1, aveTriArea, scoreAB, A_CPX_exists, B_CPX_exists, iA_CPX,
-                                     iB_CPX, frontList, edges, edgeADT, edge01ADT, triangleADT, points, pointADT, edgeCenterADT);
+                                     iB_CPX, frontList, edges, edgeADT, edge01ADT, triangleADT, points, pointADT, edgeCenterADT, circleADT);
                                         
                     //int i = frontFirst.cloPtsMaxSize - frontFirst.cloPts.size();
                     int i = initSize - candPts.size();
@@ -218,10 +279,7 @@ namespace AFT
                     //ids[i] = frontFirst.cloPts.front();
                     ids[i] = candPts.back();
                     
-                    /*cout << "A_CPX_exists = " << A_CPX_exists << endl;
-                    cout << "B_CPX_exists = " << B_CPX_exists << endl;
-                    cout << "iA_CPX = " << iA_CPX << endl;
-                    cout << "iB_CPX = " << iB_CPX << endl;*/
+                    
                     
                     if (elAB)
                     {
@@ -330,14 +388,21 @@ namespace AFT
                 
                 
                 construct (iChosenPoint, isNewPoint, A_CPX_exists, B_CPX_exists, iA_CPX, iB_CPX, it0,
-                           it1, frontList, edges, triangles, triangleADT, edgeADT, newGridId, points, edgeCenters, edgeCenterADT);
+                           it1, frontList, edges, triangles, triangleADT, edgeADT, newGridId, points, edgeCenters, edgeCenterADT, circleADT);
                 
-                /*if (triangles.size() == 28)
-                {
-                    exit(-2);
-                }*/
                 
-            }
+                cout << "elAB = " << elAB << endl;
+                cout << "elNP1 = " << elNP1 << endl;
+                cout << "elNP2 = " << elNP2 << endl;
+                
+                cout << "scoreAB = " << scoreAB << endl;
+                cout << "scoreNP1 = " << scoreNP1 << endl;
+                cout << "scoreNP2 = " << scoreNP2 << endl;
+                
+                exit(-2);
+                
+                
+            }*/
             
             cout << "frontListSize = " << frontList.size() << endl;
         }

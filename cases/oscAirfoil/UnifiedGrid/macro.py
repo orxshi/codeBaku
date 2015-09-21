@@ -20,9 +20,9 @@ paraview.simple._DisableFirstRenderCameraReset()
 mainView = GetActiveViewOrCreate('RenderView')
 mainView.InteractionMode = '2D'
 
-fileName1 = '/home/orhan/Documents/codeBaku/cases/oscAirfoil/UnifiedGrid/out/9_12_2015_21_36/Grid_0/allVTK_0.vtk' 
-fileName2 = '/home/orhan/Documents/codeBaku/cases/oscAirfoil/UnifiedGrid/out/9_12_2015_21_36/Grid_1/allVTK_0.vtk'
-fileName3 = '/home/orhan/Documents/codeBaku/cases/oscAirfoil/UnifiedGrid/out/9_12_2015_21_36/tri.vtk'
+fileName1 = '/home/orhan/Documents/codeBaku/cases/oscAirfoil/UnifiedGrid/out/9_19_2015_11_53/Grid_0/allVTK_0.vtk' 
+fileName2 = '/home/orhan/Documents/codeBaku/cases/oscAirfoil/UnifiedGrid/out/9_19_2015_11_53/Grid_1/allVTK_0.vtk'
+fileName3 = '/home/orhan/Documents/codeBaku/cases/oscAirfoil/UnifiedGrid/out/9_19_2015_11_53/tri.vtk'
 
 [vtk1,vtk1Dis] = createVTK(fileName1, mainView)
 [vtk2,vtk2Dis] = createVTK(fileName2, mainView)
