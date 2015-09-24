@@ -246,13 +246,13 @@ bool Grid::CellADT::compareFunction (const Node* node, const ADTPoint& targetPoi
 {
     bool inside;
     CVector tempVector;
-    unsigned int size = node->p.vertices.size();
+    unsigned int size = node->p->vertices.size();
     double frac[size];
     vector<CVector> xc(size);
 
     for (unsigned int v=0; v<size; ++v)
     {
-        xc[v] = node->p.vertices[v].dim;
+        xc[v] = node->p->vertices[v].dim;
     }
     
     for (int i=0; i<ADT_DIM; ++i)
@@ -285,7 +285,7 @@ bool Grid::CellADT::doCubesOverlap (const Node* node, const ADTPoint& targetPoin
 
     for (int d=0; d<ADT_DIM; ++d)
     {
-        if (!(node->p.dim[d*2] <= targetPoint.dim[d*2]) || !(node->p.dim[d*2+1] >= targetPoint.dim[d*2+1]))
+        if (!(node->p->dim[d*2] <= targetPoint.dim[d*2]) || !(node->p->dim[d*2+1] >= targetPoint.dim[d*2+1]))
         {
             insideCube = false;
             break;

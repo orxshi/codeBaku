@@ -126,6 +126,9 @@ int main(int argc, char** argv)
         grs[0].identifyIBlank (grs[1]);
         grs[1].identifyIBlank (grs[0]);
         
+        grs[0].outAllVTK(0);
+        grs[1].outAllVTK(0);
+        
         AFT::aft (grs, finalGrid);
                 
         //oa.setAngles (solOscAirfoil.time);

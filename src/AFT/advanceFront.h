@@ -8,11 +8,6 @@
 #ifndef ADVANCEFRONT_H
 #define	ADVANCEFRONT_H
 
-#define tolPreferExistingPoint 0.0
-double scoreAB;
-double scoreNP1;
-double scoreNP2;
-double score;
 bool A_CPX_exists;
 bool B_CPX_exists;
 int iA_CPX;

@@ -89,7 +89,7 @@ namespace AFT
         virtual bool compareFunction (const Node* node, const ADTPoint& targetPoint);
         virtual bool doCubesOverlap (const Node* node, const ADTPoint& targetPoint);        
         void build (const EdgeADT& edgeADT);
-        ADTPoint createADTPoint (const Triangle& tri, const vector<Point>& points);
+        ADTPoint createADTPoint (const Triangle& tri, const vector<Point>& points, int idTri);
     };
     
     // Preset
@@ -130,7 +130,7 @@ namespace AFT
     double triEdgeCircumradius (double a, double b, double c);
     void flip (vector<Triangle>& triangles, vector<Edge>& edges, const vector<Point>& points);
     void outputTrianglesVTK (const vector<Point>& points, const vector<Triangle>& triangles, string dir, string fileName);
-    void addToTriangleList(vector<Triangle>& triangles, const Triangle& tmpTriangle, TriangleADT& triangleADT, const vector<Point>& points, CircleADT& circleADT);
+    void addToTriangleList(vector<Triangle>& triangles, Triangle& tmpTriangle, TriangleADT& triangleADT, const vector<Point>& points, CircleADT& circleADT, vector<Edge>& edges);
     CVector cntTriangle3Pts (const CVector& p0, const CVector& p1, const CVector& p2);
     bool triQuality (const CVector& p0, const CVector& p1, const CVector& p2, double rho);
     
@@ -150,16 +150,8 @@ namespace AFT
     void srchCandPts (FrontMember& fm, vector<Edge>& edges, vector<Point>& points, PointADT& pointADT, deque<int>& candPts, double rho, EdgeADT& edgeADT, EdgeADT& edge01ADT);
     bool checkTwoFormingEdges (const Point& CPX, const Point& A, const Point& B, bool& A_CPX_exists, bool& B_CPX_exists, int& iA_CPX, int& iB_CPX,
             vector<Edge>& edges, EdgeADT& edgeADT, vector<Point>& points);
-    bool checkCircumBound (const Point& CPX, const Point& A, const Point& B, double rho);
-    bool ptCCInter (const Point& CPX, CircleADT& circleADT);
-    
-    // FModules
-    //void F1 (int iCPX, int iCPY, bool& YChecked, bool& XChecked, int terminal, vector<FrontMember>& frontList, vector<Edge>& edges,
-    //         vector<Triangle>& triangles, EdgeADT& edgeADT, TriangleADT& triangleADT, int newGridId, const vector<Point>& points);
-    //void F2 (int iCPX, int iCPY, int iA_CPX, bool& YChecked, bool& XChecked, int terminal, vector<FrontMember>& frontList,
-    //         vector<Edge>& edges, vector<Triangle>& triangles, TriangleADT& triangleADT, EdgeADT& edgeADT, int newGridId, const vector<Point>& points);
-    //void F3 (int iCPX, int iCPY, bool& YChecked, bool& XChecked, int terminal, vector<FrontMember>& frontList, vector<Edge>& edges,
-    //         vector<Triangle>& triangles, TriangleADT& triangleADT, EdgeADT& edgeADT, int newGridId, const vector<Point>& points);
+    bool checkCircumBound (const Point& CPX, const Point& A, const Point& B, double rho);    
+    bool ptCCInter (const Point& CPX, CircleADT& circleADT, TriangleADT& triangleADT, vector<Triangle>& triangles);
     
     double getAveTriArea (const vector<Edge>& edges, const vector<Point>& points);
     void aft (vector<Grid>& gr, Grid& finalGrid);

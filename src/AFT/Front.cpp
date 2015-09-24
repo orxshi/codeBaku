@@ -93,6 +93,8 @@ namespace AFT
         #include "advanceFront.h"
         
         double aveEdgeSize = sqrt ( (4./sqrt(3.) * aveTriArea) );
+        
+        // circumradius of average triangle size
         double rho = triEdgeCircumradius (aveEdgeSize, aveEdgeSize, aveEdgeSize);
         
         while (!frontList.empty())
@@ -149,8 +151,8 @@ namespace AFT
                 
                 if (newPointPass)
                 {
-                    // check if new point intersects circumcircles
-                    if (!ptCCInter (crP, circleADT))
+                    // check if new point intersects circumcircles                    
+                    if (!ptCCInter (crP, circleADT, triangleADT, triangles))                    
                     {
                         // add new point to points list
                         addToPointList (crP, points, pointADT);

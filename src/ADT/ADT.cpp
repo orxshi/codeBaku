@@ -19,6 +19,7 @@ void ADT::destroy_tree(Node *&leaf)
     {
         destroy_tree(leaf->left);
         destroy_tree(leaf->right);
+        delete leaf->p;
         delete leaf;
         leaf = NULL;
     }
@@ -34,7 +35,7 @@ void ADT::destroy_tree()
     }
 }
 
-void ADT::insert (const ADTPoint& point, Node* node, bool& isInserted)
+void ADT::insert (ADTPoint& point, Node* node, bool& isInserted)
 {
     unsigned int j = node->level % ADT_VAR;
     node->key = 0.5 * (node->c[j] + node->d[j]);
@@ -62,8 +63,19 @@ void ADT::insert (const ADTPoint& point, Node* node, bool& isInserted)
             }
 
             node->left->level = node->level + 1;
-            isInserted = true;
-            node->left->p = point;
+            isInserted = true;            
+            node->left->p = new ADTPoint (point);
+            idsInTree.push_back (point.idx);
+            addrsInTree.push_back (node);            
+            node->left->isEmpty = false;
+        }
+        else if (node->left->isEmpty)
+        {
+            ++sizeTree;
+            node->left->p = new ADTPoint (point);
+            node->left->isEmpty = false;
+            idsInTree.push_back (point.idx);
+            addrsInTree.push_back (node);
         }
         else
         {
@@ -94,7 +106,18 @@ void ADT::insert (const ADTPoint& point, Node* node, bool& isInserted)
 
             node->right->level = node->level + 1;
             isInserted = true;
-            node->right->p = point;
+            node->right->p = new ADTPoint (point);
+            idsInTree.push_back (point.idx);
+            addrsInTree.push_back (node);
+            node->right->isEmpty = false;
+        }
+        else if (node->right->isEmpty)
+        {
+            ++sizeTree;
+            node->right->p = new ADTPoint (point);
+            node->right->isEmpty = false;
+            idsInTree.push_back (point.idx);
+            addrsInTree.push_back (node);
         }
         else
         {
@@ -102,6 +125,8 @@ void ADT::insert (const ADTPoint& point, Node* node, bool& isInserted)
         }
     }
 }
+
+
 
 bool ADT::doRegionOverlap (const unsigned int j, const Node* node, const ADTPoint& targetPoint)
 {
@@ -152,19 +177,14 @@ void ADT::search (Node* node, const ADTPoint& targetPoint, int& index)
 {
     if (node != NULL)
     {
-        //cout << "node->p.dim[0] = " << node->p.dim[0] << endl;
-        //cout << "node->p.dim[1] = " << node->p.dim[1] << endl;
-        
-        //cout << "targetPoint.dim[0] = " << targetPoint.dim[0] << endl;
-        //cout << "targetPoint.dim[1] = " << targetPoint.dim[1] << endl;
-        
         // check whether the point is inside the element
-        if ((node->p.idx!=-1) && doCubesOverlap (node, targetPoint) && compareFunction (node, targetPoint) )
+        if (!node->isEmpty && node->p->idx!=-1 && doCubesOverlap (node, targetPoint) && compareFunction (node, targetPoint) )
         {
             if (searchForNIntersections)
             {
                 ++nIntersections;
-                ids.push_back (node->p.idx);
+                ids.push_back (node->p->idx);
+                addresses.push_back (node);
                 
                 searchChildren (node, targetPoint);
 
@@ -181,10 +201,8 @@ void ADT::search (Node* node, const ADTPoint& targetPoint, int& index)
                 fill (searchStack.begin(), searchStack.end(), nullptr);
                 searchStack.clear();
             
-                index = node->p.idx;
-                //cout << "node->p.idx = " << node->p.idx << endl;
-                //cout << "node->p.dim[0] = " << node->p.dim[0] << endl;
-                //cout << "node->p.dim[1] = " << node->p.dim[1] << endl;
+                index = node->p->idx;
+                addresses.push_back (node);
             
                 if (node != root)
                 {
@@ -211,7 +229,8 @@ int ADT::search (const ADTPoint& targetPoint)
 {
     int i = -1;
     nIntersections = 0;
-    ids.clear();
+    ids.clear();    
+    for (int j=0; j<addresses.size(); ++j) { addresses[j] = NULL; } addresses.clear();
     
     fill (searchStack.begin(), searchStack.end(), nullptr);
     searchStack.clear();
@@ -229,36 +248,48 @@ int ADT::search (const ADTPoint& targetPoint)
     if (regionOverlap)
     {
         search (root, targetPoint, i);
-    }
-    /*else
-    {
-        cout << "no overlap" << endl;
-        cout << "root->c[0] = " << root->c[0] << endl;
-        cout << "root->c[1] = " << root->c[1] << endl;
-        cout << "root->c[2] = " << root->c[2] << endl;
-        cout << "root->c[3] = " << root->c[3] << endl;
-        cout << "root->c[4] = " << root->c[4] << endl;
-        cout << "root->c[5] = " << root->c[5] << endl;
-        
-        cout << "root->d[0] = " << root->d[0] << endl;
-        cout << "root->d[1] = " << root->d[1] << endl;
-        cout << "root->d[2] = " << root->d[2] << endl;
-        cout << "root->d[3] = " << root->d[3] << endl;
-        cout << "root->d[4] = " << root->d[4] << endl;
-        cout << "root->d[5] = " << root->d[5] << endl;
-        
-        cout << "targetPoint.dim[0] = " << targetPoint.dim[0] << endl;
-        cout << "targetPoint.dim[1] = " << targetPoint.dim[1] << endl;
-        cout << "targetPoint.dim[2] = " << targetPoint.dim[2] << endl;
-        cout << "targetPoint.dim[2] = " << targetPoint.dim[3] << endl;
-        cout << "targetPoint.dim[2] = " << targetPoint.dim[4] << endl;
-        cout << "targetPoint.dim[2] = " << targetPoint.dim[5] << endl;
-    }*/
+    }    
 
     fill (searchStack.begin(), searchStack.end(), nullptr);
     searchStack.clear();    
     
     return i;
+}
+
+void ADT::removeSearchAddresses ()
+{
+    for (int j=0; j<addresses.size(); ++j)
+    {
+        if (addresses[j] != NULL)
+        {
+            addresses[j]->isEmpty = true;
+            delete addresses[j]->p;
+            addresses[j] = NULL;
+        }
+    }
+}
+
+void ADT::removeViaID (int id)
+{
+    for (int i=0; i<idsInTree.size(); ++i)
+    {
+        if (id == idsInTree[i])
+        {
+            if (addrsInTree[i] != NULL)
+            {
+                addrsInTree[i]->isEmpty = true;
+                delete addrsInTree[i]->p;
+                addrsInTree[i] = NULL;
+                addrsInTree.erase (addrsInTree.begin() + i);
+                idsInTree.erase (idsInTree.begin() + i);
+            }
+        }
+        else
+        {
+            cout << "could not find id in tree in ADT::removeViaID(...)" << endl;
+            exit(-2);
+        }
+    }   
 }
 
 void ADT::build ()
@@ -286,7 +317,9 @@ void ADT::build ()
             }
         }
 
-        root->p = points.front();
+        root->p = new ADTPoint (points.front());
+        idsInTree.push_back (points.front().idx);
+        addrsInTree.push_back (root);
 
         points.erase (points.begin());
     }

@@ -6,7 +6,9 @@ namespace AFT
     {
         this->root = new CircleADT::Node();
         this->root->level = 0;
-        this->root->p.idx = -1;
+        //this->root->p->idx = -1;
+        idsInTree.push_back (-1);
+        addrsInTree.push_back (root);
 
         for (unsigned int d=0; d<ADT_VAR; ++d)
         {
@@ -25,7 +27,7 @@ namespace AFT
         {
             for (unsigned int d=0; d<ADT_DIM; ++d)
             {
-                if (!(node->p.dim[d*2] <= targetPoint.dim[d*2+1]) || !(node->p.dim[d*2+1] >= targetPoint.dim[d*2]))
+                if (!(node->p->dim[d*2] <= targetPoint.dim[d*2+1]) || !(node->p->dim[d*2+1] >= targetPoint.dim[d*2]))
                 {
                     insideCube = false;
                     break;
@@ -79,10 +81,10 @@ namespace AFT
         corner[3][2] = 0.;
         
         // center of circle
-        CVector center = node->p.vertices[0].dim;
+        CVector center = node->p->vertices[0].dim;
         
         // radius of circle
-        double r = fabs( node->p.dim[0] - node->p.vertices[0].dim[0] ); // |xminRec - xCen|
+        double r = fabs( node->p->dim[0] - node->p->vertices[0].dim[0] ); // |xminRec - xCen|
         
         for (int i=0; i<4; ++i)
         {
@@ -98,7 +100,7 @@ namespace AFT
         return false;
     }
     
-    ADT::ADTPoint CircleADT::createADTPoint (const Triangle& tri, const vector<Point>& points)
+    ADT::ADTPoint CircleADT::createADTPoint (const Triangle& tri, const vector<Point>& points, int idTri)
     {
         const CVector& p0 = points[ tri.p[0] ].dim;
         const CVector& p1 = points[ tri.p[1] ].dim;
@@ -123,6 +125,8 @@ namespace AFT
         Point p;
         p.dim = cnt;
         
+        vec.idx = idTri;        
+        
         vec.vertices.push_back (p);
 
         return vec;
@@ -136,7 +140,7 @@ namespace AFT
         {
             for (unsigned int d=0; d<ADT_DIM; ++d)
             {
-                if (!(node->p.dim[d*2] <= targetPoint.dim[d*2+1]) || !(node->p.dim[d*2+1] >= targetPoint.dim[d*2]))
+                if (!(node->p->dim[d*2] <= targetPoint.dim[d*2+1]) || !(node->p->dim[d*2+1] >= targetPoint.dim[d*2]))
                 {
                     insideCube = false;
                     break;
@@ -171,9 +175,9 @@ namespace AFT
             const Point& p2 = targetPoint.vertices[1];
             const Point& p3 = targetPoint.vertices[2];
 
-            const Point& k1 = node->p.vertices[0];
-            const Point& k2 = node->p.vertices[1];
-            const Point& k3 = node->p.vertices[2];
+            const Point& k1 = node->p->vertices[0];
+            const Point& k2 = node->p->vertices[1];
+            const Point& k3 = node->p->vertices[2];
             
             unsigned int count = 0;
             unsigned int reqCount = 2;
@@ -195,8 +199,8 @@ namespace AFT
             // if one triangle is inside another one
             if (count <= 1) // count was equal to 1 before.
             {
-                inside_1 = localCmpFunc (node->p, targetPoint);
-                inside_2 = localCmpFunc (targetPoint, node->p);
+                inside_1 = localCmpFunc (*(node->p), targetPoint);
+                inside_2 = localCmpFunc (targetPoint, *(node->p));
 
                 if (inside_1 || inside_2)
                 {
@@ -270,7 +274,10 @@ namespace AFT
     {
         this->root = new TriangleADT::Node();
         this->root->level = 0;
-        this->root->p.idx = -1;
+        //this->root->p->idx = -1;
+        
+        idsInTree.push_back (-1);
+        addrsInTree.push_back (root);
 
         for (unsigned int d=0; d<ADT_VAR; ++d)
         {
@@ -555,7 +562,7 @@ namespace AFT
     
     void findNeighbors (const vector<Edge>& edges, vector<Triangle>& triangles)
     {
-        for (unsigned int t=0; t<triangles.size(); ++t)
+        /*for (unsigned int t=0; t<triangles.size(); ++t)
         {
             triangles[t].nei.resize (3);
             
@@ -584,6 +591,15 @@ namespace AFT
                     cout << "e.nei.size() != 2 in findNeighbors(...)" << endl;
                     exit(-2);
                 }
+            }
+        }*/
+        
+        for (const Triangle& t: triangles)
+        {
+            if (t.nei.size() != 2)
+            {
+                cout << "triangle nei size must be 2 in AFT::findNeighbors(...)" << endl;
+                exit(-2);
             }
         }
     }
@@ -984,8 +1000,8 @@ namespace AFT
         radius = sqrt(difX * difX + difY * difY);
     }
     
-    void addToTriangleList(vector<Triangle>& triangles, const Triangle& tmpTriangle,
-            TriangleADT& triangleADT, const vector<Point>& points, CircleADT& circleADT)
+    void addToTriangleList(vector<Triangle>& triangles, Triangle& tmpTriangle,
+            TriangleADT& triangleADT, const vector<Point>& points, CircleADT& circleADT, vector<Edge>& edges)
     {
         bool tmpBool;
         
@@ -994,9 +1010,37 @@ namespace AFT
         vec.idx = triangles.size() - 1;
         triangleADT.insert (vec, triangleADT.root, tmpBool);
         
-        ADT::ADTPoint vec1 = circleADT.createADTPoint (tmpTriangle, points);
-        vec1.idx = triangles.size() - 1;
+        ADT::ADTPoint vec1 = circleADT.createADTPoint (tmpTriangle, points, vec.idx);        
         circleADT.insert (vec1, circleADT.root, tmpBool);
+        
+        for (int e: tmpTriangle.e)
+        {
+            if (edges[e].nei.size() > 1)
+            {
+                cout << "edges[e].nei.size cannot be greater than 1 in AFT::addToTriangleList(...)" << endl;
+                
+                for (int i=0; i<edges[e].nei.size(); ++i)
+                {
+                    cout << "edges[e].nei = " << edges[e].nei[i] << endl;
+                }
+                
+                for (int i=0; i<tmpTriangle.e.size(); ++i)
+                {
+                    cout << "tmpTriangle.e = " << tmpTriangle.e[i] << endl;
+                }
+                
+                cout << "t = " << triangles.size() - 1 << endl;
+                
+                exit(-2);
+            }
+            
+            if (edges[e].nei.size() == 1)
+            {
+                tmpTriangle.nei.push_back (edges[e].nei[0]); // you need do this before the following statement
+            }
+            
+            edges[e].nei.push_back (triangles.size() - 1);
+        }
     }
     
     CVector Triangle::centroid(const vector<Point>& points)

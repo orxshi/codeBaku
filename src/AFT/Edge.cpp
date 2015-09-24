@@ -45,7 +45,7 @@ namespace AFT
 
         for (unsigned int d=0; d<ADT_DIM; ++d)
         {
-            if (!(node->p.dim[d*2] <= targetPoint.dim[d*2+1]) || !(node->p.dim[d*2+1] >= targetPoint.dim[d*2]))
+            if (!(node->p->dim[d*2] <= targetPoint.dim[d*2+1]) || !(node->p->dim[d*2+1] >= targetPoint.dim[d*2]))
             {
                 insideCube = false;
                 break;
@@ -58,7 +58,7 @@ namespace AFT
     bool EdgeADT::compareFunction (const Node* node, const ADTPoint& targetPoint)
     {
         bool exactMatch;
-        bool inside = doIntersect(targetPoint.vertices[0].dim, targetPoint.vertices[1].dim, node->p.vertices[0].dim, node->p.vertices[1].dim, exactMatch);
+        bool inside = doIntersect(targetPoint.vertices[0].dim, targetPoint.vertices[1].dim, node->p->vertices[0].dim, node->p->vertices[1].dim, exactMatch);
 
         return inside;
     }
@@ -128,13 +128,13 @@ namespace AFT
     
     void knowParentTriangles (vector<Edge>& edges, const vector<Triangle>& triangles)
     {
-        for (unsigned int t=0; t<triangles.size(); ++t)
+        /*for (unsigned int t=0; t<triangles.size(); ++t)
         {
             for (int d=0; d<3; ++d)
             {
                 edges[triangles[t].e[d]].nei.push_back (t);
             }
-        }
+        }*/
         
         for (Edge& e: edges)
         {

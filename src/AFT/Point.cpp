@@ -30,7 +30,7 @@ namespace AFT
 
         for (unsigned int d=0; d<ADT_DIM; ++d)
         {
-            if (!(node->p.dim[d*2] <= targetPoint.dim[d*2+1]) || !(node->p.dim[d*2+1] >= targetPoint.dim[d*2]))
+            if (!(node->p->dim[d*2] <= targetPoint.dim[d*2+1]) || !(node->p->dim[d*2+1] >= targetPoint.dim[d*2]))
             {
                 insideCube = false;
                 break;
@@ -181,7 +181,7 @@ namespace AFT
     }
     
     void srchCandPts (FrontMember& fm, vector<Edge>& edges, vector<Point>& points, PointADT& pointADT, deque<int>& candPts, double rho, EdgeADT& edgeADT, EdgeADT& edge01ADT)
-    {cout << "rho = " << rho << endl;
+    {
         int it0 = edges[fm.edge].t[0];
         int it1 = edges[fm.edge].t[1];        
         Point& t0 = points[it0];
@@ -215,7 +215,7 @@ namespace AFT
             const Point& p = points [pointADT.ids[i]];
             
             if (pointADT.ids[i] != it1 && pointADT.ids[i] != it0 )
-            {cout << "pointADT.ids[i] = " << pointADT.ids[i] << endl;
+            {
                 Point tmpCntPnt;
                 tmpCntPnt.dim = cntTriangle3Pts (t0.dim, t1.dim, p.dim);
                 bool cntInsideDomain = rayCasting (tmpCntPnt, edge01ADT);
@@ -813,9 +813,10 @@ namespace AFT
         return true;
     }*/
     
-    bool ptCCInter (const Point& CPX, CircleADT& circleADT)
+    bool ptCCInter (const Point& CPX, CircleADT& circleADT, TriangleADT& triangleADT, vector<Triangle>& triangles)
     {
         // checks if new point intersects circumcircles
+        // delete corresponding triangles from triangles list and tree
         
         ADT::ADTPoint vecC;
 
@@ -827,13 +828,21 @@ namespace AFT
         vecC.dim[3] = vecC.dim[2];
         vecC.dim[5] = vecC.dim[4];
 
-        circleADT.searchForNIntersections = false; // change to true in future
-        int res = circleADT.search (vecC);
-        if (res != -1)
+        circleADT.searchForNIntersections = true;
+        circleADT.search (vecC);
+        
+        if (circleADT.ids.size() != 0)
         {
-            cout << "point intersects a circumcircle in AFT::ptCCInter(...)" << endl;
+            // new point intersected at least one circumcircle
+            
+            // remove triangles from triangles list
+            // which point to remove?            
+            // which edges to remove?
+            // add edges to front list
+            
+            cout << "point intersects circumcircle(s) in AFT::ptCCInter(...)" << endl;
+            cout << "nIntersections = " << circleADT.ids.size() << endl;
             return true;
-            //exit(-2);
         }
         
         return false;

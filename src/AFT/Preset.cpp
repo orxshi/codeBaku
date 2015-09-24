@@ -19,7 +19,7 @@ namespace AFT
                     if (L.iBlank == iBlank_t::FIELD && R.iBlank == iBlank_t::FIELD)
                     {
                         if ( (L.trim == true && R.trim == false) || (R.trim == true && L.trim == false) )
-                        {
+                        {   
                             // this face is quadrilateral because all grids have just one layer in z-direction
 
                             indices.clear();
@@ -60,7 +60,8 @@ namespace AFT
                             Edge tempEdge = createEdge (indices[0], indices[1], g, false);                            
                             Point cntPoint;
                             cntPoint.belonging = g;                            
-                            cntPoint.dim = 0.5 * (points[tempEdge.t[0]].dim + points[tempEdge.t[1]].dim);                            
+                            cntPoint.dim = 0.5 * (points[tempEdge.t[0]].dim + points[tempEdge.t[1]].dim);    
+                            tempEdge.nei.push_back (-1);
                             edges.push_back (tempEdge);
                             edgeCenters.push_back (cntPoint);
                         }

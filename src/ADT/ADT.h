@@ -47,31 +47,39 @@ struct ADT
     vector<ADTPoint> points;
     int nIntersections;
     bool searchForNIntersections;
-    vector <int> ids;
+    vector <int> ids;    
+    vector <int> idsInTree;
+    
 
     struct Node
     {
         Vector<ADT_VAR> c, d;
-        ADTPoint p;
+        //ADTPoint p;
+        ADTPoint* p;
         double key;
         Node* left;
         Node* right;
         unsigned int level;
+        bool isEmpty;
 
         Node()
         {
             left = NULL;
             right = NULL;
+            p = NULL;
+            isEmpty = true;
         }
     };
 
     Node *root;
     vector <Node*> searchStack;    
+    vector <Node*> addresses;
+    vector <Node*> addrsInTree;
 
     void destroy_tree (Node *&leaf);
     void destroy_tree();
 
-    void insert (const ADTPoint& point, Node *node, bool& isInserted);
+    void insert (ADTPoint& point, Node *node, bool& isInserted);
 
     bool doRegionOverlap (const unsigned int j, const Node *node, const ADTPoint& targetPoint);
 
@@ -82,6 +90,9 @@ struct ADT
 
     void search (Node* node, const ADTPoint& targetPoint, int& index);
     int search (const ADTPoint& targetPoint);
+    
+    void removeSearchAddresses ();
+    void removeViaID (int id);
 
     // Constructor
     ADT();

@@ -49,6 +49,9 @@ namespace AFT
      
         cout << "Preparing... " << flush;
         setPointsEdges (gr, points, edges, edgeCenters, newGridId);
+        
+        cout << "edges.size() = " << edges.size() << endl;
+        
         createFrontList (edges, frontList, points);
         aveTriArea = getAveTriArea (edges, points);
         cout << "done!" << endl;
@@ -64,18 +67,18 @@ namespace AFT
             {
                 mesh1Edges.push_back (e);
             }
-        }        
+        }
         
-        exportToGMSH (points, mesh0Edges, mesh1Edges, gr[0].mainDir);
+        exportToGMSH (points, mesh0Edges, mesh1Edges, gr[0].mainDir); cout << "exported to GMSH" << endl;
         
-        edge0ADT.build (points, mesh0Edges);
-        edge1ADT.build (points, mesh1Edges);
-        edgeADT.build (points, edges);
-        edge01ADT.build (points, edges);
-        triangleADT.build (edgeADT);
-        pointADT.build (points);
-        edgeCenterADT.build (edgeCenters);
-        circleADT.build (edgeADT);
+        edge0ADT.build (points, mesh0Edges); cout << "built edge0ADT" << endl;
+        edge1ADT.build (points, mesh1Edges); cout << "built edge1ADT" << endl;
+        edgeADT.build (points, edges); cout << "built edgeADT" << endl;
+        edge01ADT.build (points, edges); cout << "built edge01ADT" << endl;
+        triangleADT.build (edgeADT); cout << "built triangleADT" << endl;
+        pointADT.build (points); cout << "built pointADT" << endl;
+        edgeCenterADT.build (edgeCenters); cout << "built edgeCenterADT" << endl;
+        circleADT.build (edgeADT); cout << "built circleADT" << endl;
         cout << "done!" << endl;
         
         cout << "Advancing front... " << flush;
@@ -190,7 +193,7 @@ namespace AFT
         }
         
         Triangle tmpTriangle = createTriangle (iFrontEdge, iA_CPX, iB_CPX, edges, points);
-        addToTriangleList (triangles, tmpTriangle, triangleADT, points, circleADT);
+        addToTriangleList (triangles, tmpTriangle, triangleADT, points, circleADT, edges);
         
         eraseFromFrontList (frontList);
         sortFrontList (frontList, points, edges);
@@ -202,7 +205,7 @@ namespace AFT
         dir.append ("/exprtGMSH.geo");
         out.open (dir.c_str());
         
-        vector <vector <int> > ptConn ((points.size()+1));        
+        vector <vector <int> > ptConn ((points.size()+1));
         
         if (out.is_open())
         {
@@ -254,7 +257,7 @@ namespace AFT
             out << "Line(";
             out << 0;
             out << ") = {";
-            out << mesh0Edges[0].t[0];
+            out << mesh0Edges[0].t[0];            
             out << ",";
             out << mesh0Edges[0].t[1];
             out << "};" << endl;
@@ -413,9 +416,11 @@ namespace AFT
         {
             if (j != i)
             {
+                //cout << "points[pts[j]].dim.size() = " << points[pts[j]].dim.size() << endl;
+            
                 CVector d = points[pts[j]].dim - center;
                 
-                //cout << "mag(d) = " << mag(d) << endl;
+                
 
                 if ( (radius - mag(d)) > 1e-5 )
                 {
