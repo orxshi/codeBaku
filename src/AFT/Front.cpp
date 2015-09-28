@@ -151,29 +151,15 @@ namespace AFT
                 
                 if (newPointPass)
                 {
-                    // check if new point intersects circumcircles                    
-                    if (!ptCCInter (crP, circleADT, triangleADT, triangles))                    
-                    {
-                        // add new point to points list
-                        addToPointList (crP, points, pointADT);
-                        int iCrP = points.size() - 1;
-                        
-                        // construct triangle if all previous stages are passed
-                        construct (iCrP, A_CPX_exists, B_CPX_exists, iA_CPX, iB_CPX, it0,
-                           it1, frontList, edges, triangles, triangleADT, edgeADT, newGridId, points, edgeCenters, edgeCenterADT, circleADT);
-                    }
-                    else
-                    {
-                        cout << "none of the ways work in AFT::advanceFront(...)" << endl;
-                
-                        cout << "it0 = " << it0 << endl;
-                        cout << "it1 = " << it1 << endl;
-                        cout << "iCPX = " << iCPX << endl;
-
-                        outputTrianglesVTK (points, triangles, "../out", "tri.vtk");
-
-                        exit(-2);
-                    }
+                    ptCCInter (crP, circleADT, triangleADT, triangles, frontList, edges, edgeADT, points, pointADT);
+                    
+                    // add new point to points list
+                    addToPointList (crP, points, pointADT);
+                    int iCrP = points.size() - 1;
+                    
+                    // construct triangle if all previous stages are passed
+                    construct (iCrP, A_CPX_exists, B_CPX_exists, iA_CPX, iB_CPX, it0,
+                       it1, frontList, edges, triangles, triangleADT, edgeADT, newGridId, points, edgeCenters, edgeCenterADT, circleADT);
                 }
                 else
                 {

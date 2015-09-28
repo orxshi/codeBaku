@@ -154,7 +154,7 @@ namespace AFT
     }
     
     void construct (int iCPX, bool A_CPX_exists, bool B_CPX_exists, int iA_CPX, int iB_CPX, int iA, int iB, vector<FrontMember>& frontList,
-             vector<Edge>& edges, vector<Triangle>& triangles, TriangleADT& triangleADT, EdgeADT& edgeADT, int newGridId, const vector<Point>& points, vector<Point>& edgeCenters, PointADT& edgeCenterADT, CircleADT& circleADT)
+             vector<Edge>& edges, vector<Triangle>& triangles, TriangleADT& triangleADT, EdgeADT& edgeADT, int newGridId, vector<Point>& points, vector<Point>& edgeCenters, PointADT& edgeCenterADT, CircleADT& circleADT)
     {
         int iFrontEdge = frontList.front().edge;
         

@@ -1,6 +1,8 @@
+address = ../ADT
 CC = g++
 CFLAGS = -c -std=c++11 -fpic -O3
 LDFLAGS = -shared
+#LDFLAGS += -L$(address) -Wl,-rpath=$(address)
 SOURCES=AFT.cpp\
 	Edge.cpp\
 	Preset.cpp\
@@ -18,7 +20,7 @@ TARGET=libAFT.so
 all: $(TARGET)
 	
 $(TARGET): $(OBJECTS) 
-	$(CC) $(LDFLAGS) $(OBJECTS) $(PETSC_LIB) -o $@
+	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
 
 .cpp.o:
 	$(CC) $(CFLAGS) $< -o $@

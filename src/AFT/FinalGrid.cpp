@@ -10,7 +10,7 @@ namespace AFT
         pointADT.insert (vec, pointADT.root, tempBool);
     }
     
-    bool cmpPoints (const Point& p0, const Point& p1)
+    bool cmpPoints (const ::Point& p0, const ::Point& p1)
     {
         int counter = 0;
         for (int d=0; d<N_DIM; ++d)
@@ -29,7 +29,7 @@ namespace AFT
         return false;
     }
     
-    bool pointExistsForCreateCells(const Point& refPoint, const vector<Point>& points, int& index)
+    bool pointExistsForCreateCells(const ::Point& refPoint, const vector<::Point>& points, int& index)
     {
         for (int ip=0; ip<points.size(); ++ip)
         {
@@ -180,7 +180,7 @@ namespace AFT
         return true;
     }
     
-    void addGhostCells (const Face& f, const vector<Face>& face, const vector<Cell>& cell, const vector<Point>& pt, Grid& finalGrid, PointADT& fgp, PointADT& fgcc)
+    void addGhostCells (const Face& f, const vector<Face>& face, const vector<Cell>& cell, const vector<::Point>& pt, Grid& finalGrid, PointADT& fgp, PointADT& fgcc)
     {
         //int nExists = 0;
         const Cell* GC;
@@ -215,12 +215,14 @@ namespace AFT
         for (int v=0; v<f.vtx.size(); ++v)
         {
             // create new point
-            Point p = pt[ f.vtx[v] ];
+            ::Point p = pt[ f.vtx[v] ];
+            Point pp;
+            pp.dim = p.dim;
 
             //int pointIndex1;
             int pointIndex;
-            //bool ptExists = pointExistsForCreateCells(p, finalGrid.pt, pointIndex);
-            bool ptExists = pointExists (p, fgp, pointIndex);
+            //bool ptExists = pointExistsForCreateCells(p, finalGrid.pt, pointIndex);            
+            bool ptExists = pointExists (pp, fgp, pointIndex);
                         
             /*if (ptExists != ptExists1)
             {
@@ -257,10 +259,10 @@ namespace AFT
 
             if (!ptExists)
             {
-                p.belonging = finalGrid.id;
+                pp.belonging = finalGrid.id;
                 finalGrid.pt.push_back (p);
                 pointIndex = finalGrid.pt.size() - 1;
-                addToPointADT (p, fgp, pointIndex);
+                addToPointADT (pp, fgp, pointIndex);
             }
             /*else
             {
@@ -300,7 +302,7 @@ namespace AFT
         //cin.ignore();
     }
     
-    void addCells (const Face& f, const vector<Face>& face, const vector<Cell>& cell, const vector<Point>& pt, Grid& finalGrid, PointADT& fgp, PointADT& fgcc)
+    void addCells (const Face& f, const vector<Face>& face, const vector<Cell>& cell, const vector<::Point>& pt, Grid& finalGrid, PointADT& fgp, PointADT& fgcc)
     {
         int neiSize = f.nei.size();
         const Cell* LRC[ neiSize ];
@@ -353,18 +355,20 @@ namespace AFT
         for (int v=0; v<f.vtx.size(); ++v)
         {
             // create new point
-            Point p = pt[ f.vtx[v] ];
+            ::Point p = pt[ f.vtx[v] ];
+            Point pp;
+            pp.dim = p.dim;
 
             int pointIndex = -1;
             //bool ptExists = pointExistsForCreateCells(p, finalGrid.pt, pointIndex);
-            bool ptExists = pointExists (p, fgp, pointIndex);
+            bool ptExists = pointExists (pp, fgp, pointIndex);
 
             if (!ptExists)
             {
-                p.belonging = finalGrid.id;
+                pp.belonging = finalGrid.id;
                 finalGrid.pt.push_back (p);
                 pointIndex = finalGrid.pt.size() - 1;
-                addToPointADT (p, fgp, pointIndex);
+                addToPointADT (pp, fgp, pointIndex);
             }
 
             finalGrid.face.back().vtx.push_back( pointIndex );
@@ -389,11 +393,15 @@ namespace AFT
             {
                 if (c.belonging == 0 || c.belonging == 1)
                 {
-                    match = pointExists (gr[c.belonging].pt[v], fgp, pointIndex);
+                    Point pp;
+                    pp.dim = gr[c.belonging].pt[v].dim;
+                    match = pointExists (pp, fgp, pointIndex);
                 }
                 else if (c.belonging == 2)
                 {
-                    match = pointExists (newGrid.pt[v], fgp, pointIndex);
+                    Point pp;
+                    pp.dim = newGrid.pt[v].dim;
+                    match = pointExists (pp, fgp, pointIndex);
                 }
                 else
                 {
@@ -458,7 +466,7 @@ namespace AFT
         }
     }
     
-    void addIntergridCells (const Face& f, const vector<Face>& face, const vector<Cell>& cell, const vector<Point>& pt, Grid& finalGrid, const Grid& newGrid, PointADT& fgp, PointADT& fgcc, PointADT& fgfc)
+    void addIntergridCells (const Face& f, const vector<Face>& face, const vector<Cell>& cell, const vector<::Point>& pt, Grid& finalGrid, const Grid& newGrid, PointADT& fgp, PointADT& fgcc, PointADT& fgfc)
     {
         int neiSize = f.nei.size();
         const Cell* LRC[ neiSize ];
@@ -557,18 +565,20 @@ namespace AFT
         for (int v=0; v<f.vtx.size(); ++v)
         {
             // create new point
-            Point p = pt[ f.vtx[v] ];
+            ::Point p = pt[ f.vtx[v] ];
+            Point pp;
+            pp.dim = p.dim;
 
             int pointIndex;
             //bool ptExists = pointExistsForCreateCells(p, finalGrid.pt, pointIndex);
-            bool ptExists = pointExists (p, fgp, pointIndex);
+            bool ptExists = pointExists (pp, fgp, pointIndex);
 
             if (!ptExists)
             {
-                p.belonging = finalGrid.id;
+                pp.belonging = finalGrid.id;
                 finalGrid.pt.push_back (p);
                 pointIndex = finalGrid.pt.size() - 1;
-                addToPointADT (p, fgp, pointIndex);
+                addToPointADT (pp, fgp, pointIndex);
             }
 
             refFace.vtx.push_back( pointIndex );
@@ -679,7 +689,7 @@ namespace AFT
         
         for (const Grid& g: gr)
         {
-            for (const Point& p: g.pt)
+            for (const ::Point& p: g.pt)
             {
                 for (int d=0; d<ADT_DIM; ++d)
                 {

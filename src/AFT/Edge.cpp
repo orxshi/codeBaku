@@ -5,6 +5,7 @@ namespace AFT
     Edge::Edge()
     {
         newlyCreated = false;
+        alive = true;
     }
     
     void EdgeADT::build (const vector<Point>& points, const vector<Edge>& edges)
@@ -23,7 +24,7 @@ namespace AFT
         ADT::build();
     }
     
-    ADT::ADTPoint EdgeADT::createADTPoint (const Point& a, const Point& b)
+    ADT::ADTPoint EdgeADT::createADTPoint (const AFT::Point& a, const AFT::Point& b)
     {
         ADTPoint vec;
 
@@ -33,8 +34,8 @@ namespace AFT
             vec.dim[i*2+1] = max( a.dim[i], b.dim[i] );
         }
 
-        vec.vertices.push_back (a);
-        vec.vertices.push_back (b);
+        vec.vertices.push_back (a.dim);
+        vec.vertices.push_back (b.dim);
 
         return vec;
     }
@@ -57,9 +58,9 @@ namespace AFT
     
     bool EdgeADT::compareFunction (const Node* node, const ADTPoint& targetPoint)
     {
-        bool exactMatch;
-        bool inside = doIntersect(targetPoint.vertices[0].dim, targetPoint.vertices[1].dim, node->p->vertices[0].dim, node->p->vertices[1].dim, exactMatch);
-
+        bool exactMatch;        
+        bool inside = doIntersect (targetPoint.vertices[0], targetPoint.vertices[1], node->p->vertices[0], node->p->vertices[1], exactMatch);
+        
         return inside;
     }
     
@@ -150,7 +151,7 @@ namespace AFT
         }
     }
     
-    void addToEdgeList (Edge& edge, int iP1, int iP2, vector<Edge>& edges, EdgeADT& edgeADT, const vector<Point>& points)
+    void addToEdgeList (Edge& edge, int iP1, int iP2, vector<Edge>& edges, EdgeADT& edgeADT, vector<Point>& points)
     {
         bool tempBool;
         
@@ -158,5 +159,8 @@ namespace AFT
         ADT::ADTPoint vec = edgeADT.createADTPoint (points[iP1], points[iP2]);
         vec.idx = edges.size() - 1;
         edgeADT.insert (vec, edgeADT.root, tempBool);
+        
+        points[iP1].e.push_back (edges.size() - 1);
+        points[iP2].e.push_back (edges.size() - 1);
     }
 }

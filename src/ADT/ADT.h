@@ -31,7 +31,7 @@ struct ADT
     struct ADTPoint
     {
         int idx;
-        vector <Point> vertices;
+        vector <CVector> vertices;
         Vector <ADT_VAR> dim;
         /*
          * 0: xmin
@@ -92,7 +92,7 @@ struct ADT
     int search (const ADTPoint& targetPoint);
     
     void removeSearchAddresses ();
-    void removeViaID (int id);
+    bool removeViaID (int id);
 
     // Constructor
     ADT();

@@ -36,9 +36,14 @@ namespace AFT
             iP1 = triangles[t].p[1];
             iP2 = triangles[t].p[2];
             
-            const Point& p0 = points[ iP0 ];
-            const Point& p1 = points[ iP1 ];
-            const Point& p2 = points[ iP2 ];
+            ::Point p0, p1, p2;
+            p0.dim = points[ iP0 ].dim;
+            p1.dim = points[ iP1 ].dim;
+            p2.dim = points[ iP2 ].dim;
+            
+            //const Point& p0 = points[ iP0 ];
+            //const Point& p1 = points[ iP1 ];
+            //const Point& p2 = points[ iP2 ];
             
             int index;
             
@@ -125,9 +130,14 @@ namespace AFT
             iP1 = triangles[t-triangles.size()].p[1];
             iP2 = triangles[t-triangles.size()].p[2];
             
-            const Point& p0 = points2[ iP0 ];
-            const Point& p1 = points2[ iP1 ];
-            const Point& p2 = points2[ iP2 ];
+            ::Point p0, p1, p2;
+            p0.dim = points2[ iP0 ].dim;
+            p1.dim = points2[ iP1 ].dim;
+            p2.dim = points2[ iP2 ].dim;
+            
+            //const Point& p0 = points2[ iP0 ];
+            //const Point& p1 = points2[ iP1 ];
+            //const Point& p2 = points2[ iP2 ];
             
             int index;
             
@@ -440,7 +450,7 @@ namespace AFT
         }*/
     }
     
-    bool faceExists (const Face& nf, const vector<Face>& face, const vector<Point>& point, int& index)
+    bool faceExists (const Face& nf, const vector<Face>& face, const vector<::Point>& point, int& index)
     {
         int counter;
         

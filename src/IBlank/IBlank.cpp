@@ -32,7 +32,7 @@ void Grid::CellADT::build (const Grid& gr)
             points[c].dim[4] = min (p.dim[2], points[c].dim[4]);
             points[c].dim[5] = max (p.dim[2], points[c].dim[5]);*/
 
-            points[c].vertices.push_back (p);
+            points[c].vertices.push_back (p.dim);
         }
 
         points[c].idx = c+gr.n_bou_elm;
@@ -252,7 +252,7 @@ bool Grid::CellADT::compareFunction (const Node* node, const ADTPoint& targetPoi
 
     for (unsigned int v=0; v<size; ++v)
     {
-        xc[v] = node->p->vertices[v].dim;
+        xc[v] = node->p->vertices[v];
     }
     
     for (int i=0; i<ADT_DIM; ++i)

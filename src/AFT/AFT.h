@@ -24,23 +24,40 @@ using std::deque;
 
 namespace AFT
 {
+    struct Point
+    {
+        bool alive;
+        CVector dim;
+        int belonging;
+        bool newlyCreated;
+        vector<int> tri;
+        vector<int> e;
+        
+        Point();
+        bool eraseParentEdge (int iEdge);
+        bool eraseParentTri (int iTri);
+    };
+
     struct Edge
     {
+        bool alive;
         vector<int> t;
         int belonging;
         bool newlyCreated;
         vector<int> nei;
-        //int i;
+        vector<int> tri;
 
         Edge();
     };
     
     struct Triangle
-    {
+    {   
+        bool alive;
         vector<int> p;
         vector<int> e;
         vector <int> nei;
         
+        Triangle ();
         CVector centroid(const vector<Point>& points);
         double qualityScore (const vector<Point>& points, double aveTriArea, bool verbose, bool& passed);
     };
@@ -62,7 +79,7 @@ namespace AFT
         virtual bool compareFunction (const Node* node, const ADTPoint& targetPoint);
         virtual bool doCubesOverlap (const Node* node, const ADTPoint& targetPoint);
         void build (const vector<Point>& points, const vector<Edge>& edges);
-        ADTPoint createADTPoint (const Point& a, const Point& b);
+        ADTPoint createADTPoint (const Point& a, const Point& b);        
     };
     
     struct TriangleADT : public ADT
@@ -111,7 +128,7 @@ namespace AFT
     bool checkEdgeIntersection (const Point& closestPoint, const Point& frontListPoint, EdgeADT& edgeADT, const vector<Edge>& edges, const vector<Point>& points, bool& exactMatch, int& result);
     int checkNumberOfEdgeIntersection (const Point& closestPoint, const Point& frontListPoint, EdgeADT& edgeADT);
     void knowParentTriangles (vector<Edge>& edges, const vector<Triangle>& triangles);
-    void addToEdgeList (Edge& edge, int iP1, int iP2, vector<Edge>& edges, EdgeADT& edgeADT, const vector<Point>& points);
+    void addToEdgeList (Edge& edge, int iP1, int iP2, vector<Edge>& edges, EdgeADT& edgeADT, vector<Point>& points);
     
     // Intersection
     bool doIntersect (const CVector& p1, const CVector& q1, const CVector& p2, const CVector& q2, bool& exactMatch);
@@ -130,7 +147,7 @@ namespace AFT
     double triEdgeCircumradius (double a, double b, double c);
     void flip (vector<Triangle>& triangles, vector<Edge>& edges, const vector<Point>& points);
     void outputTrianglesVTK (const vector<Point>& points, const vector<Triangle>& triangles, string dir, string fileName);
-    void addToTriangleList(vector<Triangle>& triangles, Triangle& tmpTriangle, TriangleADT& triangleADT, const vector<Point>& points, CircleADT& circleADT, vector<Edge>& edges);
+    void addToTriangleList(vector<Triangle>& triangles, Triangle& tmpTriangle, TriangleADT& triangleADT, vector<Point>& points, CircleADT& circleADT, vector<Edge>& edges);
     CVector cntTriangle3Pts (const CVector& p0, const CVector& p1, const CVector& p2);
     bool triQuality (const CVector& p0, const CVector& p1, const CVector& p2, double rho);
     
@@ -151,20 +168,20 @@ namespace AFT
     bool checkTwoFormingEdges (const Point& CPX, const Point& A, const Point& B, bool& A_CPX_exists, bool& B_CPX_exists, int& iA_CPX, int& iB_CPX,
             vector<Edge>& edges, EdgeADT& edgeADT, vector<Point>& points);
     bool checkCircumBound (const Point& CPX, const Point& A, const Point& B, double rho);    
-    bool ptCCInter (const Point& CPX, CircleADT& circleADT, TriangleADT& triangleADT, vector<Triangle>& triangles);
+    void ptCCInter (const Point& CPX, CircleADT& circleADT, TriangleADT& triangleADT, vector<Triangle>& triangles, vector<FrontMember>& frontList, vector<Edge>& edges, EdgeADT& edgeADT, vector<Point>& points, PointADT& pointADT);
     
     double getAveTriArea (const vector<Edge>& edges, const vector<Point>& points);
     void aft (vector<Grid>& gr, Grid& finalGrid);
     void outputTriangles (const vector<Point>& points, const vector<Triangle>& triangles);
-    bool faceExists (const Face& nf, const vector<Face>& face, const vector<Point>& point, int& index);
+    bool faceExists (const Face& nf, const vector<Face>& face, const vector<::Point>& point, int& index);
     void createCells (double offsetZ, const vector<Point>& points, Grid& newGrid, const vector<Triangle>& triangles, int phys, int newGridId);
-    bool pointExistsForCreateCells(const Point& p, const vector<Point>& points, int& index);
+    bool pointExistsForCreateCells(const ::Point& refPoint, const vector<::Point>& points, int& index);
     void createFinalGrid (Grid& finalGrid, const vector<Grid>& gr, const Grid& newGrid);
-    void addIntergridCells (const Face& f, const vector<Face>& face, const vector<Cell>& cell, const vector<Point>& pt, Grid& finalGrid, const Grid& newGrid, PointADT& fgp, PointADT& fgcc, PointADT& fgfc);
-    void addCells (const Face& f, const vector<Face>& face, const vector<Cell>& cell, const vector<Point>& pt, Grid& finalGrid, PointADT& fgp, PointADT& fgcc);
+    void addIntergridCells (const Face& f, const vector<Face>& face, const vector<Cell>& cell, const vector<::Point>& pt, Grid& finalGrid, const Grid& newGrid, PointADT& fgp, PointADT& fgcc, PointADT& fgfc);
+    void addCells (const Face& f, const vector<Face>& face, const vector<Cell>& cell, const vector<::Point>& pt, Grid& finalGrid, PointADT& fgp, PointADT& fgcc);
     void modifyCellVertices (Grid& finalGrid, const Grid& newGrid, const vector<Grid>& gr, PointADT& fgp);
     void construct (int iCPX, bool A_CPX_exists, bool B_CPX_exists, int iA_CPX, int iB_CPX, int iA, int iB, vector<FrontMember>& frontList,
-             vector<Edge>& edges, vector<Triangle>& triangles, TriangleADT& triangleADT, EdgeADT& edgeADT, int newGridId, const vector<Point>& points, vector<Point>& edgeCenters, PointADT& edgeCenterADT, CircleADT& circleADT);
+             vector<Edge>& edges, vector<Triangle>& triangles, TriangleADT& triangleADT, EdgeADT& edgeADT, int newGridId, vector<Point>& points, vector<Point>& edgeCenters, PointADT& edgeCenterADT, CircleADT& circleADT);
     void exportToGMSH (const vector<Point>& points, const vector<Edge>& mesh0Edges, const vector<Edge>& mesh1Edges, string dir);
     double spacingFnc (double b, double aveTriSize);
     int Tanemura_Merriam (int iA, int iB, vector<Point>& points, deque<int>& pts);

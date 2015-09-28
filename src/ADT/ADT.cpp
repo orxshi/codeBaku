@@ -176,7 +176,9 @@ void ADT::searchChildren (const Node* node, const ADTPoint& targetPoint)
 void ADT::search (Node* node, const ADTPoint& targetPoint, int& index)
 {
     if (node != NULL)
-    {
+    {    
+        
+    
         // check whether the point is inside the element
         if (!node->isEmpty && node->p->idx!=-1 && doCubesOverlap (node, targetPoint) && compareFunction (node, targetPoint) )
         {
@@ -269,7 +271,7 @@ void ADT::removeSearchAddresses ()
     }
 }
 
-void ADT::removeViaID (int id)
+bool ADT::removeViaID (int id)
 {
     for (int i=0; i<idsInTree.size(); ++i)
     {
@@ -282,14 +284,12 @@ void ADT::removeViaID (int id)
                 addrsInTree[i] = NULL;
                 addrsInTree.erase (addrsInTree.begin() + i);
                 idsInTree.erase (idsInTree.begin() + i);
+                return true;
             }
         }
-        else
-        {
-            cout << "could not find id in tree in ADT::removeViaID(...)" << endl;
-            exit(-2);
-        }
-    }   
+    }
+    
+    return false;
 }
 
 void ADT::build ()
@@ -318,6 +318,7 @@ void ADT::build ()
         }
 
         root->p = new ADTPoint (points.front());
+        root->isEmpty = false;
         idsInTree.push_back (points.front().idx);
         addrsInTree.push_back (root);
 

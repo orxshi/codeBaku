@@ -25,7 +25,9 @@ namespace AFT
                             indices.clear();
                             for (const int iv: f.vtx)
                             {
-                                Point v = gr[g].pt[iv];
+                                Point v;
+                                v.dim = gr[g].pt[iv].dim;
+                                v.belonging = gr[g].pt[iv].belonging;
                                 //v.belonging = newGridId;
 
                                 if (v.dim[2] == 0.)
@@ -64,6 +66,9 @@ namespace AFT
                             tempEdge.nei.push_back (-1);
                             edges.push_back (tempEdge);
                             edgeCenters.push_back (cntPoint);
+                            
+                            points[tempEdge.t[0]].e.push_back (edges.size() - 1);
+                            points[tempEdge.t[1]].e.push_back (edges.size() - 1);
                         }
                     }
                 //}

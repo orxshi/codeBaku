@@ -1,6 +1,7 @@
 #address = $(CODE_BAKU_SRC)
 address1 = ../../../../src/
 address2 = ../../../../src/AFT
+address3 = ../../../../src/ADT
 include ${PETSC_DIR}/lib/petsc/conf/variables
 #include ${PETSC_DIR}/lib/petsc/conf/rules
 #include ${PETSC_DIR}/lib/petsc/conf/test
@@ -10,6 +11,7 @@ CC = g++
 CFLAGS = -c -std=c++11 -O3 -I$(INC1) -I$(INC2)
 LDFLAGS = -L$(address1) -Wl,-rpath=$(address1)
 LDFLAGS += -L$(address2) -Wl,-rpath=$(address2)
+LDFLAGS += -L$(address3) -Wl,-rpath=$(address3)
 SOURCES=main.cpp\
 	Init/Init.cpp\
 	Init/Read.cpp\
@@ -23,7 +25,7 @@ TARGET = out
 all: $(SOURCES) $(TARGET)
 	
 $(TARGET): $(OBJECTS) 
-	$(CC) $(LDFLAGS) $(OBJECTS) $(PETSC_LIB) -o $@ -lcb -lAFT
+	$(CC) $(LDFLAGS) $(OBJECTS) $(PETSC_LIB) -o $@ -lcb -lAFT -lADT
 
 .cpp.o:
 	$(CC) $(CFLAGS) $< -o $@

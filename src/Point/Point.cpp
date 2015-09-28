@@ -2,5 +2,5 @@
 
 Point::Point()
 {
-    newlyCreated = false;
+    //newlyCreated = false;
 }

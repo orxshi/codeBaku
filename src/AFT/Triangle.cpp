@@ -2,6 +2,11 @@
 
 namespace AFT
 {
+    Triangle::Triangle ()
+    {
+        alive = true;
+    }
+
     void CircleADT::build (const EdgeADT& edgeADT)
     {
         this->root = new CircleADT::Node();
@@ -81,10 +86,10 @@ namespace AFT
         corner[3][2] = 0.;
         
         // center of circle
-        CVector center = node->p->vertices[0].dim;
+        CVector center = node->p->vertices[0];
         
         // radius of circle
-        double r = fabs( node->p->dim[0] - node->p->vertices[0].dim[0] ); // |xminRec - xCen|
+        double r = fabs( node->p->dim[0] - node->p->vertices[0][0] ); // |xminRec - xCen|
         
         for (int i=0; i<4; ++i)
         {
@@ -127,7 +132,7 @@ namespace AFT
         
         vec.idx = idTri;        
         
-        vec.vertices.push_back (p);
+        vec.vertices.push_back (p.dim);
 
         return vec;
     }
@@ -171,30 +176,30 @@ namespace AFT
 
         if (node->level != 0)
         {
-            const Point& p1 = targetPoint.vertices[0];
-            const Point& p2 = targetPoint.vertices[1];
-            const Point& p3 = targetPoint.vertices[2];
+            const CVector& p1 = targetPoint.vertices[0];
+            const CVector& p2 = targetPoint.vertices[1];
+            const CVector& p3 = targetPoint.vertices[2];
 
-            const Point& k1 = node->p->vertices[0];
-            const Point& k2 = node->p->vertices[1];
-            const Point& k3 = node->p->vertices[2];
+            const CVector& k1 = node->p->vertices[0];
+            const CVector& k2 = node->p->vertices[1];
+            const CVector& k3 = node->p->vertices[2];
             
             unsigned int count = 0;
             unsigned int reqCount = 2;
 
             bool dummyEM;
             
-            if ( doIntersect (k1.dim, k2.dim, p1.dim, p2.dim, dummyEM) ) {++count;} if (count==reqCount) return true;
-            if ( doIntersect (k1.dim, k2.dim, p1.dim, p3.dim, dummyEM) ) {++count;} if (count==reqCount) return true;            
-            if ( doIntersect (k1.dim, k2.dim, p2.dim, p3.dim, dummyEM) ) {++count;} if (count==reqCount) return true;            
+            if ( doIntersect (k1, k2, p1, p2, dummyEM) ) {++count;} if (count==reqCount) return true;
+            if ( doIntersect (k1, k2, p1, p3, dummyEM) ) {++count;} if (count==reqCount) return true;            
+            if ( doIntersect (k1, k2, p2, p3, dummyEM) ) {++count;} if (count==reqCount) return true;            
 
-            if ( doIntersect (k1.dim, k3.dim, p1.dim, p2.dim, dummyEM) ) {++count;} if (count==reqCount) return true;            
-            if ( doIntersect (k1.dim, k3.dim, p1.dim, p3.dim, dummyEM) ) {++count;} if (count==reqCount) return true;            
-            if ( doIntersect (k1.dim, k3.dim, p2.dim, p3.dim, dummyEM) ) {++count;} if (count==reqCount) return true;            
+            if ( doIntersect (k1, k3, p1, p2, dummyEM) ) {++count;} if (count==reqCount) return true;            
+            if ( doIntersect (k1, k3, p1, p3, dummyEM) ) {++count;} if (count==reqCount) return true;            
+            if ( doIntersect (k1, k3, p2, p3, dummyEM) ) {++count;} if (count==reqCount) return true;            
 
-            if ( doIntersect (k2.dim, k3.dim, p1.dim, p2.dim, dummyEM) ) {++count;} if (count==reqCount) return true;            
-            if ( doIntersect (k2.dim, k3.dim, p1.dim, p3.dim, dummyEM) ) {++count;} if (count==reqCount) return true;            
-            if ( doIntersect (k2.dim, k3.dim, p2.dim, p3.dim, dummyEM) ) {++count;} if (count==reqCount) return true;            
+            if ( doIntersect (k2, k3, p1, p2, dummyEM) ) {++count;} if (count==reqCount) return true;            
+            if ( doIntersect (k2, k3, p1, p3, dummyEM) ) {++count;} if (count==reqCount) return true;            
+            if ( doIntersect (k2, k3, p2, p3, dummyEM) ) {++count;} if (count==reqCount) return true;            
 
             // if one triangle is inside another one
             if (count <= 1) // count was equal to 1 before.
@@ -219,50 +224,50 @@ namespace AFT
     bool TriangleADT::localCmpFunc (const ADTPoint& node, const ADTPoint& targetPoint)
     {
         bool inside;
-        Point one;
-        Point two;
-        Point thr;
-        Point cp1;
-        Point cp2;        
+        CVector one;
+        CVector two;
+        CVector thr;
+        CVector cp1;
+        CVector cp2;        
 
-        const Point&  p1 = targetPoint.vertices[0];
-        const Point&  p2 = targetPoint.vertices[1];
-        const Point&  p3 = targetPoint.vertices[2];
+        const CVector&  p1 = targetPoint.vertices[0];
+        const CVector&  p2 = targetPoint.vertices[1];
+        const CVector&  p3 = targetPoint.vertices[2];
 
-        const Point&  k1 = node.vertices[0];
-        const Point&  k2 = node.vertices[1];
-        const Point&  k3 = node.vertices[2];        
+        const CVector&  k1 = node.vertices[0];
+        const CVector&  k2 = node.vertices[1];
+        const CVector&  k3 = node.vertices[2];        
 
         for (unsigned int i=0; i<targetPoint.vertices.size(); ++i)
         {
             inside = true;
 
-            one.dim = k1.dim - k2.dim;
-            two.dim = targetPoint.vertices[i].dim - k2.dim;
-            thr.dim = k3.dim - k2.dim;
+            one = k1 - k2;
+            two = targetPoint.vertices[i] - k2;
+            thr = k3 - k2;
 
-            cp1.dim = crossP (one.dim, two.dim);
-            cp2.dim = crossP (one.dim, thr.dim);
+            cp1 = crossP (one, two);
+            cp2 = crossP (one, thr);
 
-            if ( dotP (cp1.dim, cp2.dim) <= 0. ) inside = false;
+            if ( dotP (cp1, cp2) <= 0. ) inside = false;
 
-            one.dim = k1.dim - k3.dim;
-            two.dim = targetPoint.vertices[i].dim - k3.dim;
-            thr.dim = k2.dim - k3.dim;
+            one = k1 - k3;
+            two = targetPoint.vertices[i] - k3;
+            thr = k2 - k3;
 
-            cp1.dim = crossP (one.dim, two.dim);
-            cp2.dim = crossP (one.dim, thr.dim);
+            cp1 = crossP (one, two);
+            cp2 = crossP (one, thr);
 
-            if ( dotP (cp1.dim, cp2.dim) <= 0. ) inside = false;
+            if ( dotP (cp1, cp2) <= 0. ) inside = false;
 
-            one.dim = k2.dim - k3.dim;
-            two.dim = targetPoint.vertices[i].dim - k3.dim;
-            thr.dim = k1.dim - k3.dim;
+            one = k2 - k3;
+            two = targetPoint.vertices[i] - k3;
+            thr = k1 - k3;
 
-            cp1.dim = crossP (one.dim, two.dim);
-            cp2.dim = crossP (one.dim, thr.dim);
+            cp1 = crossP (one, two);
+            cp2 = crossP (one, thr);
 
-            if ( dotP (cp1.dim, cp2.dim) <= 0. ) inside = false;
+            if ( dotP (cp1, cp2) <= 0. ) inside = false;
 
             if (inside == true) return true;
         }
@@ -294,14 +299,14 @@ namespace AFT
     {
         ADTPoint vec;
         
-        const Point& p0 = points[ tri.p[0] ];
-        const Point& p1 = points[ tri.p[1] ];
-        const Point& p2 = points[ tri.p[2] ];
+        const CVector& p0 = points[ tri.p[0] ].dim;
+        const CVector& p1 = points[ tri.p[1] ].dim;
+        const CVector& p2 = points[ tri.p[2] ].dim;
 
         for (unsigned int i=0; i<ADT_DIM; ++i)
         {
-            vec.dim[i*2]   = min( min(p0.dim[i], p1.dim[i]), p2.dim[i] );
-            vec.dim[i*2+1] = max( max(p0.dim[i], p1.dim[i]), p2.dim[i] );
+            vec.dim[i*2]   = min( min(p0[i], p1[i]), p2[i] );
+            vec.dim[i*2+1] = max( max(p0[i], p1[i]), p2[i] );
         }
 
         vec.vertices.push_back (p0);
@@ -325,9 +330,9 @@ namespace AFT
             vec.dim[i*2+1] = max( max(p0.dim[i], p1.dim[i]), p2.dim[i] );
         }
 
-        vec.vertices.push_back (p0);
-        vec.vertices.push_back (p1);
-        vec.vertices.push_back (p2);
+        vec.vertices.push_back (p0.dim);
+        vec.vertices.push_back (p1.dim);
+        vec.vertices.push_back (p2.dim);
 
         return vec;
     }
@@ -1001,7 +1006,7 @@ namespace AFT
     }
     
     void addToTriangleList(vector<Triangle>& triangles, Triangle& tmpTriangle,
-            TriangleADT& triangleADT, const vector<Point>& points, CircleADT& circleADT, vector<Edge>& edges)
+            TriangleADT& triangleADT, vector<Point>& points, CircleADT& circleADT, vector<Edge>& edges)
     {
         bool tmpBool;
         
@@ -1012,6 +1017,14 @@ namespace AFT
         
         ADT::ADTPoint vec1 = circleADT.createADTPoint (tmpTriangle, points, vec.idx);        
         circleADT.insert (vec1, circleADT.root, tmpBool);
+        
+        points[tmpTriangle.p[0]].tri.push_back (triangles.size() - 1);
+        points[tmpTriangle.p[1]].tri.push_back (triangles.size() - 1);
+        points[tmpTriangle.p[2]].tri.push_back (triangles.size() - 1);
+        
+        edges[tmpTriangle.e[0]].tri.push_back (triangles.size() - 1);
+        edges[tmpTriangle.e[1]].tri.push_back (triangles.size() - 1);
+        edges[tmpTriangle.e[2]].tri.push_back (triangles.size() - 1);
         
         for (int e: tmpTriangle.e)
         {
@@ -1030,6 +1043,16 @@ namespace AFT
                 }
                 
                 cout << "t = " << triangles.size() - 1 << endl;
+                cout << "e = " << e << endl;
+                cout << "t[0] = " << edges[e].t[0] << endl;
+                cout << "t[1] = " << edges[e].t[1] << endl;
+                
+                cout << "p[0] = " << tmpTriangle.p[0] << endl;
+                cout << "p[1] = " << tmpTriangle.p[1] << endl;
+                cout << "p[2] = " << tmpTriangle.p[2] << endl;
+                
+                outputTrianglesVTK (points, triangles, "../out", "tri.vtk");
+                
                 
                 exit(-2);
             }

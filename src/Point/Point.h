@@ -17,7 +17,7 @@ struct Point
 {
     CVector dim;
     int belonging;
-    bool newlyCreated;
+    //bool newlyCreated;    
     
     Point();
 };
