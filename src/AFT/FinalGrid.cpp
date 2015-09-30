@@ -679,7 +679,7 @@ namespace AFT
     {
         pADT.root = new PointADT::Node();
         pADT.root->level = 0;
-        pADT.root->p->idx = -1;
+        //pADT.root->p->idx = -1;
         
         for (int d=0; d<ADT_VAR; ++d)
         {
@@ -698,7 +698,6 @@ namespace AFT
                 }
             }
         }
-        
         
         for (int d=0; d<ADT_DIM; ++d)
         {

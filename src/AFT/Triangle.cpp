@@ -621,17 +621,16 @@ namespace AFT
         int iEdgeB;
         int iEdgeAN;
         int iEdgeBN;
+        int iTriB;
+        int iTriAN;
         double disExclusivePointCenter;
 
         // note that rectangular coordiantes are considered not circular
-
-        /*cout << "triangles[171].p[0] = " << triangles[171].p[0] << endl;
-        cout << "triangles[171].p[1] = " << triangles[171].p[1] << endl;
-        cout << "triangles[171].p[2] = " << triangles[171].p[2] << endl;*/
         
-        for (unsigned int t=0; t<triangles.size(); ++t)
-            //for (unsigned int t=0; t<170; ++t)
+        for (unsigned int t=0; t<triangles.size(); ++t)            
         {
+            cout << "t = " << t << endl;
+        
             Triangle& tri = triangles[t];
             
             const int ip0 = tri.p[0];
@@ -641,270 +640,256 @@ namespace AFT
             const CVector& pd1 = points[ ip1 ].dim;
             const CVector& pd2 = points[ ip2 ].dim;
             
-            /*if (t == 3)
-            {
-                cout << "tri.p[0] = " << tri.p[0] << endl;
-                cout << "tri.p[1] = " << tri.p[1] << endl;
-                cout << "tri.p[2] = " << tri.p[2] << endl;
-                
-            }
-            
-            if (tri.p[0] == tri.p[1] || tri.p[0] == tri.p[2] || tri.p[1] == tri.p[2])
-            {
-                cout << "points are same in flip triangles 1" << endl;
-                cout << "tri.p[0] = " << tri.p[0] << endl;
-                cout << "tri.p[1] = " << tri.p[1] << endl;
-                cout << "tri.p[2] = " << tri.p[2] << endl;
-                cout << "t = " << t << endl;
-                exit(-2);
-            }*/
-            
-            
-            
             triPtsCircums (pd0, pd1, pd2, center, radius);
             
-            /*if (t == 3)
-                        {
-                            exit(-2);
-                        }*/
-
-            if ( true )
-            //if ( isfinite(center[0]) && isfinite(center[1]) )
+            cout << "tri.nei.size() = " << tri.nei.size() << endl;
+            
+            for (unsigned int n=0; n<tri.nei.size(); ++n)
             {
-                for (unsigned int n=0; n<tri.nei.size(); ++n)
+                iNei = tri.nei[n];
+                cout << "iNei = " << iNei << endl;
+                Triangle& nei = triangles[ iNei ];
+                
+                if (iNei != -1)
                 {
-                    iNei = tri.nei[n];
-                    Triangle& nei = triangles[ iNei ];
-                    
-                    if (iNei != -1)
+                    // determine the edge shared with neigbour
                     {
-                        iNeiEdge = tri.e[n];
-                        Edge& neiEdge = edges[ iNeiEdge ];
-                        int iNeiEdgeT0 = neiEdge.t[0];
-                        int iNeiEdgeT1 = neiEdge.t[1];
+                        bool foundEdge = false;
+                        for (int ie: tri.e)
+                        {
+                            const Edge& e = edges[ie];
+                        
+                            for (int nn: e.nei)
+                            {
+                                if (nn == iNei)
+                                {
+                                    iNeiEdge = ie;
+                                    foundEdge = true;
+                                    break;
+                                }
+                            }
+                            
+                            if (foundEdge)
+                            {
+                                break;
+                            }
+                        }
+                        
+                        if (!foundEdge)
+                        {
+                            cout << "could not find edge in AFT::flip(...)" << endl;
+                            cout << "tri.e[0] = " << tri.e[0] << endl;
+                            cout << "tri.e[1] = " << tri.e[1] << endl;
+                            cout << "tri.e[2] = " << tri.e[2] << endl;
+                            cout << "t = " << t << endl;
+                            cout << "iNei = " << iNei << endl;
+                            
+                            for (int ie: tri.e)
+                            {
+                                const Edge& e = edges[ie];
+                                
+                                for (int nn: e.nei)
+                                {
+                                    cout << "nn = " << nn << endl;                                    
+                                }
+                            }
+                            
+                            exit (-2);
+                        }
+                    }
+                    
+                    Edge& neiEdge = edges[ iNeiEdge ];
+                    int iNeiEdgeT0 = neiEdge.t[0];
+                    int iNeiEdgeT1 = neiEdge.t[1];
 
-                        // get exclusive point
-                        for (const int p: nei.p)
+                    // get exclusive point
+                    for (const int p: nei.p)
+                    {
+                        if (p != iNeiEdgeT0 && p != iNeiEdgeT1)
+                        {
+                            iExclusivePoint = p;
+                            break;
+                        }
+                    }                        
+                    const Point& exclusivePoint = points[ iExclusivePoint ];
+
+                    disExclusivePointCenter = sqrt(
+                            pow(exclusivePoint.dim[0] - center[0],2) + pow(exclusivePoint.dim[1] - center[1],2)
+                            );
+                    
+                    if (disExclusivePointCenter <= radius)
+                    {
+                        // get own exclusive point
+                        for (const int p: tri.p)
                         {
                             if (p != iNeiEdgeT0 && p != iNeiEdgeT1)
                             {
-                                iExclusivePoint = p;
+                                iOwnExclusivePoint = p;                                    
                                 break;
                             }
-                        }                        
-                        const Point& exclusivePoint = points[ iExclusivePoint ];
+                        }                            
+                        const Point& ownExclusivePoint = points[iOwnExclusivePoint];
 
-                        disExclusivePointCenter = sqrt(
-                                pow(exclusivePoint.dim[0] - center[0],2) + pow(exclusivePoint.dim[1] - center[1],2)
-                                );
-                        
-                        /*if (t == 3)
+                        // get edgeA and edgeB
+                        for (int e: tri.e)
                         {
-                            cout << "radius = " << radius << endl;
-                        }*/
-                        
-                        
-                        if (disExclusivePointCenter <= radius)
-                        {
-                            
-                            /*if (t == 3)
+                            if (e != iNeiEdge)
                             {
-                                cout << "radius = " << radius << endl;
-                                cout << "tri.p[0] = " << tri.p[0] << endl;
-                                cout << "tri.p[1] = " << tri.p[1] << endl;
-                                cout << "tri.p[2] = " << tri.p[2] << endl;
-                                cout << "pd0[0] = " << pd0[0] << endl;
-                                cout << "pd0[1] = " << pd0[1] << endl;
-                                cout << "pd1[0] = " << pd1[0] << endl;
-                                cout << "pd1[1] = " << pd1[1] << endl;
-                                cout << "pd2[0] = " << pd2[0] << endl;
-                                cout << "pd2[1] = " << pd2[1] << endl;
-                                cout << "t = " << t << endl;
-                                exit(-2);
-                            }*/
-                            
-                            // get own exclusive point
-                            for (const int p: tri.p)
-                            {
-                                if (p != iNeiEdgeT0 && p != iNeiEdgeT1)
+                                if (edges[e].t[0] != iNeiEdgeT1 && edges[e].t[1] != iNeiEdgeT1)
                                 {
-                                    iOwnExclusivePoint = p;                                    
-                                    break;
+                                    iEdgeA = e;
                                 }
-                            }                            
-                            const Point& ownExclusivePoint = points[iOwnExclusivePoint];
-
-                            // get edgeA and edgeB
-                            for (int e: tri.e)
-                            {
-                                if (e != iNeiEdge)
+                                else if (edges[e].t[0] != iNeiEdgeT0 && edges[e].t[1] != iNeiEdgeT0)
                                 {
-                                    if (edges[e].t[0] != iNeiEdgeT1 && edges[e].t[1] != iNeiEdgeT1)
-                                    {
-                                        iEdgeA = e;
-                                    }
-                                    else if (edges[e].t[0] != iNeiEdgeT0 && edges[e].t[1] != iNeiEdgeT0)
-                                    {
-                                        iEdgeB = e;
-                                    }
+                                    iEdgeB = e;
                                 }
                             }
-
-                            // get edgeAN and edgeBN
-                            for (int e: nei.e)
-                            {
-                                if (e != iNeiEdge)
-                                {
-                                    if (edges[e].t[0] != iNeiEdgeT1 && edges[e].t[1] != iNeiEdgeT1)
-                                    {
-                                        iEdgeAN = e;
-                                    }
-                                    else if (edges[e].t[0] != iNeiEdgeT0 && edges[e].t[1] != iNeiEdgeT0)
-                                    {
-                                        iEdgeBN = e;
-                                    }
-                                }
-                            }
-                            
-                            Edge& edgeA  = edges[ iEdgeA ];
-                            Edge& edgeB  = edges[ iEdgeB ];
-                            Edge& edgeAN = edges[ iEdgeAN ];
-                            Edge& edgeBN = edges[ iEdgeBN ];
-
-                            for (unsigned int i=0; i<edgeB.nei.size(); ++i)
-                            {
-                                if (edgeB.nei[i] == t)
-                                {
-                                    int iTriB = edgeB.nei[1-i];
-                                    
-                                    if ( edgeB.nei[1-i] != -1 )
-                                    {
-                                        for (int& r: triangles[iTriB].nei)
-                                        {
-                                            if (r == t)
-                                            {
-                                                r = iNei;
-                                                break;
-                                            }
-                                        }
-                                    }
-
-                                    for (int r=0; r<3; ++r)
-                                    {
-                                        if (nei.e[r] == iEdgeAN)
-                                        {
-                                            nei.e[r] = iEdgeB;
-                                            nei.nei[r] = iTriB;
-                                            break;
-                                        }
-                                    }
-
-                                    edgeB.nei[i] = iNei;
-                                    break;
-                                }
-                            }
-
-                            for (unsigned int i=0; i<edgeAN.nei.size(); ++i)
-                            {
-                                if (edgeAN.nei[i] == iNei)
-                                {
-                                    int iTriAN = edgeAN.nei[1-i];
-                                    
-                                    if ( edgeAN.nei[1-i] != -1 )
-                                    {
-                                        Triangle& triAN = triangles[ iTriAN ];
-
-                                        for (int& r: triAN.nei)
-                                        {
-                                            if (r == iNei)
-                                            {
-                                                r = t;
-                                                break;
-                                            }
-                                        }
-                                    }
-                                    
-                                    for (int r=0; r<3; ++r)
-                                    {
-                                        if (tri.e[r] == iEdgeB)
-                                        {
-                                            tri.e[r] = iEdgeAN;
-                                            tri.nei[r] = iTriAN;
-                                            break;
-                                        }
-                                    }
-
-                                    edgeAN.nei[i] = t;
-                                    break;
-                                }
-                            }
-                            
-                            tri.p[0] = iNeiEdgeT0;
-                            tri.p[1] = iExclusivePoint;
-                            tri.p[2] = iOwnExclusivePoint;
-                            
-                            /*if (t == 3)
-                            {
-                                cout << "tri.p[0] = " << tri.p[0] << endl;
-                                cout << "tri.p[1] = " << tri.p[1] << endl;
-                                cout << "tri.p[2] = " << tri.p[2] << endl;
-                                
-                            }
-                            
-                            
-                            
-                            if (tri.p[0] == tri.p[1] || tri.p[0] == tri.p[2] || tri.p[1] == tri.p[2])
-                            {
-                                cout << "points are same in flip triangles" << endl;
-                                cout << "tri.p[0] = " << tri.p[0] << endl;
-                                cout << "tri.p[1] = " << tri.p[1] << endl;
-                                cout << "tri.p[2] = " << tri.p[2] << endl;
-                                cout << "t = " << t << endl;
-                                exit(-2);
-                            }*/
-                            
-                            nei.p[0] = iNeiEdgeT1;
-                            nei.p[1] = iExclusivePoint;
-                            nei.p[2] = iOwnExclusivePoint;
-                            
-                            /*if (t == 3)
-                            {
-                                cout << "nei.p[0] = " << nei.p[0] << endl;
-                                cout << "nei.p[1] = " << nei.p[1] << endl;
-                                cout << "nei.p[2] = " << nei.p[2] << endl;
-                                cout << "iNei = " << iNei << endl;
-                                exit(-2);
-                            }
-                            
-                            if (nei.p[0] == nei.p[1] || nei.p[0] == nei.p[2] || nei.p[1] == nei.p[2])
-                            {
-                                cout << "points are same in flip triangles for nei" << endl;
-                                cout << "nei.p[0] = " << nei.p[0] << endl;
-                                cout << "nei.p[1] = " << nei.p[1] << endl;
-                                cout << "nei.p[2] = " << nei.p[2] << endl;
-                                
-                                exit(-2);
-                            }*/
-
-                            neiEdge.t[0] = iExclusivePoint;
-                            neiEdge.t[1] = iOwnExclusivePoint;
-                            
-                            /*if (triangles[171].p[0] != 178 || triangles[171].p[2] != 14)
-                            {
-                                cout << t << endl;
-                                cout << triangles[171].p[0] << endl;
-                                cout << triangles[171].p[2] << endl;
-                                exit(-2);
-                            }*/
                         }
+
+                        // get edgeAN and edgeBN
+                        for (int e: nei.e)
+                        {
+                            if (e != iNeiEdge)
+                            {
+                                if (edges[e].t[0] != iNeiEdgeT1 && edges[e].t[1] != iNeiEdgeT1)
+                                {
+                                    iEdgeAN = e;
+                                }
+                                else if (edges[e].t[0] != iNeiEdgeT0 && edges[e].t[1] != iNeiEdgeT0)
+                                {
+                                    iEdgeBN = e;
+                                }
+                            }
+                        }
+                        
+                        Edge& edgeA  = edges[ iEdgeA ];
+                        Edge& edgeB  = edges[ iEdgeB ];
+                        Edge& edgeAN = edges[ iEdgeAN ];
+                        Edge& edgeBN = edges[ iEdgeBN ];
+
+                        // detect iTriB
+                        for (int ii: edgeB.nei)
+                        {
+                            if (ii != t)
+                            {
+                                iTriB = ii;
+                                break;
+                            }
+                        }
+                        
+                        // detect iTriAN
+                        for (int ii: edgeAN.nei)
+                        {
+                            if (ii != iNei)
+                            {
+                                iTriAN = ii;
+                                break;
+                            }
+                        }
+                        
+                        // swap neighbors of t and nei
+                        // change nei of nei from iTriAN to iTriB
+                        for (int& nn: nei.nei)
+                        {
+                            if (nn == iTriAN)
+                            {
+                                nn = iTriB;
+                                break;
+                            }
+                        }
+                        
+                        // change nei of tri from iTriB to iTriAN
+                        for (int& nn: tri.nei)
+                        {
+                            if (nn == iTriB)
+                            {
+                                nn = iTriAN;
+                                break;
+                            }
+                        }
+                        
+                        // swap neigbours of TriB and TriAN
+                        // change nei of TriB (if exists) from t to iNei
+                        if (iTriB != -1)
+                        {
+                            for (int& r: triangles[iTriB].nei)
+                            {
+                                if (r == t)
+                                {
+                                    r = iNei;
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        // change nei of TriAN (if exists) from iNei to t
+                        if (iTriAN != -1)
+                        {
+                            for (int& nn: triangles[iTriAN].nei)
+                            {
+                                if (nn == iNei)
+                                {
+                                    nn = t;
+                                    break;
+                                }
+                            }
+                        }
+                        
+                        // swap neigbors of edgeB and edgeAN
+                        // change nei of edgeB from t to iNei
+                        for (int& i: edgeB.nei)
+                        {
+                            if (i == t)
+                            {
+                                i = iNei;
+                                break;
+                            }
+                        }
+                        
+                        // change nei of edgeAN from iNei to t
+                        for (int& i: edgeAN.nei)
+                        {
+                            if (i == iNei)
+                            {
+                                i = t;
+                                break;
+                            }
+                        }
+
+                        // swap edges of t and nei
+                        // change edge of nei from iEdgeAN to iEdgeB
+                        for (int& i: nei.e)
+                        {
+                            if (i == iEdgeAN)
+                            {
+                                i = iEdgeB;
+                                break;
+                            }
+                        }
+                        
+                        // change edge of t from iEdgeB to iEdgeAN
+                        for (int& i: tri.e)
+                        {
+                            if (i == iEdgeB)
+                            {
+                                i = iEdgeAN;
+                                break;
+                            }
+                        }
+                        
+                        tri.p[0] = iNeiEdgeT0;
+                        tri.p[1] = iExclusivePoint;
+                        tri.p[2] = iOwnExclusivePoint;
+                        
+                        nei.p[0] = iNeiEdgeT1;
+                        nei.p[1] = iExclusivePoint;
+                        nei.p[2] = iOwnExclusivePoint;
+
+                        neiEdge.t[0] = iExclusivePoint;
+                        neiEdge.t[1] = iOwnExclusivePoint;
                     }
                 }
-            }
-            else
-            {
-                cout << "not finite in flip(...)" << endl;
-                exit(-2);
-            }
+            }            
         }
     }
     
@@ -916,6 +901,24 @@ namespace AFT
     void triPtsCircums (const CVector& A, const CVector& B, const CVector& C, CVector& cnt, double& radius)
     {
         // http://paulbourke.net/geometry/circlesphere/
+        
+        if (A[0] == B[0] && A[1] == B[1])
+        {
+            cout << "A = B in AFT::triPtsCircums(...)" << endl;
+            exit(-2);
+        }
+        
+        if (A[0] == C[0] && A[1] == C[1])
+        {
+            cout << "A = C in AFT::triPtsCircums(...)" << endl;
+            exit(-2);
+        }
+        
+        if (B[0] == C[0] && B[1] == C[1])
+        {
+            cout << "B = C in AFT::triPtsCircums(...)" << endl;
+            exit(-2);
+        }
 
         double xDelta_a, yDelta_a;
         double xDelta_b, yDelta_b;
@@ -1022,12 +1025,18 @@ namespace AFT
         points[tmpTriangle.p[1]].tri.push_back (triangles.size() - 1);
         points[tmpTriangle.p[2]].tri.push_back (triangles.size() - 1);
         
-        edges[tmpTriangle.e[0]].tri.push_back (triangles.size() - 1);
-        edges[tmpTriangle.e[1]].tri.push_back (triangles.size() - 1);
-        edges[tmpTriangle.e[2]].tri.push_back (triangles.size() - 1);
+        //edges[tmpTriangle.e[0]].nei.push_back (triangles.size() - 1);
+        //edges[tmpTriangle.e[1]].nei.push_back (triangles.size() - 1);
+        //edges[tmpTriangle.e[2]].nei.push_back (triangles.size() - 1);
         
         for (int e: tmpTriangle.e)
         {
+            if (edges[e].alive == false)
+            {
+                cout << "edges[e] cannot be dead in AFT::addToTriangleList(...)" << endl;
+                exit(-2);
+            }
+        
             if (edges[e].nei.size() > 1)
             {
                 cout << "edges[e].nei.size cannot be greater than 1 in AFT::addToTriangleList(...)" << endl;
@@ -1035,6 +1044,11 @@ namespace AFT
                 for (int i=0; i<edges[e].nei.size(); ++i)
                 {
                     cout << "edges[e].nei = " << edges[e].nei[i] << endl;
+                    
+                    if (edges[e].nei[i] != -1)
+                    {
+                        cout << "triangles[" << edges[e].nei[i] << "].alive = " << triangles[edges[e].nei[i]].alive << endl;
+                    }
                 }
                 
                 for (int i=0; i<tmpTriangle.e.size(); ++i)
@@ -1051,6 +1065,12 @@ namespace AFT
                 cout << "p[1] = " << tmpTriangle.p[1] << endl;
                 cout << "p[2] = " << tmpTriangle.p[2] << endl;
                 
+                
+                
+                //eraseDeadPoints (points, edges, triangles);
+                //eraseDeadEdges (edges, triangles);
+                //eraseDeadTriangles (triangles);
+                
                 outputTrianglesVTK (points, triangles, "../out", "tri.vtk");
                 
                 
@@ -1058,8 +1078,8 @@ namespace AFT
             }
             
             if (edges[e].nei.size() == 1)
-            {
-                tmpTriangle.nei.push_back (edges[e].nei[0]); // you need do this before the following statement
+            {    
+                tmpTriangle.nei.push_back (edges[e].nei[0]);
             }
             
             edges[e].nei.push_back (triangles.size() - 1);
@@ -1200,6 +1220,100 @@ namespace AFT
         }
         
         return true;
+    }
+    
+    void eraseDeadTriangles (vector<Triangle>& triangles, vector<Point>& points, vector<Edge>& edges)
+    {
+        for (int it=0; it<triangles.size(); ++it)
+        {
+            triangles[it].id = it;
+        }
+        
+        triangles.erase (remove_if (triangles.begin(), triangles.end(), [](Triangle& t) { return t.alive == false; }), triangles.end());
+    
+        /*for (int it=0; it<triangles.size(); ++it)
+        {
+            if (triangles[it].alive == false)
+            {
+                triangles.erase(triangles.begin() + it);
+            }
+        }*/
+        
+        for (int it=0; it<triangles.size(); ++it)
+        {
+            Triangle& t = triangles[it];
+        
+            for (int ip: t.p)
+            {
+                Point& p = points[ip];
+                
+                for (int pp=0; pp<p.tri.size(); ++pp)
+                {
+                    if (p.tri[pp] == t.id)
+                    {
+                        p.tri[pp] = it;
+                        break;
+                    }
+                }
+            }
+            
+            for (int ie: t.e)
+            {
+                Edge& e = edges[ie];
+                
+                for (int pp=0; pp<e.nei.size(); ++pp)
+                {
+                    if (e.nei[pp] == t.id)
+                    {
+                        e.nei[pp] = it;
+                        break;
+                    }
+                }
+            }
+        }
+        
+        for (int it=0; it<triangles.size(); ++it)
+        {
+            Triangle& t = triangles[it];
+        
+            t.id = it;
+        }
+        
+        for (int it=0; it<triangles.size(); ++it)
+        {
+            Triangle& t = triangles[it];
+            
+            t.nei.clear();
+            
+            //t.nei.erase (remove_if (t.nei.begin(), t.nei.end(), [](int i) { return i != -1; }), t.nei.end());
+        }
+        
+        for (int ie=0; ie<edges.size(); ++ie)
+        {
+            Edge& e = edges[ie];
+            
+            if (e.alive == false)
+            {
+                cout << "e.alive == false in eraseDeadTriangles(...)" << endl;
+                exit(-2);
+            }
+            
+            if (e.nei.size() != 2)
+            {
+                cout << "nei size must be 2 in eraseDeadTriangles(...)" << endl;
+                cout << "e.nei.size() = " << e.nei.size() << endl;
+                cout << "ie = " << ie << endl;
+                exit(-2);
+            }
+            
+            for (int n=0; n<e.nei.size(); ++n)
+            {
+                if (e.nei[n] != -1)
+                {
+                    triangles[e.nei[n]].nei.push_back (e.nei[1-n]);
+                }
+            }
+        }
     }
 }
 

@@ -21,6 +21,7 @@ using std::unique_ptr;
 using std::setw;
 using std::isfinite;
 using std::deque;
+using std::remove_if;
 
 namespace AFT
 {
@@ -32,6 +33,7 @@ namespace AFT
         bool newlyCreated;
         vector<int> tri;
         vector<int> e;
+        int id;
         
         Point();
         bool eraseParentEdge (int iEdge);
@@ -45,9 +47,11 @@ namespace AFT
         int belonging;
         bool newlyCreated;
         vector<int> nei;
-        vector<int> tri;
+        //vector<int> tri;
+        int id;
 
         Edge();
+        bool eraseParentTri (int iTri);
     };
     
     struct Triangle
@@ -56,6 +60,7 @@ namespace AFT
         vector<int> p;
         vector<int> e;
         vector <int> nei;
+        int id;
         
         Triangle ();
         CVector centroid(const vector<Point>& points);
@@ -129,6 +134,7 @@ namespace AFT
     int checkNumberOfEdgeIntersection (const Point& closestPoint, const Point& frontListPoint, EdgeADT& edgeADT);
     void knowParentTriangles (vector<Edge>& edges, const vector<Triangle>& triangles);
     void addToEdgeList (Edge& edge, int iP1, int iP2, vector<Edge>& edges, EdgeADT& edgeADT, vector<Point>& points);
+    void eraseDeadEdges (vector<Edge>& edges, vector<Triangle>& triangles, vector<Point>& points);
     
     // Intersection
     bool doIntersect (const CVector& p1, const CVector& q1, const CVector& p2, const CVector& q2, bool& exactMatch);
@@ -150,6 +156,7 @@ namespace AFT
     void addToTriangleList(vector<Triangle>& triangles, Triangle& tmpTriangle, TriangleADT& triangleADT, vector<Point>& points, CircleADT& circleADT, vector<Edge>& edges);
     CVector cntTriangle3Pts (const CVector& p0, const CVector& p1, const CVector& p2);
     bool triQuality (const CVector& p0, const CVector& p1, const CVector& p2, double rho);
+    void eraseDeadTriangles (vector<Triangle>& triangles, vector<Point>& points, vector<Edge>& edges);
     
     // Reblanking
     void fieldToFringe (Grid& gr, Grid& ogr, int crt);
@@ -157,18 +164,19 @@ namespace AFT
     
     // Point
     //void findClosestPoint (FrontMember& fm, vector<Edge>& edges, vector<Point>& points);    
-    Point getNewPt (const Point& t0, const Point& t1, double aveTriSize, EdgeADT& edge01ADT);
+    Point getNewPt (const Point& t0, const Point& t1, double aveTriSize, EdgeADT& edge01ADT, TriangleADT& triangleADT);
     bool rayCasting (const Point& p, EdgeADT& edgeADT);    
     void addToPointList (Point& p, vector<Point>& points, PointADT& pointADT);
     double getPointDistance (double r);
     bool eligible (int iCPX, Point& CPX, bool isNewPoint, int iA, int iB, double aveTriArea, double& score, bool& A_CPX_exists, bool& B_CPX_exists, int& iA_CPX, int& iB_CPX, vector<FrontMember>& frontList, vector<Edge>& edges, EdgeADT& edgeADT, EdgeADT& edge01ADT, TriangleADT& triangleADT, vector<Point>& points, PointADT& pointADT, PointADT& edgeCenterADT, CircleADT& circleADT);
     bool pointsNearby (const CVector& range1, const CVector& range2, PointADT& pointADT, PointADT& edgeCenterADT);
     bool pointExists (const Point& p, PointADT& pointADT, int& result);
-    void srchCandPts (FrontMember& fm, vector<Edge>& edges, vector<Point>& points, PointADT& pointADT, deque<int>& candPts, double rho, EdgeADT& edgeADT, EdgeADT& edge01ADT);
+    void srchCandPts (FrontMember& fm, vector<Edge>& edges, vector<Point>& points, PointADT& pointADT, deque<int>& candPts, double rho, EdgeADT& edgeADT, EdgeADT& edge01ADT, TriangleADT& triangleADT);
     bool checkTwoFormingEdges (const Point& CPX, const Point& A, const Point& B, bool& A_CPX_exists, bool& B_CPX_exists, int& iA_CPX, int& iB_CPX,
             vector<Edge>& edges, EdgeADT& edgeADT, vector<Point>& points);
     bool checkCircumBound (const Point& CPX, const Point& A, const Point& B, double rho);    
     void ptCCInter (const Point& CPX, CircleADT& circleADT, TriangleADT& triangleADT, vector<Triangle>& triangles, vector<FrontMember>& frontList, vector<Edge>& edges, EdgeADT& edgeADT, vector<Point>& points, PointADT& pointADT);
+    void eraseDeadPoints (vector<Point>& points, vector<Edge>& edges, vector<Triangle>& triangles);
     
     double getAveTriArea (const vector<Edge>& edges, const vector<Point>& points);
     void aft (vector<Grid>& gr, Grid& finalGrid);

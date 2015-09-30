@@ -137,7 +137,7 @@ namespace AFT
             }
         }*/
         
-        for (Edge& e: edges)
+        /*for (Edge& e: edges)
         {
             if (e.nei.size() == 1)
             {
@@ -148,7 +148,7 @@ namespace AFT
                 cout << "e.nei.size() == 0 in knowParentTriangles(...)" << endl;
                 exit(-2);
             }
-        }
+        }*/
     }
     
     void addToEdgeList (Edge& edge, int iP1, int iP2, vector<Edge>& edges, EdgeADT& edgeADT, vector<Point>& points)
@@ -158,9 +158,91 @@ namespace AFT
         edges.push_back (edge);
         ADT::ADTPoint vec = edgeADT.createADTPoint (points[iP1], points[iP2]);
         vec.idx = edges.size() - 1;
+        
         edgeADT.insert (vec, edgeADT.root, tempBool);
         
         points[iP1].e.push_back (edges.size() - 1);
         points[iP2].e.push_back (edges.size() - 1);
+    }
+    
+    void eraseDeadEdges (vector<Edge>& edges, vector<Triangle>& triangles, vector<Point>& points)
+    {
+        for (int ie=0; ie<edges.size(); ++ie)
+        {
+            Edge& e = edges[ie];
+            
+            e.id = ie;
+        }
+        
+        edges.erase (remove_if (edges.begin(), edges.end(), [](Edge& e) { return e.alive == false; }), edges.end());
+        
+        /*for (int ie=0; ie<edges.size(); ++ie)
+        {
+            Edge& e = edges[ie];
+        
+            if (e.alive == false)
+            {
+                edges.erase(edges.begin() + ie);
+            }
+        }*/
+        
+        for (int ie=0; ie<edges.size(); ++ie)
+        {
+            Edge& e = edges[ie];
+            
+            for (int ip: e.t)
+            {
+                Point& p = points[ip];
+                
+                for (int pp=0; pp<p.e.size(); ++pp)
+                {
+                    if (p.e[pp] == e.id)
+                    {
+                        p.e[pp] = ie;
+                        break;
+                    }
+                }
+            }
+            
+            for (int t: e.nei)
+            {            
+                if (t != -1)
+                {
+                    Triangle& tri = triangles[t];
+                    
+                    for (int pp=0; pp<tri.p.size(); ++pp)
+                    {
+                        if (tri.e[pp] == e.id)
+                        {
+                            tri.e[pp] = ie;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        
+        for (int ie=0; ie<edges.size(); ++ie)
+        {
+            Edge& e = edges[ie];
+            
+            e.id = ie;
+        }
+    }
+    
+    bool Edge::eraseParentTri (int iTri)
+    {
+        for (int it=0; it<nei.size(); ++it)        
+        {
+            int t = nei[it];
+        
+            if (t == iTri)
+            {
+                nei.erase (nei.begin() + it);
+                return true;
+            }
+        }
+        
+        return false;
     }
 }

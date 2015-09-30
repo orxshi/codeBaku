@@ -85,41 +85,64 @@ namespace AFT
         advanceFront (frontList, points, aveTriArea, edges, triangles, triangleADT, pointADT, edgeCenterADT, edgeADT, edge01ADT, newGridId, edgeCenters, circleADT);
         cout << "done!" << endl;
         
+        eraseDeadPoints (points, edges, triangles);
+        eraseDeadEdges (edges, triangles, points);
+        eraseDeadTriangles (triangles, points, edges);
+        
         cout << "Outputing unflipped triangles... " << flush;        
         outputTrianglesVTK (points, triangles, gr[0].mainDir, "tri.vtk");
         cout << "done!" << endl;
         
-        cout << "Neighborhood... " << flush;
-        knowParentTriangles (edges, triangles);
-        findNeighbors (edges, triangles);
-        cout << "done!" << endl;
         
-        /*cout << "Flipping triangles... " << flush;
+        
+        
+        
+        
+        //cout << "Neighborhood... " << flush;
+        //knowParentTriangles (edges, triangles);
+        //findNeighbors (edges, triangles);
+        //cout << "done!" << endl;
+        
+        
+        
+        cout << "Flipping triangles... " << flush;
         flip (triangles, edges, points);
         cout << "done!" << endl;
         
         cout << "Flipping triangles... " << flush;
         flip (triangles, edges, points);
-        cout << "done!" << endl;*/
+        cout << "done!" << endl;
+        
+        
+        
+        
         
         cout << "Outputing flipped triangles... " << flush;    
         outputTrianglesVTK (points, triangles, gr[0].mainDir, "triFlip.vtk");
         cout << "done!" << endl;
         
+        
+        
         cout << "Creating cells... " << flush;
         createCells (offsetZ, points, newGrid, triangles, phys, newGridId);
         cout << "done!" << endl;
         
-        /*cout << "Outputing new grid... " << flush;
+        cout << "Outputing new grid... " << flush;
         //newGrid.createOutputDir( gr[0].mainDir );
         //newGrid.outAllTecplot();
         newGrid.outAllVTK(0);
-        cout << "done!" << endl;*/
+        cout << "done!" << endl;
         
         cout << "Creating final grid... " << flush;
         createFinalGrid (finalGrid, gr, newGrid);
         //finalGrid.createOutputDir( gr[0].mainDir );
         cout << "done!" << endl;
+        
+        
+        
+        
+        
+        
         
         /*cout << "Outputing final grid... " << flush;        
         //finalGrid.outAllTecplot();
@@ -131,6 +154,9 @@ namespace AFT
         //finalGrid.read_input();
         //finalGrid.printInput();
         //cout << "done!" << endl;
+        
+        cout << "finished AFT" << endl;
+        //newGrid.~Grid();
     }
     
     double getAveTriArea (const vector<Edge>& edges, const vector<Point>& points)

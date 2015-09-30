@@ -28,20 +28,34 @@ int main(int argc, char** argv)
     bg.read_grid();
     bg.set_grid();
     
+    cout << "main 1" << endl;
+    
     Grid ag (mainDir, 1);
     ag.read_grid();
     ag.set_grid();
     
+    cout << "main 2" << endl;
+    
     //Grid finalGrid (mainDir, 3);
+    
+    
     
     OscInit oscInit;
     oscInit.read();    
     oscInit.init (ag);
     oscInit.init (bg);
     
+    
+    
     vector<Grid> grs;    
     grs.push_back(bg);
+    
+    cout << "main 3" << endl;
+    
     grs.push_back(ag);
+    
+    cout << "main 4" << endl;        
+    
     
     grs[0].setWallDistance(2);
     grs[1].setWallDistance(3);
@@ -106,6 +120,8 @@ int main(int argc, char** argv)
         oa.moveGrid (grs[1]);
     }
     
+    
+    
     // solve osc airfoil
     for (double time=0.; time<1.; time+=1.)
     {
@@ -129,7 +145,9 @@ int main(int argc, char** argv)
         grs[0].outAllVTK(0);
         grs[1].outAllVTK(0);
         
+        
         AFT::aft (grs, finalGrid);
+        exit(-2);
                 
         //oa.setAngles (solOscAirfoil.time);
         //oa.getAllFaceVelocities (gr);

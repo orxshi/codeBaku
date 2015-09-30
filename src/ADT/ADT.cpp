@@ -10,7 +10,9 @@ ADT::ADT()
 
 ADT::~ADT()
 {
+    cout << "destroying tree" << endl;
     destroy_tree();
+    cout << "done destroying tree" << endl;
 }
 
 void ADT::destroy_tree(Node *&leaf)
@@ -19,20 +21,35 @@ void ADT::destroy_tree(Node *&leaf)
     {
         destroy_tree(leaf->left);
         destroy_tree(leaf->right);
-        delete leaf->p;
+        
+        if (leaf->p != NULL)
+        {
+            delete leaf->p;
+        }
+        
         delete leaf;
         leaf = NULL;
     }
 }
 
 void ADT::destroy_tree()
-{
-    destroy_tree(root);
-
+{   
     for (unsigned int i=0; i<searchStack.size(); ++i)
     {
         searchStack[i] = NULL;
     }
+    
+    for (unsigned int i=0; i<addrsInTree.size(); ++i)
+    {
+        addrsInTree[i] = NULL;
+    }
+    
+    for (unsigned int i=0; i<addresses.size(); ++i)
+    {
+        addresses[i] = NULL;
+    }
+
+    destroy_tree(root);
 }
 
 void ADT::insert (ADTPoint& point, Node* node, bool& isInserted)
@@ -66,7 +83,7 @@ void ADT::insert (ADTPoint& point, Node* node, bool& isInserted)
             isInserted = true;            
             node->left->p = new ADTPoint (point);
             idsInTree.push_back (point.idx);
-            addrsInTree.push_back (node);            
+            addrsInTree.push_back (node->left);            
             node->left->isEmpty = false;
         }
         else if (node->left->isEmpty)
@@ -75,7 +92,7 @@ void ADT::insert (ADTPoint& point, Node* node, bool& isInserted)
             node->left->p = new ADTPoint (point);
             node->left->isEmpty = false;
             idsInTree.push_back (point.idx);
-            addrsInTree.push_back (node);
+            addrsInTree.push_back (node->left);
         }
         else
         {
@@ -108,7 +125,7 @@ void ADT::insert (ADTPoint& point, Node* node, bool& isInserted)
             isInserted = true;
             node->right->p = new ADTPoint (point);
             idsInTree.push_back (point.idx);
-            addrsInTree.push_back (node);
+            addrsInTree.push_back (node->right);
             node->right->isEmpty = false;
         }
         else if (node->right->isEmpty)
@@ -117,7 +134,7 @@ void ADT::insert (ADTPoint& point, Node* node, bool& isInserted)
             node->right->p = new ADTPoint (point);
             node->right->isEmpty = false;
             idsInTree.push_back (point.idx);
-            addrsInTree.push_back (node);
+            addrsInTree.push_back (node->right);
         }
         else
         {
@@ -176,9 +193,7 @@ void ADT::searchChildren (const Node* node, const ADTPoint& targetPoint)
 void ADT::search (Node* node, const ADTPoint& targetPoint, int& index)
 {
     if (node != NULL)
-    {    
-        
-    
+    {
         // check whether the point is inside the element
         if (!node->isEmpty && node->p->idx!=-1 && doCubesOverlap (node, targetPoint) && compareFunction (node, targetPoint) )
         {
@@ -277,10 +292,19 @@ bool ADT::removeViaID (int id)
     {
         if (id == idsInTree[i])
         {
+            cout << "found id in tree" << endl;
+            cout << "addrsInTree[i] = " << addrsInTree[i] << endl;            
+        
             if (addrsInTree[i] != NULL)
             {
                 addrsInTree[i]->isEmpty = true;
-                delete addrsInTree[i]->p;
+                
+                if (addrsInTree[i]->p != NULL)
+                {
+                    delete addrsInTree[i]->p;
+                    addrsInTree[i]->p = NULL;
+                }
+                
                 addrsInTree[i] = NULL;
                 addrsInTree.erase (addrsInTree.begin() + i);
                 idsInTree.erase (idsInTree.begin() + i);

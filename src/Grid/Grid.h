@@ -87,6 +87,9 @@ struct Grid
     // Constructor
     Grid (string mainDir, int id);
     Grid (const Grid&);
+    
+    // Destructor
+    ~Grid ();
 
     // Private Methods
     void read_ptSize ();
