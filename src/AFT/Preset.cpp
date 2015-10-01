@@ -76,20 +76,13 @@ namespace AFT
         }
     }
     
-    void createFrontList (const vector<Edge>& edges, vector<FrontMember>& frontList, const vector<Point>& points)
+    void createFrontList (vector<Edge>& edges, vector<FrontMember>& frontList, vector<Point>& points)
     {
         for (unsigned int e=0; e<edges.size(); ++e)
         {
-            addToFrontList (e, frontList);
+            addToFrontList (e, frontList, points, edges);
         }
 
-        sortFrontList (frontList, points, edges);
-        
-        /*for (int e=0; e<edges.size(); ++e)
-        {
-            cout << edges[e].newlyCreated << endl;
-        }
-        
-        exit(-2);*/
+        //sortFrontList (frontList, points, edges);
     }
 }

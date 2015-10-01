@@ -5,17 +5,11 @@ namespace AFT
     void aft (vector<Grid>& gr, Grid& finalGrid)
     {
         cout << "Allocating... " << flush;
-        int newGridId = 2;
-        //int finalGridId = 3;
+        int newGridId = 2;        
         double offsetZ = 1.;
         int phys = 1;
         Grid newGrid (gr[0].mainDir, newGridId);        
-        //finalGrid.id = finalGridId;
         double aveTriArea;
-        //Point meshCenter;
-        //meshCenter.dim[0] = 0.5;
-        //meshCenter.dim[1] = 0.;
-        //meshCenter.dim[2] = 0.;
         vector<Point> points;
         vector<Point> edgeCenters;
         vector<Edge> edges;
@@ -33,6 +27,7 @@ namespace AFT
         CircleADT circleADT;
         cout << "done!" << endl;
         
+        // this should not be in AFT
         cout << "Trimming/Re-blanking... " << flush;
         gr[0].trimWhoHasFringeNeighbor();
         gr[1].trimWhoHasFringeNeighbor();
@@ -40,6 +35,7 @@ namespace AFT
         gr[1].trimWhoHasTrimNeighbor (2);
         cout << "done!" << endl;
         
+        // this too
         cout << "Outputing after trimming/reblanking... " << flush;
         //gr[0].outAllTecplot();
         //gr[1].outAllTecplot();
@@ -49,9 +45,6 @@ namespace AFT
      
         cout << "Preparing... " << flush;
         setPointsEdges (gr, points, edges, edgeCenters, newGridId);
-        
-        cout << "edges.size() = " << edges.size() << endl;
-        
         createFrontList (edges, frontList, points);
         aveTriArea = getAveTriArea (edges, points);
         cout << "done!" << endl;
@@ -69,59 +62,45 @@ namespace AFT
             }
         }
         
-        exportToGMSH (points, mesh0Edges, mesh1Edges, gr[0].mainDir); cout << "exported to GMSH" << endl;
-        
-        edge0ADT.build (points, mesh0Edges); cout << "built edge0ADT" << endl;
-        edge1ADT.build (points, mesh1Edges); cout << "built edge1ADT" << endl;
-        edgeADT.build (points, edges); cout << "built edgeADT" << endl;
-        edge01ADT.build (points, edges); cout << "built edge01ADT" << endl;
-        triangleADT.build (edgeADT); cout << "built triangleADT" << endl;
-        pointADT.build (points); cout << "built pointADT" << endl;
-        edgeCenterADT.build (edgeCenters); cout << "built edgeCenterADT" << endl;
-        circleADT.build (edgeADT); cout << "built circleADT" << endl;
+        edge0ADT.build (points, mesh0Edges);
+        edge1ADT.build (points, mesh1Edges);
+        edgeADT.build (points, edges);
+        edge01ADT.build (points, edges);
+        triangleADT.build (edgeADT);
+        pointADT.build (points);
+        edgeCenterADT.build (edgeCenters);
+        circleADT.build (edgeADT);
         cout << "done!" << endl;
+        
+        cout << "Exporting to GMSH... " << flush;
+        exportToGMSH (points, mesh0Edges, mesh1Edges, gr[0].mainDir);
+        cout << "done!" << endl;        
         
         cout << "Advancing front... " << flush;
         advanceFront (frontList, points, aveTriArea, edges, triangles, triangleADT, pointADT, edgeCenterADT, edgeADT, edge01ADT, newGridId, edgeCenters, circleADT);
         cout << "done!" << endl;
         
+        cout << "Erasing dead elements... " << flush;
         eraseDeadPoints (points, edges, triangles);
         eraseDeadEdges (edges, triangles, points);
         eraseDeadTriangles (triangles, points, edges);
+        cout << "done!" << endl;
         
         cout << "Outputing unflipped triangles... " << flush;        
         outputTrianglesVTK (points, triangles, gr[0].mainDir, "tri.vtk");
-        cout << "done!" << endl;
+        cout << "done!" << endl;        
         
-        
-        
-        
-        
-        
-        //cout << "Neighborhood... " << flush;
-        //knowParentTriangles (edges, triangles);
-        //findNeighbors (edges, triangles);
-        //cout << "done!" << endl;
-        
-        
-        
-        cout << "Flipping triangles... " << flush;
+        /*cout << "Flipping triangles... " << flush;
         flip (triangles, edges, points);
         cout << "done!" << endl;
         
         cout << "Flipping triangles... " << flush;
         flip (triangles, edges, points);
         cout << "done!" << endl;
-        
-        
-        
-        
         
         cout << "Outputing flipped triangles... " << flush;    
         outputTrianglesVTK (points, triangles, gr[0].mainDir, "triFlip.vtk");
-        cout << "done!" << endl;
-        
-        
+        cout << "done!" << endl;*/
         
         cout << "Creating cells... " << flush;
         createCells (offsetZ, points, newGrid, triangles, phys, newGridId);
@@ -138,12 +117,6 @@ namespace AFT
         //finalGrid.createOutputDir( gr[0].mainDir );
         cout << "done!" << endl;
         
-        
-        
-        
-        
-        
-        
         /*cout << "Outputing final grid... " << flush;        
         //finalGrid.outAllTecplot();
         finalGrid.outAllVTK(0);
@@ -154,42 +127,19 @@ namespace AFT
         //finalGrid.read_input();
         //finalGrid.printInput();
         //cout << "done!" << endl;
-        
-        cout << "finished AFT" << endl;
-        //newGrid.~Grid();
-    }
-    
-    double getAveTriArea (const vector<Edge>& edges, const vector<Point>& points)
-    {
-        double x,y,size=0.;
-        
-        for (const Edge& e: edges)
-        {
-            const Point& t0 = points[ e.t[0] ];
-            const Point& t1 = points[ e.t[1] ];
-            
-            x = t0.dim[0] - t1.dim[0];
-            y = t0.dim[1] - t1.dim[1];
-            size += pow(x,2) + pow(y,2);
-        }
-        
-        size /= edges.size();
-        size *= 2.;
-        
-        return ( sqrt(3.)/4.*sqrt(size) );
     }
     
     void construct (int iCPX, bool A_CPX_exists, bool B_CPX_exists, int iA_CPX, int iB_CPX, int iA, int iB, vector<FrontMember>& frontList,
-             vector<Edge>& edges, vector<Triangle>& triangles, TriangleADT& triangleADT, EdgeADT& edgeADT, int newGridId, vector<Point>& points, vector<Point>& edgeCenters, PointADT& edgeCenterADT, CircleADT& circleADT)
+             vector<Edge>& edges, vector<Triangle>& triangles, TriangleADT& triangleADT, EdgeADT& edgeADT, int newGridId, vector<Point>& points, vector<Point>& edgeCenters, PointADT& edgeCenterADT, CircleADT& circleADT, int iFrontEdge)
     {
-        int iFrontEdge = frontList.front().edge;
+        //int iFrontEdge = frontList.front().edge;
         
         if (!A_CPX_exists)
         {
             Edge tmpEdge = createEdge (iA, iCPX, newGridId, true);
             addToEdgeList (tmpEdge, iA, iCPX, edges, edgeADT, points);
             iA_CPX = edges.size() - 1;
-            addToFrontList (iA_CPX, frontList);
+            addToFrontList (iA_CPX, frontList, points, edges);
             
             Point cntPoint;
             cntPoint.belonging = newGridId;
@@ -206,7 +156,7 @@ namespace AFT
             Edge tmpEdge = createEdge (iB, iCPX, newGridId, true);
             addToEdgeList (tmpEdge, iB, iCPX, edges, edgeADT, points);
             iB_CPX = edges.size() - 1;
-            addToFrontList (iB_CPX, frontList);
+            addToFrontList (iB_CPX, frontList, points, edges);
             
             Point cntPoint;
             cntPoint.belonging = newGridId;
@@ -219,10 +169,10 @@ namespace AFT
         }
         
         Triangle tmpTriangle = createTriangle (iFrontEdge, iA_CPX, iB_CPX, edges, points);
-        addToTriangleList (triangles, tmpTriangle, triangleADT, points, circleADT, edges);
+        addToTriangleList (triangles, tmpTriangle, triangleADT, points, circleADT, edges, frontList);
         
-        eraseFromFrontList (frontList);
-        sortFrontList (frontList, points, edges);
+        eraseFromFrontList (frontList, iFrontEdge);
+        //sortFrontList (frontList, points, edges);
     }
     
     void exportToGMSH (const vector<Point>& points, const vector<Edge>& mesh0Edges, const vector<Edge>& mesh1Edges, string dir)
@@ -427,43 +377,34 @@ namespace AFT
         Point& B = points[iB];
         
         Point& CPX = points[pts[i]];
-        triPtsCircums (CPX.dim, A.dim, B.dim, center, radius);
-
-        cout << "i = " << i << endl;
-        cout << "pts[i] = " << pts[i] << endl;
-        cout << "CPX.dim.size() = " << CPX.dim.size() << endl;
-        cout << "CPX.dim[0] = " << CPX.dim[0] << endl;
-        cout << "CPX.dim[1] = " << CPX.dim[1] << endl;
-        cout << "radius = " << radius << endl;
-                    cout << "center[0] = " << center[0] << endl;
-                    cout << "center[1] = " << center[1] << endl;
+        triPtsCircums (CPX.dim, A.dim, B.dim, center, radius);        
+                
+        //cout << "iA = " << iA << endl;
+        //cout << "iB = " << iB << endl;
         
         for (int j=0; j<pts.size(); ++j)
         {
-            if (j != i)
+            //cout << "j = " << j << endl;
+            //cout << "i = " << i << endl;
+            //cout << "pts[j] = " << pts[j] << endl;
+            if (j != i && pts[j] != -1)
             {
-                //cout << "points[pts[j]].dim.size() = " << points[pts[j]].dim.size() << endl;
-            
                 CVector d = points[pts[j]].dim - center;
-                
-                
 
                 if ( (radius - mag(d)) > 1e-5 )
                 {
-                    cout << "j = " << j << endl;
-                    cout << "pts[j] = " << pts[j] << endl;
-                    cout << "points[pts[j]].dim[0] = " << points[pts[j]].dim[0] << endl;
-                    cout << "points[pts[j]].dim[1] = " << points[pts[j]].dim[1] << endl;
-                    cout << "d[0] = " << d[0] << endl;
-                    cout << "d[1] = " << d[1] << endl;
-                    cout << "mag(d) = " << mag(d) << endl;
-                    cout << "radius2 = " << radius << endl;
-                    
-                    //cin.ignore();
-                    
+                    pts[i] = -1;
                     i = j;
+                    //cout << "pts[i] = " << pts[i] << endl;                    
+                    //pts.erase (pts.begin() + j);
+                    //cout << "radius = " << radius << endl;
+                    //cout << "mag(d) = " << mag(d) << endl;
                     found = true;
                     break;
+                }
+                else
+                {
+                    pts[j] = -1;
                 }
             }
         }
@@ -476,14 +417,14 @@ namespace AFT
     
     int Tanemura_Merriam (int iA, int iB, vector<Point>& points, deque<int>& pts)
     {
+        //cout << "iA = " << iA << endl;
+        //cout << "iB = " << iB << endl;        
+    
         if (pts.size() == 0)
         {
             cout << "pts.size() == 0 in AFT::Tanemura_Merriam(...)" << endl;
             exit(-2);
         }
-        
-        cout << "iA = " << iA << endl;
-        cout << "iB = " << iB << endl;
         
         int i = 0;
         

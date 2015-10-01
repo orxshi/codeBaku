@@ -8,7 +8,6 @@ SOURCES=AFT.cpp\
 	Preset.cpp\
 	Trimming.cpp\
 	Triangle.cpp\
-	Intersection.cpp\
 	Point.cpp\
 	ReBlanking.cpp\
 	Front.cpp\

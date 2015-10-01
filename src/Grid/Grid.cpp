@@ -1,17 +1,13 @@
 #include "Grid.h"
 
 Grid::~Grid ()
-{
-    cout << "destroying grid" << endl;
-    cellADT.destroy_tree();
-    cout << "done destroying grid" << endl;
+{    
+    cellADT.destroy_tree();    
 }
 
 // Constructor
 Grid::Grid (string mainDir, int id)
 {
-    cout << "constructing grid" << endl;
-
     meshFile  = "undefined";    
     bcVerbose[0] = "EMPTY";
     bcVerbose[1] = "SLIP_WALL";
@@ -37,15 +33,11 @@ Grid::Grid (string mainDir, int id)
     logDir.append (slash);
     logDir.append (temps);
     
-    nHoles = 0;    
-    
-    cout << "done constructing grid" << endl;
+    nHoles = 0;
 }
 
 Grid::Grid (const Grid& other)
 {
-    cout << "copy constructing grid" << endl;
-
     n_bou_elm = other.n_bou_elm;
     n_in_elm = other.n_in_elm;
     totalNElms = other.totalNElms;
@@ -66,7 +58,5 @@ Grid::Grid (const Grid& other)
     bt = other.bt;    
     bcVerbose = other.bcVerbose;
     cellADT = other.cellADT;
-    holes = other.holes;    
-    
-    cout << "done copy constructing grid" << endl;
+    holes = other.holes;
 }

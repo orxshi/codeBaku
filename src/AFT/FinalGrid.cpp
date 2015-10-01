@@ -712,16 +712,16 @@ namespace AFT
         PointADT fgcc; // final grid cell centers
         PointADT ngfc; // new grid face centers
         
-        cout << "Building fgp..." << flush;
+        //cout << "Building fgp..." << flush;
         buildPointADTforFinalGrid (fgp, gr);
-        cout << " done" << endl;
+        //cout << " done" << endl;
         
-        cout << "Building fgcc..." << flush;
+        //cout << "Building fgcc..." << flush;
         buildPointADTforFinalGrid (fgcc, gr);
-        cout << " done" << endl;
+        //cout << " done" << endl;
         
         
-        cout << "Building ngfc..." << flush;
+        //cout << "Building ngfc..." << flush;
         ngfc.points.reserve (newGrid.face.size());
         
         for (int iF=0; iF<newGrid.face.size(); ++iF)                
@@ -733,7 +733,7 @@ namespace AFT
         }
         
         ngfc.build();
-        cout << " done" << endl;        
+        //cout << " done" << endl;        
         
         for (const Grid& g: gr)
         {
@@ -744,7 +744,7 @@ namespace AFT
             }
         }
         
-        cout << "added ghost cells of normal grids" << endl;
+        //cout << "added ghost cells of normal grids" << endl;
         //cout << "finalGrid.cell.size() = " << finalGrid.cell.size() << endl;
         //cout << "finalGrid.pt.size() = " << finalGrid.pt.size() << endl;
         
@@ -754,7 +754,7 @@ namespace AFT
             if (pass) addGhostCells (f, newGrid.face, newGrid.cell, newGrid.pt, finalGrid, fgp, fgcc);
         }
         
-        cout << "added ghost cells of new grid" << endl;
+        //cout << "added ghost cells of new grid" << endl;
         //cout << "finalGrid.cell.size() = " << finalGrid.cell.size() << endl;
         //cout << "finalGrid.pt.size() = " << finalGrid.pt.size() << endl;        
         
@@ -772,7 +772,7 @@ namespace AFT
             }
         }
         
-        cout << "added normal grid cells" << endl;
+        //cout << "added normal grid cells" << endl;
         
         for (const Grid& g: gr)
         {
@@ -787,7 +787,7 @@ namespace AFT
             }
         }
         
-        cout << "added intergrid cells" << endl;
+        //cout << "added intergrid cells" << endl;
         
         for (const Face& f: newGrid.face)
         {
@@ -800,20 +800,20 @@ namespace AFT
             }
         }
         
-        cout << "added new grid cells" << endl;
+        //cout << "added new grid cells" << endl;
         
-        cout << "Modifying cell Vertices..." << flush;
+        //cout << "Modifying cell Vertices..." << flush;
         modifyCellVertices (finalGrid, newGrid, gr, fgp);
-        cout << " done!" << endl;
+        //cout << " done!" << endl;
         
-        cout << "Finding Ghosts Faces..." << flush;
+        //cout << "Finding Ghosts Faces..." << flush;
         findOtherNeiOfGhostsFaces (finalGrid, fgcc);
-        cout << " done!" << endl;
+        //cout << " done!" << endl;
         
         finalGrid.totalNElms = finalGrid.cell.size();
         finalGrid.n_in_elm = finalGrid.totalNElms - finalGrid.n_bou_elm;
         
-        cout << "finalGrid.n_bou_elm = " << finalGrid.n_bou_elm << endl;
-        cout << "finalGrid.n_in_elm = " << finalGrid.n_in_elm << endl;
+        //cout << "finalGrid.n_bou_elm = " << finalGrid.n_bou_elm << endl;
+        //cout << "finalGrid.n_in_elm = " << finalGrid.n_in_elm << endl;
     }
 }

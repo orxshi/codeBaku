@@ -561,52 +561,15 @@ namespace AFT
         {
             out << t << endl;
         }
+        
+        out << "SCALARS " << "alive " << "int " << "1" << endl;
+        out << "LOOKUP_TABLE default" << endl;
+        for (unsigned int t=0; t<triangles.size(); ++t)
+        {
+            out << triangles[t].alive << endl;
+        }
 
         out.close();
-    }
-    
-    void findNeighbors (const vector<Edge>& edges, vector<Triangle>& triangles)
-    {
-        /*for (unsigned int t=0; t<triangles.size(); ++t)
-        {
-            triangles[t].nei.resize (3);
-            
-            for (unsigned int i=0; i<triangles[t].e.size(); ++i)
-            {
-                const Edge& e = edges[ triangles[t].e[i] ];
-                
-                if ( e.nei.size() == 2 )
-                {
-                    if (e.nei[0] == t)
-                    {
-                        triangles[t].nei[i] = e.nei[1];
-                    }
-                    else if (e.nei[1] == t)
-                    {
-                        triangles[t].nei[i] = e.nei[0];
-                    }
-                    else
-                    {
-                        cout << "e.nei[x] != t in findNeighbors(...)" << endl;
-                        exit(-2);
-                    }
-                }
-                else
-                {
-                    cout << "e.nei.size() != 2 in findNeighbors(...)" << endl;
-                    exit(-2);
-                }
-            }
-        }*/
-        
-        for (const Triangle& t: triangles)
-        {
-            if (t.nei.size() != 2)
-            {
-                cout << "triangle nei size must be 2 in AFT::findNeighbors(...)" << endl;
-                exit(-2);
-            }
-        }
     }
     
     void flip (vector<Triangle>& triangles, vector<Edge>& edges, const vector<Point>& points)
@@ -629,8 +592,6 @@ namespace AFT
         
         for (unsigned int t=0; t<triangles.size(); ++t)            
         {
-            cout << "t = " << t << endl;
-        
             Triangle& tri = triangles[t];
             
             const int ip0 = tri.p[0];
@@ -642,12 +603,9 @@ namespace AFT
             
             triPtsCircums (pd0, pd1, pd2, center, radius);
             
-            cout << "tri.nei.size() = " << tri.nei.size() << endl;
-            
             for (unsigned int n=0; n<tri.nei.size(); ++n)
             {
-                iNei = tri.nei[n];
-                cout << "iNei = " << iNei << endl;
+                iNei = tri.nei[n];                
                 Triangle& nei = triangles[ iNei ];
                 
                 if (iNei != -1)
@@ -1009,7 +967,7 @@ namespace AFT
     }
     
     void addToTriangleList(vector<Triangle>& triangles, Triangle& tmpTriangle,
-            TriangleADT& triangleADT, vector<Point>& points, CircleADT& circleADT, vector<Edge>& edges)
+            TriangleADT& triangleADT, vector<Point>& points, CircleADT& circleADT, vector<Edge>& edges, const vector<FrontMember>& frontList)
     {
         bool tmpBool;
         
@@ -1040,6 +998,15 @@ namespace AFT
             if (edges[e].nei.size() > 1)
             {
                 cout << "edges[e].nei.size cannot be greater than 1 in AFT::addToTriangleList(...)" << endl;
+                
+                for (const FrontMember& fm: frontList)
+                {
+                    if (e == fm.edge)
+                    {
+                        cout << "edge is in front list" << endl;
+                        break;
+                    }
+                }
                 
                 for (int i=0; i<edges[e].nei.size(); ++i)
                 {
@@ -1314,6 +1281,26 @@ namespace AFT
                 }
             }
         }
+    }
+    
+    double getAveTriArea (const vector<Edge>& edges, const vector<Point>& points)
+    {
+        double x,y,size=0.;
+        
+        for (const Edge& e: edges)
+        {
+            const Point& t0 = points[ e.t[0] ];
+            const Point& t1 = points[ e.t[1] ];
+            
+            x = t0.dim[0] - t1.dim[0];
+            y = t0.dim[1] - t1.dim[1];
+            size += pow(x,2) + pow(y,2);
+        }
+        
+        size /= edges.size();
+        size *= 2.;
+        
+        return ( sqrt(3.)/4.*sqrt(size) );
     }
 }
 

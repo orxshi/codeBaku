@@ -9,10 +9,8 @@ ADT::ADT()
 }
 
 ADT::~ADT()
-{
-    cout << "destroying tree" << endl;
+{    
     destroy_tree();
-    cout << "done destroying tree" << endl;
 }
 
 void ADT::destroy_tree(Node *&leaf)
@@ -292,9 +290,6 @@ bool ADT::removeViaID (int id)
     {
         if (id == idsInTree[i])
         {
-            cout << "found id in tree" << endl;
-            cout << "addrsInTree[i] = " << addrsInTree[i] << endl;            
-        
             if (addrsInTree[i] != NULL)
             {
                 addrsInTree[i]->isEmpty = true;

@@ -58,20 +58,22 @@ namespace AFT
         cin.ignore();*/
     }
     
-    void eraseFromFrontList (vector<FrontMember>& frontList)
+    void eraseFromFrontList (vector<FrontMember>& frontList, int edge)
     {
         if (frontList.size() != 0)
         {
-            frontList.erase (frontList.begin());
+            frontList.erase (remove_if (frontList.begin(), frontList.end(), [&](FrontMember& fm) { return fm.edge == edge; }), frontList.end());
         }
     }
     
-    void addToFrontList (int edge, vector<FrontMember>& frontList)
+    void addToFrontList (int edge, vector<FrontMember>& frontList, vector<Point>& points, vector<Edge>& edges)
     {
         FrontMember fm;
         fm.edge = edge;
         
         frontList.push_back(fm);
+        
+        sortFrontList (frontList, points, edges);
     }
     
     void eraseExistingEdgeFromFrontList (int ie, vector<FrontMember>& frontList)
@@ -100,34 +102,32 @@ namespace AFT
         while (!frontList.empty())
         {
             FrontMember& frontFirst = frontList.front();
+            int iFrontEdge = frontFirst.edge;
             Edge& frontEdge = edges [ frontFirst.edge ];
             int it0 = frontEdge.t[0];
             int it1 = frontEdge.t[1];
             const Point& t0 = points[ it0 ];
             const Point& t1 = points[ it1 ];
             
-            cout << "it0 = " << it0 << endl;
-            cout << "it1 = " << it1 << endl;
+            //cout << "it0 = " << it0 << endl;
+            //cout << "it1 = " << it1 << endl;
                         
             // search existing candidate points
             srchCandPts (frontFirst, edges, points, pointADT, candPts, (2.*rho), edgeADT, edge01ADT, triangleADT);
             
             if (candPts.size() == 0)
             {
-                cout << "outputing triangles" << endl;
-                
-                eraseDeadPoints (points, edges, triangles);
-                eraseDeadEdges (edges, triangles, points);
-                eraseDeadTriangles (triangles, points, edges);
-                
                 outputTrianglesVTK (points, triangles, "../out", "tri.vtk");
                 exit(-2);
             }
             
             // find Delaunay triangle
+            outputTrianglesVTK (points, triangles, "../out", "tri.vtk");
             int iCandPt = Tanemura_Merriam (it0, it1, points, candPts);
             int iCPX = candPts[iCandPt];
             Point CPX = points[iCPX];
+            
+            //cout << "iCPX = " << iCPX << endl;
             
             // check whether forming triangle has a circumradius smaller than threshold radius
             bool existingPointPass = checkCircumBound (CPX, t0, t1, rho);
@@ -137,38 +137,48 @@ namespace AFT
             {
                 existingPointPass = checkTwoFormingEdges (CPX, t0, t1, A_CPX_exists, B_CPX_exists, iA_CPX, iB_CPX, edges, edgeADT, points);
             }
+            /*else
+            {
+                cout << "circumbound check failed" << endl;
+            }*/
             
             // construct triangle if all previous stages are passed
             if (existingPointPass)
             {
-                cout << "constructing with existing point" << endl;
                 construct (iCPX, A_CPX_exists, B_CPX_exists, iA_CPX, iB_CPX, it0,
-                           it1, frontList, edges, triangles, triangleADT, edgeADT, newGridId, points, edgeCenters, edgeCenterADT, circleADT);
+                           it1, frontList, edges, triangles, triangleADT, edgeADT, newGridId, points, edgeCenters, edgeCenterADT, circleADT, iFrontEdge);
             }
             else // if existing point doesn't work
             {
                 // get a point normal to front
-                Point crP = getNewPt (t0, t1, aveTriArea, edge01ADT, triangleADT);
+                Point crP;
+                bool gotNewPt = getNewPt (crP, t0, t1, aveTriArea, edge01ADT, triangleADT, points, edges);
                 
                 // no need to check circumradius for uniform grid
                 // but will be needed in future
                 
                 // check two forming edges intersections
-                bool newPointPass = checkTwoFormingEdges (crP, t0, t1, A_CPX_exists, B_CPX_exists, iA_CPX, iB_CPX, edges, edgeADT, points);
+                //bool newPointPass;
+                //if (gotNewPt)
+                //{
+                //    cout << "checking edges of new point" << endl;
+                //    newPointPass = checkTwoFormingEdges (crP, t0, t1, A_CPX_exists, B_CPX_exists, iA_CPX, iB_CPX, edges, edgeADT, points);
+                //}
                 
-                if (newPointPass)
+                if (gotNewPt)
                 {
-                    cout << "new point pass in AFT::front(...)" << endl;
                     ptCCInter (crP, circleADT, triangleADT, triangles, frontList, edges, edgeADT, points, pointADT);
                     
                     // add new point to points list
                     addToPointList (crP, points, pointADT);
                     int iCrP = points.size() - 1;
                     
-                    cout << "constructing with new point" << endl;
+                    A_CPX_exists = false;
+                    B_CPX_exists = false;
+                    
                     // construct triangle if all previous stages are passed                    
                     construct (iCrP, A_CPX_exists, B_CPX_exists, iA_CPX, iB_CPX, it0,
-                       it1, frontList, edges, triangles, triangleADT, edgeADT, newGridId, points, edgeCenters, edgeCenterADT, circleADT);
+                       it1, frontList, edges, triangles, triangleADT, edgeADT, newGridId, points, edgeCenters, edgeCenterADT, circleADT, iFrontEdge);
                 }
                 else
                 {
@@ -176,11 +186,11 @@ namespace AFT
                 
                     cout << "it0 = " << it0 << endl;
                     cout << "it1 = " << it1 << endl;
-                    cout << "iCPX = " << iCPX << endl;
+                    cout << "iCPX = " << iCPX << endl;                    
                     
-                    eraseDeadPoints (points, edges, triangles);
-                    eraseDeadEdges (edges, triangles, points);
-                    eraseDeadTriangles (triangles, points, edges);
+                    //eraseDeadPoints (points, edges, triangles);
+                    //eraseDeadEdges (edges, triangles, points);
+                    //eraseDeadTriangles (triangles, points, edges);
 
                     outputTrianglesVTK (points, triangles, "../out", "tri.vtk");
 
@@ -188,7 +198,7 @@ namespace AFT
                 }
             }            
           
-            cout << "frontListSize = " << frontList.size() << endl;
+            //cout << "frontListSize = " << frontList.size() << endl;
         }
     }
 }
