@@ -419,6 +419,7 @@ void Grid::outAllVTK (int time)
         else
         {
             cout << "Error: neither of the specified types in outAllVTK()" << endl;
+            cout << "c = " << c << endl;
             exit(-2);
         }
         

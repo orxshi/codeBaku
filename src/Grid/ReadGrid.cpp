@@ -170,10 +170,12 @@ void Grid::read_elm ()
         }
 
         tmpElm.vtx.reserve (tmpElm.nVertices);
+        tmpElm.vtxBelo.reserve (tmpElm.nVertices);
         for (unsigned int i=0; i<tmpElm.nVertices; ++i)
         {
             in >> tempi;
             tmpElm.vtx.push_back(tempi-1);
+            tmpElm.vtxBelo.push_back (id);
             //tmpElm.vtx.push_back ( ref(pt[tempi-1]) );
             //tmpElm.vtxIndex.push_back (tempi-1);
             bt[tempi-1].insert(e);

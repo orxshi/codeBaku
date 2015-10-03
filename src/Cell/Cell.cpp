@@ -63,6 +63,7 @@ Cell::Cell (const Cell& other)
     face = other.face;
     type = other.type;
     vtx = other.vtx;
+    vtxBelo = other.vtxBelo;
     bc = other.bc;
     fringeBou = other.fringeBou;
     nTrims = other.nTrims;
@@ -110,9 +111,10 @@ Cell& Cell::operator= (const Cell& other)
     grad = other.grad;
     emin = other.emin;
     emax = other.emax;
-    face = other.face;
+    face = other.face;    
     type = other.type;
     vtx = other.vtx;
+    vtxBelo = other.vtxBelo;
     bc = other.bc;
     fringeBou = other.fringeBou;
     nTrims = other.nTrims;
@@ -154,6 +156,7 @@ emax(move(other.emax)),
 face(move(other.face)),
 type(move(other.type)),
 vtx(move(other.vtx)),
+vtxBelo(move(other.vtxBelo)),
 bc(move(other.bc)),
 fringeBou(move(other.fringeBou)),
 nTrims(move(other.nTrims)),

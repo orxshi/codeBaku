@@ -95,7 +95,7 @@ int main(int argc, char** argv)
     
     
     // solve osc airfoil
-    for (double time=0.; time<10.; time+=1.)
+    for (double time=0.; time<1.; time+=1.)
     {
         cout << "time = " << time << endl;
     

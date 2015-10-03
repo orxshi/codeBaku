@@ -174,9 +174,6 @@ namespace AFT
     // Final Grid
     extern bool pointExistsForCreateCells(const ::Point& refPoint, const vector<::Point>& points, int& index);
     extern void createFinalGrid (Grid& finalGrid, const vector<Grid>& gr, const Grid& newGrid);
-    extern void addIntergridCells (const Face& f, const vector<Face>& face, const vector<Cell>& cell, const vector<::Point>& pt, Grid& finalGrid, const Grid& newGrid, PointADT& fgp, PointADT& fgcc, PointADT& fgfc);
-    extern void addCells (const Face& f, const vector<Face>& face, const vector<Cell>& cell, const vector<::Point>& pt, Grid& finalGrid, PointADT& fgp, PointADT& fgcc);
-    extern void modifyCellVertices (Grid& finalGrid, const Grid& newGrid, const vector<Grid>& gr, PointADT& fgp);
     
     // AFT
     extern void aft (vector<Grid>& gr, Grid& finalGrid);

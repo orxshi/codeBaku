@@ -62,7 +62,8 @@ struct Cell
     Vector2D <N_DIM,N_VAR> emax;
     vector <int> face;    
     elmType_t type;
-    vector <int> vtx;    
+    vector <int> vtx;
+    vector <int> vtxBelo;
     BC bc;    
     fringeBou_t fringeBou;
 
