@@ -116,3 +116,48 @@ void OscAirfoil::log (string fileName)
     
     out.close();
 }
+
+void OscAirfoil::interFromOldTS (Grid& curGrid, Grid& oldGrid)
+{
+    for (int c=curGrid.n_bou_elm; c<curGrid.cell.size(); ++c)    
+    {    
+        Cell& cll = curGrid.cell[c];
+        
+        CVector r, p;
+
+        double dar = delAlpha * DEG_TO_RAD;
+        
+        p = cll.cnt;
+        r = p - centerAirfoil;
+        rotateVectorAroundPoint2D (centerAirfoil, -dar, r, p);
+        
+        ADT::ADTPoint vec;
+        
+        for (int i=0; i<ADT_DIM; ++i)
+        {
+            vec.dim[i*2]   = p[i];
+            vec.dim[i*2+1] = p[i];
+        }       
+        
+        int ind = oldGrid.cellADT.search (vec);
+        
+        if (ind != -1)
+        {
+            Cell& oc = oldGrid.cell[ind];
+            cll.prim = oc.prim;
+            cll.cons = oc.cons;
+        }
+        /*else
+        {
+            cout << "could not find corresponding cell in Grid::interFromOldTS(...)" << endl;
+            cout << "delAlpha = " << delAlpha << endl;
+            cout << "p[0] = " << p[0] << endl;
+            cout << "p[1] = " << p[1] << endl;
+            cout << "p[2] = " << p[2] << endl;
+            cout << "centerAirfoil[0] = " << centerAirfoil[0] << endl;
+            cout << "centerAirfoil[1] = " << centerAirfoil[1] << endl;
+            cout << "centerAirfoil[2] = " << centerAirfoil[2] << endl;
+            exit(-2);
+        }*/
+    }
+}

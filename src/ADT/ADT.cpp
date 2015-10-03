@@ -8,6 +8,87 @@ ADT::ADT()
     searchForNIntersections = false;
 }
 
+ADT::ADT (ADT&& other)
+{
+    sizeTree = other.sizeTree;
+    points = move(other.points);
+    idsInTree = move(other.idsInTree);
+    
+    for (unsigned int i=0; i<other.searchStack.size(); ++i)
+    {
+        other.searchStack[i] = NULL;
+    }
+    other.searchStack.clear();
+    
+    for (unsigned int i=0; i<other.addresses.size(); ++i)
+    {
+        other.addresses[i] = NULL;
+    }
+    other.addresses.clear();
+    
+    addrsInTree.reserve (other.addrsInTree.size());
+    for (unsigned int i=0; i<other.addrsInTree.size(); ++i)
+    {        
+        addrsInTree.push_back (other.addrsInTree[i]);
+        other.addrsInTree[i] = NULL;
+    }
+    other.addrsInTree.clear();
+    
+    moveNodes (root, other.root);
+}
+
+ADT& ADT::operator=(ADT&& other)
+{
+    sizeTree = other.sizeTree;
+    points = move(other.points);
+    idsInTree = move(other.idsInTree);
+    
+    for (unsigned int i=0; i<other.searchStack.size(); ++i)
+    {
+        other.searchStack[i] = NULL;
+    }
+    other.searchStack.clear();
+    
+    for (unsigned int i=0; i<other.addresses.size(); ++i)
+    {
+        other.addresses[i] = NULL;
+    }
+    other.addresses.clear();
+    
+    addrsInTree.reserve (other.addrsInTree.size());
+    for (unsigned int i=0; i<other.addrsInTree.size(); ++i)
+    {        
+        addrsInTree.push_back (other.addrsInTree[i]);
+        other.addrsInTree[i] = NULL;
+    }
+    other.addrsInTree.clear();
+    
+    moveNodes (root, other.root);
+}
+
+ADT::Node::Node (Node&& other)
+{
+    c = move(other.c);
+    d = move(other.c);
+    p = other.p; other.p = NULL;
+    key = other.key;
+    left = other.left; other.left = NULL;
+    right = other.right; other.right = NULL;
+    level = other.level;
+    isEmpty = other.isEmpty;
+}
+
+void ADT::moveNodes (Node *&leaf, Node *&otherLeaf)
+{
+    if (otherLeaf != NULL)
+    {
+        moveNodes (leaf, otherLeaf->left);
+        moveNodes (leaf, otherLeaf->right);
+        
+        leaf = move(otherLeaf); otherLeaf = NULL;
+    }
+}
+
 ADT::~ADT()
 {    
     destroy_tree();

@@ -27,6 +27,7 @@ struct MovingGrid
     void rotateVectorAroundPoint2D (const CVector pivot, const double angleRad, const CVector r, CVector& ans);
     void displacePoint2D (const CVector orig, const CVector vel, const double dt, CVector& ans);
     virtual void log (string fileName) = 0;
+    virtual void interFromOldTS (Grid& curGrid, Grid& oldGrid) = 0;
 };
 
 #endif	/* MOVINGMESH_H */

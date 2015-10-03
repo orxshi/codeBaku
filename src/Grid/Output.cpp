@@ -347,23 +347,7 @@ void Grid::outAllVTK (int time)
     out << "POINTS " << pt.size() << " float" << endl;
     
     len = 0;
-    /*for (int i=0; i<pt.size(); ++i)
-    {
-        out << pt[i].dim[0];
-        out << " ";
-        out << pt[i].dim[1];
-        out << " ";
-        out << pt[i].dim[2];
-        out << " ";
-        
-        len += N_DIM;
-        
-        if (len >= maxLen)
-        {
-            out << endl;
-            len = 0;
-        }
-    }*/
+    
     for (int i=0; i<pt.size(); ++i)
     {
         out << pt[i].dim[0];
@@ -435,6 +419,42 @@ void Grid::outAllVTK (int time)
         const Cell& cll = cell[c];
                      
         out << cll.prim[0] << endl;
+    }
+    
+    out << "SCALARS " << "u " << "float " << "1" << endl;
+    out << "LOOKUP_TABLE default" << endl;    
+    for (int c=n_bou_elm; c<cell.size(); ++c)
+    {
+        const Cell& cll = cell[c];
+                     
+        out << cll.prim[1] << endl;
+    }
+    
+    out << "SCALARS " << "v " << "float " << "1" << endl;
+    out << "LOOKUP_TABLE default" << endl;    
+    for (int c=n_bou_elm; c<cell.size(); ++c)
+    {
+        const Cell& cll = cell[c];
+                     
+        out << cll.prim[2] << endl;
+    }
+    
+    out << "SCALARS " << "w " << "float " << "1" << endl;
+    out << "LOOKUP_TABLE default" << endl;    
+    for (int c=n_bou_elm; c<cell.size(); ++c)
+    {
+        const Cell& cll = cell[c];
+                     
+        out << cll.prim[3] << endl;
+    }
+    
+    out << "SCALARS " << "p " << "float " << "1" << endl;
+    out << "LOOKUP_TABLE default" << endl;    
+    for (int c=n_bou_elm; c<cell.size(); ++c)
+    {
+        const Cell& cll = cell[c];
+                     
+        out << cll.prim[4] << endl;
     }
     
     out << "SCALARS " << "iBlank " << "int " << "1" << endl;

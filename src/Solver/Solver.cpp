@@ -36,6 +36,8 @@ Solver::Petsc::Petsc (Grid& gr)
     //PetscMalloc1 (xGlobalSize, &DX);
     DX = new double [vecGlobalSize];
     
+    
+    
     // set x
     VecCreate (world, &x);
     VecSetType (x, VECSTANDARD);
@@ -43,6 +45,8 @@ Solver::Petsc::Petsc (Grid& gr)
     VecSetSizes (x, PETSC_DECIDE, vecGlobalSize);
     VecGetLocalSize (x, &vecLocalSize);
     VecGetOwnershipRange (x, &vecLocBeg, &vecLocEnd);
+    
+    
 
     // set b
     VecDuplicate (x, &b);
@@ -61,6 +65,8 @@ Solver::Petsc::Petsc (Grid& gr)
     // specific to pentagonal mesh . change later
     MatGetOwnershipRange (A, &matLocBeg, &matLocEnd);
     MatGetLocalSize (A, &matLocalSize, NULL);
+    
+    
     
     KSPCreate (world, &ksp);
     KSPSetOperators (ksp, A, A);

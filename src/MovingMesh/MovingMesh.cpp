@@ -123,7 +123,7 @@ void MovingGrid::checkGCL(const Grid& gr)
             cout << "GCL not satisfied in getMovingFaceVelocity(...)" << endl;
             cout << fabs(sum) << endl;
             
-            /*for (int iF: gr.cell[e].face)
+            for (int iF: gr.cell[e].face)
             {
                 const Face& f = gr.face[iF];
                 
@@ -137,7 +137,7 @@ void MovingGrid::checkGCL(const Grid& gr)
                 cout << "f.area[0] = " << f.area[0] << endl;
                 cout << "f.area[1] = " << f.area[1] << endl;
                 cout << "f.area[2] = " << f.area[2] << endl;
-            }*/
+            }
             
             exit(-2);
         }
@@ -179,6 +179,8 @@ void MovingGrid::displacePoint2D (const CVector orig, const CVector vel, const d
     ans[0] = orig[0] + vel[0] * dt;
     ans[1] = orig[1] + vel[1] * dt;
 }
+
+
 
 /*void getMovingFaceVelocity(Grid& gr)
 {

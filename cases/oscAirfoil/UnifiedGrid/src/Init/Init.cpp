@@ -27,8 +27,13 @@ void OscInit::init (Grid& gr)
         //cll.iBlank = iBlank_t::FIELD;
     }
     
+    
+    
     gr.set_BCs();
+    
     gr.apply_BCs();
+    
+    
     
     for (int c=0; c<gr.n_bou_elm; ++c)
     {

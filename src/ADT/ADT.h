@@ -25,6 +25,7 @@ using std::fill;
 using std::cout;
 using std::endl;
 using std::cin;
+using std::move;
 
 struct ADT
 {
@@ -69,12 +70,16 @@ struct ADT
             p = NULL;
             isEmpty = true;
         }
+        
+        Node (Node&& other);
     };
 
     Node *root;
     vector <Node*> searchStack;    
     vector <Node*> addresses;
     vector <Node*> addrsInTree;
+    
+    //
 
     void destroy_tree (Node *&leaf);
     void destroy_tree();
@@ -95,12 +100,15 @@ struct ADT
     bool removeViaID (int id);
 
     // Constructor
-    ADT();
-    
+    ADT();    
+    // Move constructor
+    ADT (ADT&& other);
+    ADT& operator=(ADT&& other);
     // Destructor
     ~ADT();
 
     void build();
+    void moveNodes (Node *&leaf, Node *&otherLeaf);
 };
 
 #endif	/* ADT_H */

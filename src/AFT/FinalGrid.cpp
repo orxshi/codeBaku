@@ -1,3 +1,4 @@
+
 #include "AFT.h"
 
 namespace AFT
@@ -142,7 +143,7 @@ namespace AFT
         else if (LCTrim != false || RCTrim != false)
         {
             return false;
-        }
+        }        
         
         return true;
     }
@@ -153,7 +154,7 @@ namespace AFT
         {
             return false;
         }
-        else if (LCIBlank != iBlank_t::FIELD || LCTrim != false)
+        else if (LCIBlank != iBlank_t::FIELD || LCTrim != false)        
         {
             return false;
         }
@@ -168,17 +169,31 @@ namespace AFT
         {
             return false;
         }
-        else if (LCIBlank != iBlank_t::FIELD || RCIBlank != iBlank_t::FIELD)
+        else if (LCIBlank != iBlank_t::FIELD || RCIBlank != iBlank_t::FIELD) // both sides must be field
         {
             return false;
         }
-        else if (LCTrim == false && RCTrim == false)
+        /*else if (LCTrim == false && RCTrim == false)
         {
             return false;
         }
         else if (LCTrim == true && RCTrim == true)
         {
             return false;
+        }*/
+        else if (LCTrim == false)
+        {
+            if (RCTrim == false)
+            {
+                return false;
+            }
+        }
+        else if (LCTrim == true)
+        {
+            if (RCTrim == true)
+            {
+                return false;
+            }
         }
                 
         return true;
@@ -246,6 +261,7 @@ namespace AFT
         Cell newCell = cell[f.nei[1]]; // boundary element
         newCell.nei.clear();
         newCell.face.clear();
+        newCell.belonging = finalGrid.id;
         int iRefC = finalGrid.cell.size();
         Point cellCent;
         cellCent.dim = newCell.cnt;
@@ -300,6 +316,11 @@ namespace AFT
     void addCells (const Face& f, const vector<Face>& face, const vector<Cell>& cell, const vector<::Point>& pt, Grid& finalGrid, PointADT& fgp, PointADT& fgcc)
     {
         int neiSize = f.nei.size();
+        if (neiSize != 2)
+        {
+            cout << "neiSize != 2" << endl;
+            exit(-2);
+        }
         int iRefC;
     
         // create new face
@@ -319,13 +340,13 @@ namespace AFT
                 Cell newCell = cell[f.nei[i]];
                 newCell.nei.clear();
                 newCell.face.clear();
-                newCell.face.push_back(iRefFace);
+                newCell.belonging = finalGrid.id;
                 finalGrid.cell.push_back (move(newCell));
                 iRefC = finalGrid.cell.size() - 1;
-                
                 addToPointADT (cellCent, fgcc, iRefC);
             }
             
+            finalGrid.cell[iRefC].face.push_back(iRefFace);
             newFace.nei.push_back (iRefC);
         }
         
@@ -333,6 +354,11 @@ namespace AFT
         {
             finalGrid.cell[newFace.nei[0]].nei.push_back (newFace.nei[1]);
             finalGrid.cell[newFace.nei[1]].nei.push_back (newFace.nei[0]);
+        }
+        else
+        {
+            cout << "should be two in finalgrid" << endl;
+            exit(-2);
         }
         
         // loop through vertices of face
@@ -428,9 +454,17 @@ namespace AFT
         }
     }
     
-    void addIntergridCells (const Face& f, const vector<Face>& face, const vector<Cell>& cell, const vector<::Point>& pt, Grid& finalGrid, const Grid& newGrid, PointADT& fgp, PointADT& fgcc, PointADT& fgfc)
+    void addIntergridCells (const Face& f, const vector<Face>& face, const vector<Cell>& cell, const vector<::Point>& pt, Grid& finalGrid, const Grid& newGrid, PointADT& fgp, PointADT& fgcc, PointADT& ngfc)
     {
+        bool accorL = true;
+        bool cellExist;
+    
         int neiSize = f.nei.size();
+        if (neiSize != 2)
+        {
+            cout << "neiSize != 2" << endl;
+            exit(-2);
+        }
         int iRefC;
     
         // create new face
@@ -441,25 +475,41 @@ namespace AFT
         
         // find and add existing normal grid cell
         Point cellCent;
-        cellCent.dim = cell[f.nei[0]].cnt;        
-        bool cellExist = pointExists (cellCent, fgcc, iRefC);
-        if (!cellExist)
+        if (cell[f.nei[0]].trim == false)
         {
+            cellCent.dim = cell[f.nei[0]].cnt;
+            cellExist = pointExists (cellCent, fgcc, iRefC);
+        }
+        else
+        {
+            // face conf should be changed for right cell
+            accorL = false;
             cellCent.dim = cell[f.nei[1]].cnt;
             cellExist = pointExists (cellCent, fgcc, iRefC);
+        }
+        
+        if (!cellExist)
+        {
+            cout << "cell must exist 1 in add intergrid" << endl;
+            exit(-2);
         }
         
         newFace.nei.push_back (iRefC);
         finalGrid.cell[iRefC].face.push_back (iRefFace);
         
-        // find and add non-existing new grid cell
+        // find and add existing new grid cell
         int faceIndex;
         Point faceCent;
         faceCent.dim = newFace.cnt;
-        pointExists (faceCent, fgfc, faceIndex);
+        pointExists (faceCent, ngfc, faceIndex);
         const Face& ngf = newGrid.face[faceIndex];
         cellCent.dim = newGrid.cell [ngf.nei[0]].cnt;
-        pointExists (cellCent, fgcc, iRefC); // should exist
+        cellExist = pointExists (cellCent, fgcc, iRefC); // should exist
+        if (!cellExist)
+        {
+            cout << "cell must exist in add intergrid" << endl;
+            exit(-2);
+        }
         
         finalGrid.cell [iRefC].face.push_back (iRefFace);
         newFace.nei.push_back (iRefC);
@@ -533,6 +583,13 @@ namespace AFT
             }
         }
         
+        if (!accorL)
+        {
+            int tmp = newFace.vtx[1];
+            newFace.vtx[1] = newFace.vtx.back();
+            newFace.vtx.back() = tmp;
+            newFace.set_area (finalGrid.pt);
+        }
         finalGrid.face.push_back (move(newFace));
     }
     
@@ -615,7 +672,7 @@ namespace AFT
     
         PointADT fgp; // final grid points
         PointADT fgcc; // final grid cell centers
-        PointADT fgfc; // new grid boundary face centers
+        PointADT fgfc; // final grid boundary face centers
         PointADT ngfc; // new grid face centers
         
         //cout << "Building fgp..." << flush;
@@ -644,11 +701,16 @@ namespace AFT
         
         ngfc.build();
         
-        // add boundary elements which are attached to field and untrimmed cells
+        
+        
+        // add boundary elements which are attached to field and untrimmed cells        
         for (const Grid& g: gr)
         {
-            for (const Face& f: g.face)
+            for (int ff=0; ff<g.face.size(); ++ff)
+            //for (const Face& f: g.face)
             {
+                const Face& f = g.face[ff];
+            
                 bool pass = ghostPass (f, g.cell[f.nei[0]].iBlank, g.cell[f.nei[0]].trim);
                 if (pass) {addGhostCells (f, g.face, g.cell, g.pt, finalGrid, fgp, fgcc, fgfc);}
             }
@@ -662,16 +724,25 @@ namespace AFT
         
         finalGrid.n_bou_elm = finalGrid.cell.size();
         
-        // add strictly interior cells of normal grids
-        for (const Grid& g: gr)
+        // add strictly interior cells of normal grids        
+        for (int gg=0; gg<gr.size(); ++gg)
         {
-            for (const Face& f: g.face)
+            const Grid& g = gr[gg];
+        
+            for (int ff=0; ff<g.face.size(); ++ff)            
             {
+                const Face& f = g.face[ff];
+                
                 bool pass = strictlyInteriorPass (f, g.cell[f.nei[0]].iBlank, g.cell[f.nei[1]].iBlank,
                                                   g.cell[f.nei[0]].trim, g.cell[f.nei[1]].trim);
-                if (pass) addCells (f, g.face, g.cell, g.pt, finalGrid, fgp, fgcc);
+                if (pass)
+                {
+                    addCells (f, g.face, g.cell, g.pt, finalGrid, fgp, fgcc);
+                }
             }
         }
+        
+        //cout << "finalGrid.cell.size() = " << finalGrid.cell.size() << endl;
         
         // add strictly interior cells of new grid
         for (const Face& f: newGrid.face)
@@ -685,19 +756,30 @@ namespace AFT
             }
         }
         
-        // add intergrid cells
-        for (const Grid& g: gr)
+        //cout << "finalGrid.cell.size() = " << finalGrid.cell.size() << endl;
+        
+        // add intergrid cells        
+        for (int gg=0; gg<gr.size(); ++gg)
         {
-            for (const Face& f: g.face)
+            const Grid& g = gr[gg];
+        
+            for (int ff=0; ff<g.face.size(); ++ff)
             {
+                const Face& f = g.face[ff];
+                
                 bool pass = intergridPass (f, g.cell[f.nei[0]].iBlank, g.cell[f.nei[1]].iBlank,
                                                   g.cell[f.nei[0]].trim, g.cell[f.nei[1]].trim);
                 
-                if (pass) addIntergridCells (f, g.face, g.cell, g.pt, finalGrid, newGrid, fgp, fgcc, ngfc);
+                if (pass)
+                {
+                    addIntergridCells (f, g.face, g.cell, g.pt, finalGrid, newGrid, fgp, fgcc, ngfc);
+                }
             }
         }
         
-        // connect ghosts and interiors        
+        //cout << "finalGrid.cell.size() = " << finalGrid.cell.size() << endl;
+        
+        // connect ghosts and interiors
         for (const Grid& g: gr)
         {
             for (const Face& f: g.face)

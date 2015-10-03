@@ -12,15 +12,15 @@
 
 int main(int argc, char** argv)
 {
-    //PetscInitialize (&argc, &argv, NULL, NULL);
+    PetscInitialize (&argc, &argv, NULL, NULL);
     
     Watch watchSteady;
     Watch watchOscAirfoil;
     
-    /*PetscMPIInt rank, n_procs;
+    PetscMPIInt rank, n_procs;
     MPI_Comm world = PETSC_COMM_WORLD;
     MPI_Comm_rank (world, &rank);
-    MPI_Comm_size (world, &n_procs);*/
+    MPI_Comm_size (world, &n_procs);
     
     string mainDir = createOutputDir();
     
@@ -34,75 +34,68 @@ int main(int argc, char** argv)
     ag.read_grid();
     ag.set_grid();
     
+    // initialize grids
     OscInit oscInit;
-    oscInit.read();    
+    oscInit.read();
     oscInit.init (ag);
     oscInit.init (bg);
     
     // push grids to vector
     vector<Grid> grs;    
-    grs.push_back(bg);
-    grs.push_back(ag);
+    grs.push_back(move(bg));
+    grs.push_back(move(ag));
     
+    // set wall distances
     grs[0].setWallDistance(2);
     grs[1].setWallDistance(3);
     
-    //finalGrid.readInput();
-    //finalGrid.leastSquaresCoeffs();
-    //oscInit.init (finalGrid);
-
-    //Solver solSteady (finalGrid, "SOLVER-STEADY");    
-    //solSteady.read ("Solver/solSteady.dat");
+    grs[0].cellADT.build (grs[0]);
+    grs[1].cellADT.build (grs[1]);        
+    grs[0].identifyIBlank (grs[1]);
+    grs[1].identifyIBlank (grs[0]);
     
-    ///Solver solOscAirfoil (ag, "SOLVER-OSC-AIRFOIL");
-    //solOscAirfoil.read ("Solver/solOscAirfoil.dat");
+    grs[0].outAllVTK (0);
+    grs[1].outAllVTK (0);
+    
+    Grid finalGrid (mainDir, 3);
+    
+    AFT::aft (grs, finalGrid);
+    
+    finalGrid.readInput();
+    finalGrid.leastSquaresCoeffs();
+    finalGrid.cellADT.build (finalGrid);
+    oscInit.init (finalGrid);
+    
+    Solver solSteady (finalGrid, "SOLVER-STEADY");
+    solSteady.read ("Solver/solSteady.dat");
 
     // solve steady state
-    //SMAirfoil sma (solSteady.dt);
-    OscAirfoil oa (1.);
-    //sma.read ("MovingGrid/smAirfoil.dat");
+    SMAirfoil sma (solSteady.dt);
+    OscAirfoil oa (1.); // 1 is time step
+    sma.read ("MovingGrid/smAirfoil.dat");
     oa.read ("MovingGrid/oscAirfoil.dat");
 
-    //Coeffs coeffs (gr, oscInit.rhoInf, oscInit.Mach, oa.MachAirfoil);
+    Coeffs coeffs (finalGrid, oscInit.rhoInf, oscInit.Mach, oa.MachAirfoil);
     
-    /*sma.getAllFaceVelocities (finalGrid);    
+    sma.getAllFaceVelocities (finalGrid);
     watchSteady.start();
     (solSteady.implicit) ? solSteady.impl(finalGrid) : solSteady.expl(finalGrid);
     solSteady.petsc.finalize();
-    watchSteady.stop();    */
+    watchSteady.stop();
     
+    //finalGrid.outAllVTK (0);
+        
+    // solve osc airfoil
+    //Grid oldGrid (mainDir, 4);
+    Grid oldGrid = move(finalGrid);
     int countr = 0;
     watchOscAirfoil.start();
-    
-    for (double time=0.; time<0.; time+=1.)
-    {
-        oa.setAngles (time);
-        
-        grs[0].cellADT.build (grs[0]);
-        grs[1].cellADT.build (grs[1]);        
-        grs[0].identifyIBlank (grs[1]);
-        grs[1].identifyIBlank (grs[0]);
-        
-        grs[0].outAllVTK (countr);
-        grs[1].outAllVTK (countr);
-        
-        if (time != 7)
-        {
-            oa.moveGrid (grs[1]);
-        }
-    }
-    
-    
-    
-    // solve osc airfoil
-    for (double time=0.; time<1.; time+=1.)
+    for (double time=0.; time<3.; time+=1.) // 1 is dt
     {
         cout << "time = " << time << endl;
-    
-        oa.setAngles (time);
         
         grs[0].cellADT.build (grs[0]);
-        grs[1].cellADT.build (grs[1]);        
+        grs[1].cellADT.build (grs[1]);   
         grs[0].identifyIBlank (grs[1]);
         grs[1].identifyIBlank (grs[0]);
         
@@ -110,20 +103,41 @@ int main(int argc, char** argv)
         grs[1].outAllVTK (countr);
         
         Grid finalGrid (mainDir, 3);
-        
         AFT::aft (grs, finalGrid);
-                
-        //oa.setAngles (solOscAirfoil.time);
-        //oa.getAllFaceVelocities (gr);
-        //(solOscAirfoil.implicit) ? solOscAirfoil.impl(gr) : solOscAirfoil.expl(gr);
-        //coeffs.getCoeffs (gr);
-        //outLiftCoef (coeffs, oa.alpha, solOscAirfoil.time);
+        finalGrid.cellADT.build (finalGrid);
+        finalGrid.readInput();
+        finalGrid.leastSquaresCoeffs();
+        
+        cout << "final tree size = " << finalGrid.cellADT.idsInTree.size() << endl;
+        //cout << "old tree size = " << oldGrid.cellADT.idsInTree.size() << endl;
+
+        if (time == 0.)
+        {
+            finalGrid = move(oldGrid);
+        }
+        else
+        {
+            finalGrid = move(oldGrid);
+            //oa.interFromOldTS (finalGrid, oldGrid);
+        }
+        
+        Solver solOscAirfoil (finalGrid, "SOLVER-OSC-AIRFOIL");
+        solOscAirfoil.read ("Solver/solOscAirfoil.dat");
+        solOscAirfoil.time = time;
+        
+        oa.setAngles (time);
+        oa.getAllFaceVelocities (finalGrid);
+        (solOscAirfoil.implicit) ? solOscAirfoil.impl(finalGrid) : solOscAirfoil.expl(finalGrid);
+        coeffs.getCoeffs (finalGrid);
+        outLiftCoef (coeffs, oa.alpha, solOscAirfoil.time);
         finalGrid.outAllVTK (countr);
         oa.moveGrid (grs[1]);
         
+        oldGrid = move(finalGrid);
+        
         ++countr;
     }
-    watchOscAirfoil.stop();    
+    watchOscAirfoil.stop();
     
     /*if (rank == MASTER_RANK)
     {
@@ -138,7 +152,7 @@ int main(int argc, char** argv)
         //oa.log (gr.logDir);
     }*/
     
-    //PetscFinalize();
+    PetscFinalize();
 
     return 0;
 }

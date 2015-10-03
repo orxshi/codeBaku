@@ -86,7 +86,9 @@ struct Grid
 
     // Constructor
     Grid (string mainDir, int id);
-    Grid (const Grid&);
+    //Grid (const Grid&);
+    Grid (Grid&& other);
+    Grid& operator=(Grid&& other);
     
     // Destructor
     ~Grid ();
@@ -129,7 +131,7 @@ struct Grid
     void outAllUnsteady(string title);
     void log();
     void setWallDistance (int phys);
-    void outAllVTK (int time);
+    void outAllVTK (int time);    
 };
 
 #endif	/* GRID_H */
