@@ -120,8 +120,10 @@ void OscAirfoil::log (string fileName)
 void OscAirfoil::interFromOldTS (Grid& curGrid, Grid& oldGrid)
 {
     for (int c=curGrid.n_bou_elm; c<curGrid.cell.size(); ++c)    
-    {    
+    {
         Cell& cll = curGrid.cell[c];
+        
+        if (cll.belonging == 0) continue; // airfoil or new grid
         
         CVector r, p;
 
@@ -147,17 +149,106 @@ void OscAirfoil::interFromOldTS (Grid& curGrid, Grid& oldGrid)
             cll.prim = oc.prim;
             cll.cons = oc.cons;
         }
-        /*else
+        else
         {
             cout << "could not find corresponding cell in Grid::interFromOldTS(...)" << endl;
+            cout << "c = " << c << endl;
             cout << "delAlpha = " << delAlpha << endl;
             cout << "p[0] = " << p[0] << endl;
             cout << "p[1] = " << p[1] << endl;
             cout << "p[2] = " << p[2] << endl;
-            cout << "centerAirfoil[0] = " << centerAirfoil[0] << endl;
-            cout << "centerAirfoil[1] = " << centerAirfoil[1] << endl;
-            cout << "centerAirfoil[2] = " << centerAirfoil[2] << endl;
+            cout << "cll.belonging = " << cll.belonging << endl;
+            cout << "curGrid.n_bou_elm = " << curGrid.n_bou_elm << endl;
+            cout << "curGrid.cell.size() = " << curGrid.cell.size() << endl;
+            cout << "oldGrid tree size = " << oldGrid.cellADT.idsInTree.size() << endl;
+            cout << "idx = " << oldGrid.cellADT.root->p->idx << endl;
+            cout << "idx = " << oldGrid.cellADT.root->p->dim[0] << endl;
+            cout << "idx = " << oldGrid.cellADT.root->p->dim[1] << endl;
+            cout << "idx = " << oldGrid.cellADT.root->p->dim[2] << endl;
+            cout << "idx = " << oldGrid.cellADT.root->p->dim[3] << endl;
+            cout << "idx = " << oldGrid.cellADT.root->p->dim[4] << endl;
+            cout << "idx = " << oldGrid.cellADT.root->p->dim[5] << endl;
+            cout << "cc = " << oldGrid.cellADT.root->c[0] << endl;
+            cout << "cc = " << oldGrid.cellADT.root->c[1] << endl;
+            cout << "cc = " << oldGrid.cellADT.root->c[2] << endl;
+            cout << "cc = " << oldGrid.cellADT.root->c[3] << endl;
+            cout << "cc = " << oldGrid.cellADT.root->c[4] << endl;
+            cout << "cc = " << oldGrid.cellADT.root->d[5] << endl;
+            cout << "dd = " << oldGrid.cellADT.root->d[0] << endl;
+            cout << "dd = " << oldGrid.cellADT.root->d[1] << endl;
+            cout << "dd = " << oldGrid.cellADT.root->d[2] << endl;
+            cout << "dd = " << oldGrid.cellADT.root->d[3] << endl;
+            cout << "dd = " << oldGrid.cellADT.root->d[4] << endl;
+            cout << "dd = " << oldGrid.cellADT.root->d[5] << endl;
+            cout << "tt = " << vec.dim[0] << endl;
+            cout << "tt = " << vec.dim[1] << endl;
+            cout << "tt = " << vec.dim[2] << endl;
+            cout << "tt = " << vec.dim[3] << endl;
+            cout << "tt = " << vec.dim[4] << endl;
+            cout << "tt = " << vec.dim[5] << endl;
+            for (int v: cll.vtx)
+            {
+                cout << "v = " << v << endl;
+            }
+            for (int v: cll.vtx)
+            {
+                cout << "curGrid.pt[v].dim = " << curGrid.pt[v].dim[0] << endl;
+                cout << "curGrid.pt[v].dim = " << curGrid.pt[v].dim[1] << endl;
+                cout << "curGrid.pt[v].dim = " << curGrid.pt[v].dim[2] << endl;
+            }
+            
+            for (int i=0; i<oldGrid.cellADT.idsInTree.size(); ++i)
+            {                
+                if (oldGrid.cellADT.idsInTree[i] == c)
+                {
+                    
+                    if (oldGrid.cellADT.addrsInTree[i] != NULL)
+                    {
+                        if (oldGrid.cellADT.addrsInTree[i]->p != NULL)
+                        {
+                            ADT::Node* node = oldGrid.cellADT.addrsInTree[i];
+                            ADT::ADTPoint* ap = node->p;
+                        
+                            cout << "baku = " << ap->idx << endl;
+                            cout << "c = " << node->c[0] << endl;
+                            cout << "c = " << node->c[1] << endl;
+                            cout << "c = " << node->c[2] << endl;
+                            cout << "c = " << node->c[4] << endl;
+                            cout << "c = " << node->c[4] << endl;
+                            cout << "c = " << node->c[5] << endl;
+                            
+                            cout << "d = " << node->d[0] << endl;
+                            cout << "d = " << node->d[1] << endl;
+                            cout << "d = " << node->d[2] << endl;
+                            cout << "d = " << node->d[3] << endl;
+                            cout << "d = " << node->d[4] << endl;
+                            cout << "d = " << node->d[5] << endl;
+                            
+                            bool cubesOverlap = oldGrid.cellADT.doCubesOverlap (node, vec);
+                            bool cmp = oldGrid.cellADT.compareFunction (node, vec);
+                            
+                            cout << "cubesOverlap = " << cubesOverlap << endl;
+                            cout << "cmp = " << cmp << endl;
+                            cout << "cmp = " << node->p->vertices.size() << endl;
+                            cout << "cmp = " << vec.dim[0] << endl;
+                            cout << "cmp = " << vec.dim[1] << endl;
+                            cout << "cmp = " << vec.dim[2] << endl;
+                            cout << "cmp = " << vec.dim[3] << endl;
+                            cout << "cmp = " << vec.dim[4] << endl;
+                            cout << "cmp = " << vec.dim[5] << endl;
+                            
+                            exit(-2);
+                        }
+                    }
+                }
+            }
+            
+            curGrid.outAllVTK (1);
+            /*for (int i: oldGrid.cellADT.idsInTree)
+            {
+                cout << "ids = " << i << endl;
+            }*/
             exit(-2);
-        }*/
+        }
     }
 }

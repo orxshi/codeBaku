@@ -122,7 +122,7 @@ namespace AFT
         
         //cout << "Outputing final grid... " << flush;
         //finalGrid.outAllTecplot();
-        finalGrid.outAllVTK(0);
+        //finalGrid.outAllVTK(0);
         //cout << "done!" << endl;
         
         cout << "finished AFT" << endl;

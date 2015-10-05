@@ -261,7 +261,7 @@ namespace AFT
         Cell newCell = cell[f.nei[1]]; // boundary element
         newCell.nei.clear();
         newCell.face.clear();
-        newCell.belonging = finalGrid.id;
+        //newCell.belonging = finalGrid.id;
         int iRefC = finalGrid.cell.size();
         Point cellCent;
         cellCent.dim = newCell.cnt;
@@ -340,7 +340,7 @@ namespace AFT
                 Cell newCell = cell[f.nei[i]];
                 newCell.nei.clear();
                 newCell.face.clear();
-                newCell.belonging = finalGrid.id;
+                //newCell.belonging = finalGrid.id;
                 finalGrid.cell.push_back (move(newCell));
                 iRefC = finalGrid.cell.size() - 1;
                 addToPointADT (cellCent, fgcc, iRefC);

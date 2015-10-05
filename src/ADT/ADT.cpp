@@ -179,7 +179,7 @@ void ADT::insert (ADTPoint& point, Node* node, bool& isInserted)
         }
     }
     // point is in right region
-    else
+    else if (point.dim[j] >= node->key)
     {
         if (node->right == NULL)
         {
@@ -219,6 +219,12 @@ void ADT::insert (ADTPoint& point, Node* node, bool& isInserted)
         {
             insert(point, node->right, isInserted);
         }
+    }
+    else
+    {
+        cout << "point.dim[j] = " << point.dim[j] << endl;
+        cout << "node->key = " << node->key << endl;
+        exit(-2);
     }
 }
 
@@ -323,6 +329,15 @@ void ADT::search (Node* node, const ADTPoint& targetPoint, int& index)
 
 int ADT::search (const ADTPoint& targetPoint)
 {
+    if (targetPoint.idx == 11564 && belonging == 3)
+        {
+            //if (node->p == NULL)
+            {
+                cout << "fffff11564" << endl;
+                exit(-2);
+            }
+        }
+
     int i = -1;
     nIntersections = 0;
     ids.clear();    
@@ -417,7 +432,7 @@ void ADT::build ()
             }
         }
 
-        root->p = new ADTPoint (points.front());
+        root->p = new ADTPoint (points.front());        
         root->isEmpty = false;
         idsInTree.push_back (points.front().idx);
         addrsInTree.push_back (root);
@@ -432,6 +447,11 @@ void ADT::build ()
         if (isInserted)
         {
             points.erase (points.begin());
+        }
+        else
+        {
+            cout << "not inserted" << endl;
+            exit(-2);
         }
     }
 }

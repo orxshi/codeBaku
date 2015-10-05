@@ -27,12 +27,12 @@ int main(int argc, char** argv)
     // background grid
     Grid bg (mainDir, 0);
     bg.read_grid();
-    bg.set_grid();
+    bg.set_grid();    
     
     // airfoil grid
     Grid ag (mainDir, 1);
     ag.read_grid();
-    ag.set_grid();
+    ag.set_grid();    
     
     // initialize grids
     OscInit oscInit;
@@ -59,10 +59,10 @@ int main(int argc, char** argv)
     
     Grid finalGrid (mainDir, 3);
     
-    AFT::aft (grs, finalGrid);
+    AFT::aft (grs, finalGrid);    
     
     finalGrid.readInput();
-    finalGrid.leastSquaresCoeffs();
+    finalGrid.leastSquaresCoeffs();    
     finalGrid.cellADT.build (finalGrid);
     oscInit.init (finalGrid);
     
@@ -79,7 +79,7 @@ int main(int argc, char** argv)
     
     sma.getAllFaceVelocities (finalGrid);
     watchSteady.start();
-    (solSteady.implicit) ? solSteady.impl(finalGrid) : solSteady.expl(finalGrid);
+    //(solSteady.implicit) ? solSteady.impl(finalGrid) : solSteady.expl(finalGrid);
     solSteady.petsc.finalize();
     watchSteady.stop();
     
@@ -103,22 +103,21 @@ int main(int argc, char** argv)
         grs[1].outAllVTK (countr);
         
         Grid finalGrid (mainDir, 3);
-        AFT::aft (grs, finalGrid);
+        AFT::aft (grs, finalGrid);        
         finalGrid.cellADT.build (finalGrid);
         finalGrid.readInput();
         finalGrid.leastSquaresCoeffs();
-        
-        cout << "final tree size = " << finalGrid.cellADT.idsInTree.size() << endl;
-        //cout << "old tree size = " << oldGrid.cellADT.idsInTree.size() << endl;
 
         if (time == 0.)
-        {
+        {            
             finalGrid = move(oldGrid);
         }
         else
         {
-            finalGrid = move(oldGrid);
-            //oa.interFromOldTS (finalGrid, oldGrid);
+            //finalGrid = move(oldGrid);
+            oa.interFromOldTS (finalGrid, finalGrid);
+            finalGrid.set_BCs();
+            finalGrid.apply_BCs();
         }
         
         Solver solOscAirfoil (finalGrid, "SOLVER-OSC-AIRFOIL");
@@ -127,7 +126,7 @@ int main(int argc, char** argv)
         
         oa.setAngles (time);
         oa.getAllFaceVelocities (finalGrid);
-        (solOscAirfoil.implicit) ? solOscAirfoil.impl(finalGrid) : solOscAirfoil.expl(finalGrid);
+        //(solOscAirfoil.implicit) ? solOscAirfoil.impl(finalGrid) : solOscAirfoil.expl(finalGrid);
         coeffs.getCoeffs (finalGrid);
         outLiftCoef (coeffs, oa.alpha, solOscAirfoil.time);
         finalGrid.outAllVTK (countr);

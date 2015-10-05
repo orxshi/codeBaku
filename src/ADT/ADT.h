@@ -44,6 +44,7 @@ struct ADT
          */
     };
     
+    int belonging;
     unsigned int sizeTree;
     vector<ADTPoint> points;
     int nIntersections;

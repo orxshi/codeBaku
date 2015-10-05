@@ -20,6 +20,7 @@ namespace AFT
             cll.vtx.reserve( static_cast<int>(nVertices_t::TRI) );
             cll.vtxBelo.resize (static_cast<int>(nVertices_t::TRI), newGridId);
             cll.ghost = true;
+            //cll.newlyCreated = true;
             
             iP0 = triangles[t].p[0];
             iP1 = triangles[t].p[1];
@@ -188,7 +189,8 @@ namespace AFT
             cll.face.reserve( static_cast<int>(nFaces_t::PEN) );
             cll.iBlank = iBlank_t::FIELD;
             cll.belonging = newGridId;
-            cll.ghost = false;            
+            cll.ghost = false;
+            //cll.newlyCreated = true;
             
             const Cell& noCell = newGrid.cell[t-newGrid.n_bou_elm];
             const Cell& oCell  = newGrid.cell[t-triangles.size()];

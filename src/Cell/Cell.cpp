@@ -178,7 +178,7 @@ void Cell::set_centroid (const vector<Point>& pt)
     {
         cnt[i] = 0.;
     }
-
+    
     for (const int p: vtx)
     {
         cnt += pt[p].dim;
